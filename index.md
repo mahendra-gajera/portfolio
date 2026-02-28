@@ -183,19 +183,6 @@ Production-ready RAG system for fintech customer support using Google Gemini. Cl
 
 ---
 
-### Knee X-Ray AI Explainer
-**Explainable AI for medical imaging**
-
-AI system for knee X-ray interpretation using pre-trained CNNs (ResNet-50, EfficientNet, DenseNet) with Grad-CAM visualizations for explainability. Generates natural language reports using LLM.
-
-**Stack**: Python, PyTorch, OpenCV, Ollama, Grad-CAM
-**Features**: Multiple CNN models for binary classification, Grad-CAM heatmap generation, visual overlay of attention regions, LLM-generated medical observations
-**Use Case**: Medical imaging assistance with transparency (no black box)
-
-**What I learned**: Explainable AI techniques, medical AI considerations, combining computer vision with LLMs
-
----
-
 ### MCP Production Incident Analyzer
 **AI-powered root cause analysis using Model Context Protocol**
 
