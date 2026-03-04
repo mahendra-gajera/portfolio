@@ -21,7 +21,7 @@ What drives me: Taking complex technical problems and building practical solutio
 
 ## Professional Experience
 
-### Senior Development Manager - Platforms | Redwood Software
+### Senior Development Manager | Redwood Software
 **Oct 2023 - Feb 2026 (Contract)**
 
 Leading AI product development and platform reliability initiatives:
