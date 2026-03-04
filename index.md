@@ -100,7 +100,9 @@ Laser automation and CNC systems using VC++, OpenGL, USB/Galvo hardware interfac
 - **Platform Scale**: Built automation platform (Command Factory) supporting 30+ packages and millions of workflows
 - **Security**: Implemented enterprise security controls (CyberArk, malware scanning, zero-trust architectures)
 - **Testing**: Developed testing framework reducing testing time by 50% and accelerating delivery
-- **Patent**: US Patent #10911546 - [Robotic Process Automation with Automated User Login](https://patents.justia.com/patent/10911546)
+- **Patent**: 
+    -#10911546 - [Robotic Process Automation with Automated User Login](https://patents.justia.com/patent/10911546)
+    -#11782734 - [System for text extraction from an application window for robotic process automation](https://patents.justia.com/patent/11782734)
 
 ---
 
