@@ -31,6 +31,16 @@ Leading AI product development and platform reliability initiatives:
 - Led customer-facing security initiatives including CyberArk integration and malware scanning service on AWS EKS
 - Implemented mandatory malware scanning for all file uploads using ClamAV with 100% coverage
 - Completed SAP Premium Certification across 30+ member team under tight deadlines
+- AI Agents Delivered
+
+1️⃣ Error Analysis Agent – Troubleshooting RangerAI
+Automated root cause detection and guided troubleshooting using real-time logs, execution data, and contextual telemetry — significantly reducing manual debugging cycles.
+2️⃣ Redwood Script Assistant Agent – RangerAI Script Assistant
+Context-aware coding assistant providing intelligent help for JavaScript and Redwood Scripting — improving code quality and developer productivity.
+3️⃣ Redwood Help Docs RAG Agent – RangerAI Product Assistant
+Built a semantic, vector-based knowledge retrieval agent over the product’s help documentation to deliver conversational, context-aware answers and guidance across the platform.
+4️⃣ Job Help Creation Agent – Generating Job Docs with RangerAI
+AI-powered help document generator that accelerates structured job documentation creation by 35%, ensuring accuracy and consistency of internal and customer-facing guides.
 
 **Business Impact**: Enabled AI-first platform capabilities supporting 20%+ revenue growth, 23% ARR growth, and strong customer retention in 2025.
 
@@ -53,17 +63,6 @@ Platform architecture and performance optimization:
 - Led Command Factory evolution supporting 30+ reusable RPA packages
 - Improved bot agent startup latency by 30% in production workflows
 - Implemented enterprise SaaS integrations and modern DevSecOps pipelines
-
-- AI Agents Delivered
-
-1️⃣ Error Analysis Agent – Troubleshooting RangerAI
-Automated root cause detection and guided troubleshooting using real-time logs, execution data, and contextual telemetry — significantly reducing manual debugging cycles.
-2️⃣ Redwood Script Assistant Agent – RangerAI Script Assistant
-Context-aware coding assistant providing intelligent help for JavaScript and Redwood Scripting — improving code quality and developer productivity.
-3️⃣ Redwood Help Docs RAG Agent – RangerAI Product Assistant
-Built a semantic, vector-based knowledge retrieval agent over the product’s help documentation to deliver conversational, context-aware answers and guidance across the platform.
-4️⃣ Job Help Creation Agent – Generating Job Docs with RangerAI
-AI-powered help document generator that accelerates structured job documentation creation by 35%, ensuring accuracy and consistency of internal and customer-facing guides.
 
 ### Sr Developer / Tech Lead | Automation Anywhere
 **Nov 2012 - Dec 2016**
