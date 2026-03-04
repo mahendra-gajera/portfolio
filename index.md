@@ -25,8 +25,7 @@ What drives me: Taking complex technical problems and building practical solutio
 **Oct 2023 - Feb 2026 (Contract)**
 
 Leading AI product development and platform reliability initiatives:
-- Built 4 production-ready AI skills using OpenAI LLMs and RAG patterns, contributing to Gartner's 2025 Magic Quadrant
-- Trained 4 domain-specific AI models for intelligent automation features (beta release)
+- Built 4 production agent deploy using OpenAI LLMs and RAG patterns, contributing to Gartner's 2025 Magic Quadrant
 - Implemented AI-first engineering practices integrating Claude Code and OpenAI Codex into daily development, achieving 30%+ productivity gains
 - Migrated CI/CD pipeline from Bitbucket to GitHub Actions, improving build reliability and reducing execution time by 30%
 - Led customer-facing security initiatives including CyberArk integration and malware scanning service on AWS EKS
@@ -54,6 +53,17 @@ Platform architecture and performance optimization:
 - Led Command Factory evolution supporting 30+ reusable RPA packages
 - Improved bot agent startup latency by 30% in production workflows
 - Implemented enterprise SaaS integrations and modern DevSecOps pipelines
+
+- AI Agents Delivered
+
+1️⃣ Error Analysis Agent – Troubleshooting RangerAI
+Automated root cause detection and guided troubleshooting using real-time logs, execution data, and contextual telemetry — significantly reducing manual debugging cycles.
+2️⃣ Redwood Script Assistant Agent – RangerAI Script Assistant
+Context-aware coding assistant providing intelligent help for JavaScript and Redwood Scripting — improving code quality and developer productivity.
+3️⃣ Redwood Help Docs RAG Agent – RangerAI Product Assistant
+Built a semantic, vector-based knowledge retrieval agent over the product’s help documentation to deliver conversational, context-aware answers and guidance across the platform.
+4️⃣ Job Help Creation Agent – Generating Job Docs with RangerAI
+AI-powered help document generator that accelerates structured job documentation creation by 35%, ensuring accuracy and consistency of internal and customer-facing guides.
 
 ### Sr Developer / Tech Lead | Automation Anywhere
 **Nov 2012 - Dec 2016**
