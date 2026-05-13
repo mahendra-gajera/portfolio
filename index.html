@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>mahendra gajera // engineer's notebook</title>
+<meta name="description" content="Notes from 19+ years of architecting AI platforms and intelligent automation. Built things at Redwood, Automation Anywhere, Silver Touch, Sahajanand." />
+<meta property="og:title" content="mahendra gajera // engineer's notebook" />
+<meta property="og:description" content="19+ years of architecting AI platforms and intelligent automation. 2 US Patents. Gartner Magic Quadrant 2025." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400;1,6..72,500&family=Caveat:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,300;8..60,400;8..60,500;8..60,600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --paper: #FAF6EC;
+    --paper-2: #F2EDDE;
+    --paper-3: #E8E1CE;
+    --surface: #FFFDF5;
+    --ink: #2C2520;
+    --ink-2: #4A3F35;
+    --ink-muted: #6B5F50;
+    --ink-dim: #9B8E7C;
+    --line: #E0D6C2;
+    --line-rule: #DCC9A8;
+    --red: #B23A2F;
+    --red-soft: #F5D9D3;
+    --blue: #1B4D7B;
+    --blue-soft: #D9E4EF;
+    --highlight: #F5E6A8;
+    --highlight-soft: #FAF1C8;
+    --serif: "Source Serif 4", "Newsreader", Georgia, serif;
+    --display: "Newsreader", Georgia, serif;
+    --hand: "Caveat", "Bradley Hand", cursive;
+    --mono: "JetBrains Mono", ui-monospace, monospace;
+    --max: 920px;
+    --pad: clamp(1.25rem, 4vw, 2.5rem);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--paper); color: var(--ink);
+    font-family: var(--serif); font-size: 17px; line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    background-image:
+      radial-gradient(circle at 20% 10%, rgba(178,58,47,0.02) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(27,77,123,0.02) 0%, transparent 50%);
+  }
+  body::before {
+    content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 1;
+    opacity: 0.4;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' seed='2'/><feColorMatrix values='0 0 0 0 0.7 0 0 0 0 0.6 0 0 0 0 0.45 0 0 0 0.05 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  }
+  ::selection { background: var(--highlight); color: var(--ink); }
+  a { color: inherit; text-decoration: none; }
+  button { font: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+
+  .wrap { max-width: var(--max); margin: 0 auto; padding: 0 var(--pad); position: relative; z-index: 2; }
+
+  /* COVER */
+  .cover { padding-top: 4rem; padding-bottom: 3rem; border-bottom: 1px solid var(--line); }
+  .cover-stamp {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1rem;
+    font-family: var(--mono); font-size: 0.74rem;
+    color: var(--ink-muted); letter-spacing: 0.12em;
+    text-transform: uppercase; margin-bottom: 2rem; font-weight: 500;
+  }
+  .cover-stamp strong { color: var(--ink); font-weight: 700; }
+  .cover-stamp .sep { color: var(--ink-dim); }
+  .cover-stamp .found {
+    font-family: var(--hand); font-size: 1.15rem; color: var(--red);
+    letter-spacing: 0; text-transform: none; font-weight: 500; margin-left: auto;
+  }
+  .cover-stamp .found::after { content: " ✎"; }
+
+  .hi {
+    font-family: var(--mono); font-size: 0.78rem;
+    color: var(--ink-muted); letter-spacing: 0.08em; margin-bottom: 1.25rem;
+  }
+  .hi::before { content: "// "; color: var(--red); font-weight: 600; }
+
+  h1.headline {
+    font-family: var(--display); font-weight: 400;
+    font-size: clamp(2.5rem, 6vw, 4.25rem);
+    line-height: 1.05; letter-spacing: -0.025em;
+    margin-bottom: 2rem; color: var(--ink);
+    font-variation-settings: "opsz" 60;
+  }
+  h1.headline em { font-style: italic; color: var(--red); font-weight: 500; }
+  h1.headline .mark { text-decoration: underline wavy var(--red); text-underline-offset: 6px; text-decoration-thickness: 1.5px; }
+
+  .lede {
+    font-size: 1.1rem; line-height: 1.65;
+    color: var(--ink-2); margin-bottom: 1.25rem; max-width: 680px;
+  }
+  .lede strong { color: var(--ink); font-weight: 600; }
+
+  .cover-meta {
+    display: flex; flex-direction: column; gap: 0.4rem;
+    margin: 2rem 0 1.5rem;
+    font-size: 0.95rem; color: var(--ink-muted); font-style: italic;
+  }
+  .cover-meta a { color: var(--blue); border-bottom: 1px solid var(--blue-soft); transition: border-color 0.2s; }
+  .cover-meta a:hover { border-bottom-color: var(--blue); }
+
+  .self-portrait {
+    display: flex; align-items: flex-end; gap: 1.5rem;
+    margin: 2.5rem 0 0; padding-top: 2rem;
+    border-top: 1px dashed var(--line);
+  }
+  .self-mark {
+    width: 110px; height: 130px; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--paper-2) 0%, var(--paper-3) 100%);
+    border: 1px solid var(--line); border-radius: 4px;
+    box-shadow: 2px 3px 0 rgba(44,37,32,0.06);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    font-family: var(--display); font-weight: 500;
+    font-size: 2.5rem; color: var(--ink);
+    position: relative; transform: rotate(-2deg);
+  }
+  .self-mark::after {
+    content: "id."; position: absolute; bottom: -22px; left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--mono); font-size: 0.65rem;
+    color: var(--ink-dim); letter-spacing: 0.12em;
+  }
+  .self-caption {
+    font-family: var(--hand); font-size: 1.35rem;
+    color: var(--ink-muted); line-height: 1.3;
+    padding-bottom: 0.5rem;
+  }
+  .self-caption strong { color: var(--ink); font-weight: 600; }
+
+  section { padding: 4rem 0; border-bottom: 1px solid var(--line); }
+  .section-marker {
+    font-family: var(--mono); font-size: 0.78rem;
+    color: var(--ink-muted); letter-spacing: 0.08em;
+    margin-bottom: 0.75rem; text-transform: uppercase; font-weight: 500;
+  }
+  .section-marker .sym {
+    color: var(--red); font-family: var(--display); font-size: 1.1rem;
+    margin-right: 0.4rem; font-style: italic; vertical-align: -1px;
+  }
+  .section-marker .slash { color: var(--red); }
+  h2.section-title {
+    font-family: var(--display); font-weight: 400;
+    font-size: clamp(2rem, 4.5vw, 3rem);
+    line-height: 1.05; letter-spacing: -0.025em;
+    margin-bottom: 1.5rem; color: var(--ink);
+    font-variation-settings: "opsz" 60;
+  }
+  h2.section-title em { font-style: italic; color: var(--red); font-weight: 500; }
+  .section-lede {
+    font-size: 1.05rem; color: var(--ink-2);
+    line-height: 1.6; margin-bottom: 2.5rem; max-width: 700px;
+  }
+
+  /* THINKING */
+  .thinking-grid { display: grid; grid-template-columns: 1fr; gap: 2.5rem; }
+  .thought {
+    display: grid; grid-template-columns: 140px 1fr;
+    gap: 1.5rem 2rem; align-items: start;
+  }
+  @media (max-width: 700px) { .thought { grid-template-columns: 1fr; gap: 0.5rem; } }
+  .thought-tag {
+    font-family: var(--hand); font-size: 1.4rem;
+    color: var(--red); line-height: 1.1; padding-top: 0.2rem;
+  }
+  .thought-tag::before { content: "★ "; }
+  .thought-body h3 {
+    font-family: var(--display); font-weight: 500;
+    font-size: 1.45rem; line-height: 1.25; letter-spacing: -0.01em;
+    margin-bottom: 0.85rem; color: var(--ink);
+    font-variation-settings: "opsz" 36;
+  }
+  .thought-body p {
+    font-size: 1rem; color: var(--ink-2);
+    line-height: 1.65; margin-bottom: 0.75rem;
+  }
+  .thought-body p strong { color: var(--ink); font-weight: 600; }
+  .thought-note {
+    font-family: var(--hand); font-size: 1.2rem;
+    color: var(--red); margin-top: 0.5rem; display: inline-block;
+  }
+  .thought-note::before { content: "→ "; }
+
+  /* DEMOS */
+  .demo-grid { display: grid; grid-template-columns: 1fr; gap: 1.25rem; }
+  .demo-card {
+    display: grid; grid-template-columns: 1fr auto;
+    align-items: center; gap: 1.5rem;
+    padding: 1.5rem 1.75rem;
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 4px; box-shadow: 1px 2px 0 rgba(44,37,32,0.04);
+    transition: all 0.2s; position: relative;
+  }
+  .demo-card:hover {
+    box-shadow: 2px 4px 0 rgba(44,37,32,0.08);
+    transform: translateY(-1px); border-color: var(--line-rule);
+  }
+  @media (max-width: 640px) { .demo-card { grid-template-columns: 1fr; gap: 1rem; } }
+  .demo-card h3 {
+    font-family: var(--display); font-weight: 500;
+    font-size: 1.3rem; line-height: 1.25; letter-spacing: -0.01em;
+    margin-bottom: 0.45rem; color: var(--ink);
+    font-variation-settings: "opsz" 36;
+  }
+  .demo-card p { font-size: 0.95rem; color: var(--ink-2); line-height: 1.55; }
+  .demo-actions {
+    display: flex; flex-direction: column; gap: 0.5rem; align-items: flex-end;
+  }
+  @media (max-width: 640px) { .demo-actions { align-items: flex-start; flex-direction: row; } }
+  .demo-btn {
+    display: inline-flex; align-items: center; gap: 0.45rem;
+    font-family: var(--mono); font-size: 0.8rem;
+    padding: 0.55rem 1rem; background: var(--ink); color: var(--paper);
+    border-radius: 4px; font-weight: 500;
+    transition: all 0.2s; white-space: nowrap;
+  }
+  .demo-btn:hover { background: var(--red); transform: translateY(-1px); }
+  .demo-link {
+    display: inline-flex; align-items: center; gap: 0.35rem;
+    font-family: var(--mono); font-size: 0.74rem;
+    color: var(--ink-muted); letter-spacing: 0.04em;
+    transition: color 0.2s;
+  }
+  .demo-link:hover { color: var(--red); }
+  .demo-footer-note {
+    font-family: var(--hand); font-size: 1.3rem;
+    color: var(--ink-muted); text-align: center; margin-top: 2rem;
+  }
+  .demo-footer-note::before { content: "↑ "; color: var(--red); }
+
+  /* CASES */
+  .case { margin-bottom: 3rem; padding-bottom: 3rem; border-bottom: 1px dashed var(--line); }
+  .case:last-child { border-bottom: none; }
+  .case-number {
+    font-family: var(--display); font-size: 2.8rem; font-weight: 400;
+    color: var(--ink-dim); line-height: 1; letter-spacing: -0.02em;
+    margin-bottom: 0.75rem; font-style: italic;
+    font-variation-settings: "opsz" 60;
+  }
+  .case-number::before { content: "№ "; color: var(--red); font-style: normal; font-size: 0.8em; }
+  .case h3 {
+    font-family: var(--display); font-weight: 500;
+    font-size: clamp(1.6rem, 3.5vw, 2.25rem);
+    line-height: 1.15; letter-spacing: -0.02em;
+    margin-bottom: 0.6rem; color: var(--ink);
+    font-variation-settings: "opsz" 48;
+  }
+  .case-meta {
+    font-family: var(--mono); font-size: 0.74rem;
+    color: var(--ink-muted); letter-spacing: 0.08em;
+    text-transform: uppercase; margin-bottom: 1.25rem; font-weight: 500;
+  }
+  .case-meta .pin { color: var(--red); }
+  .case-summary {
+    font-size: 1.02rem; color: var(--ink-2);
+    line-height: 1.65; margin-bottom: 1.5rem; max-width: 680px;
+  }
+  .case-summary em { font-style: italic; color: var(--ink); }
+  .case-metrics {
+    display: flex; flex-wrap: wrap; gap: 1.5rem 2.5rem;
+    margin-bottom: 1.5rem; padding: 1.25rem 0;
+    border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  }
+  .case-metric .n {
+    font-family: var(--display); font-weight: 500;
+    font-size: 2.1rem; color: var(--red);
+    line-height: 1; letter-spacing: -0.02em;
+    margin-bottom: 0.25rem;
+    font-variation-settings: "opsz" 48;
+  }
+  .case-metric .l {
+    font-family: var(--mono); font-size: 0.74rem;
+    color: var(--ink-muted); letter-spacing: 0.05em; text-transform: uppercase;
+  }
+  .case-toggle {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    font-family: var(--hand); font-size: 1.3rem;
+    color: var(--red); margin-top: 0.5rem; transition: color 0.2s;
+  }
+  .case-toggle::before {
+    content: "▸"; font-family: var(--mono); font-size: 0.9rem;
+    transition: transform 0.2s;
+  }
+  .case.open .case-toggle::before { transform: rotate(90deg); }
+  .case-toggle:hover { color: var(--ink); }
+  .case-toggle .open-text { display: none; }
+  .case.open .case-toggle .closed-text { display: none; }
+  .case.open .case-toggle .open-text { display: inline; }
+  .case-details { max-height: 0; overflow: hidden; transition: max-height 0.5s ease, margin-top 0.3s ease; }
+  .case.open .case-details { max-height: 4000px; margin-top: 1.5rem; }
+  .case-section { margin-bottom: 1.75rem; }
+  .case-section h4 {
+    font-family: var(--mono); font-size: 0.82rem;
+    color: var(--red); letter-spacing: 0.04em;
+    margin-bottom: 0.85rem; font-weight: 600;
+  }
+  .case-section h4::before { content: "// "; color: var(--ink-dim); }
+  .case-section ul { list-style: none; display: grid; gap: 0.7rem; }
+  .case-section li {
+    padding-left: 1.5rem; position: relative;
+    color: var(--ink-2); line-height: 1.6; font-size: 0.96rem;
+  }
+  .case-section li::before {
+    content: "—"; position: absolute; left: 0;
+    color: var(--red); font-family: var(--mono);
+  }
+  .case-section li strong { color: var(--ink); font-weight: 600; }
+  .case-section li em { color: var(--ink-2); font-style: italic; }
+  .case-section code {
+    font-family: var(--mono); font-size: 0.85em;
+    background: var(--highlight-soft); padding: 0.05rem 0.35rem;
+    border-radius: 3px; color: var(--ink);
+  }
+  .case-stack {
+    display: flex; flex-wrap: wrap;
+    font-family: var(--mono); font-size: 0.78rem;
+    color: var(--ink-2); line-height: 1.7;
+  }
+  .case-stack span {
+    padding: 0.25rem 0.65rem; background: var(--paper-2);
+    border-radius: 3px; margin: 0 0.35rem 0.35rem 0;
+  }
+  .case-docs { margin-top: 1.5rem; display: flex; flex-wrap: wrap; gap: 0.75rem; }
+  .case-docs a {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    font-family: var(--mono); font-size: 0.78rem;
+    padding: 0.4rem 0.8rem; background: var(--surface);
+    border: 1px solid var(--line); border-radius: 4px;
+    color: var(--ink-2); transition: all 0.2s;
+  }
+  .case-docs a:hover { border-color: var(--red); color: var(--red); }
+
+  /* TIMELINE */
+  .timeline-item {
+    display: grid; grid-template-columns: 200px 1fr;
+    gap: 2rem; padding: 1.5rem 0;
+    border-top: 1px solid var(--line);
+  }
+  .timeline-item:first-child { border-top: none; padding-top: 0; }
+  @media (max-width: 700px) { .timeline-item { grid-template-columns: 1fr; gap: 0.5rem; } }
+  .timeline-when {
+    font-family: var(--mono); font-size: 0.78rem;
+    color: var(--ink-muted); letter-spacing: 0.06em;
+    line-height: 1.5; font-weight: 500;
+  }
+  .timeline-when .arrow { color: var(--red); margin: 0 0.3rem; }
+  .timeline-body h3 {
+    font-family: var(--display); font-weight: 500;
+    font-size: 1.3rem; line-height: 1.25;
+    margin-bottom: 0.35rem; color: var(--ink);
+    font-variation-settings: "opsz" 36;
+  }
+  .timeline-body .place {
+    font-family: var(--display); font-style: italic;
+    font-size: 1.05rem; color: var(--ink-muted); margin-bottom: 0.85rem;
+  }
+  .timeline-body p { font-size: 0.97rem; color: var(--ink-2); line-height: 1.6; }
+  .timeline-body p strong { color: var(--ink); font-weight: 600; }
+  .timeline-body p em { font-style: italic; color: var(--red); }
+
+  /* STACK */
+  .stack-grid { display: grid; gap: 1.5rem; }
+  .stack-cat h4 {
+    font-family: var(--mono); font-size: 0.82rem;
+    color: var(--red); letter-spacing: 0.04em;
+    margin-bottom: 0.6rem; font-weight: 600;
+  }
+  .stack-cat h4::before { content: "// "; color: var(--ink-dim); }
+  .stack-cat p { font-size: 1rem; color: var(--ink-2); line-height: 1.8; }
+  .stack-cat p strong { color: var(--ink); font-weight: 600; }
+  .recognition {
+    margin-top: 2rem; padding: 1.5rem;
+    background: var(--highlight-soft);
+    border-left: 3px solid var(--red); border-radius: 4px;
+  }
+  .recognition h4 {
+    font-family: var(--mono); font-size: 0.78rem;
+    color: var(--red); letter-spacing: 0.04em;
+    margin-bottom: 0.6rem; font-weight: 600;
+  }
+  .recognition h4::before { content: "// "; color: var(--ink-dim); }
+  .recognition p { font-size: 0.98rem; color: var(--ink); line-height: 1.6; }
+
+  /* LAST PAGE */
+  .last-page { padding: 5rem 0 3rem; text-align: left; }
+  .last-page .marker {
+    font-family: var(--mono); font-size: 0.78rem;
+    color: var(--ink-muted); letter-spacing: 0.08em;
+    margin-bottom: 0.75rem; text-transform: uppercase;
+  }
+  .last-page .marker::before { content: "// "; color: var(--red); }
+  .last-page h2 {
+    font-family: var(--display); font-weight: 400;
+    font-size: clamp(2rem, 5vw, 3.25rem);
+    line-height: 1.05; letter-spacing: -0.025em;
+    margin-bottom: 1.5rem; color: var(--ink);
+    font-variation-settings: "opsz" 60;
+  }
+  .last-page h2 em { font-style: italic; color: var(--red); font-weight: 500; }
+  .last-page p.intro {
+    font-size: 1.1rem; color: var(--ink-2);
+    line-height: 1.65; margin-bottom: 1rem; max-width: 640px;
+  }
+  .last-page p.intro strong { color: var(--ink); font-weight: 600; }
+  .last-page .drop-note {
+    font-family: var(--hand); font-size: 1.5rem;
+    color: var(--red); margin: 2rem 0 2.5rem;
+  }
+  .signoff {
+    font-family: var(--hand); font-size: 2rem;
+    color: var(--ink); margin: 2.5rem 0 3rem;
+  }
+  .signoff::after { content: " ✎"; color: var(--red); }
+  .contact-list { list-style: none; display: grid; gap: 0.65rem; font-size: 1rem; }
+  .contact-list li {
+    color: var(--ink-2); display: flex; align-items: baseline; gap: 0.75rem;
+  }
+  .contact-list li .key {
+    font-family: var(--mono); font-size: 0.78rem;
+    color: var(--ink-muted); letter-spacing: 0.05em;
+    text-transform: uppercase; min-width: 75px;
+  }
+  .contact-list li a {
+    color: var(--blue); border-bottom: 1px solid var(--blue-soft);
+    transition: all 0.2s;
+  }
+  .contact-list li a:hover { color: var(--red); border-bottom-color: var(--red); }
+
+  footer.notebook-end {
+    padding: 2.5rem 0; border-top: 1px solid var(--line);
+    text-align: center; margin-top: 2rem;
+  }
+  footer.notebook-end p {
+    font-family: var(--mono); font-size: 0.72rem;
+    color: var(--ink-dim); letter-spacing: 0.12em;
+    text-transform: uppercase; line-height: 1.8;
+  }
+  footer.notebook-end p strong { color: var(--ink-muted); font-weight: 600; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition-duration: 0.01ms !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="cover">
+    <div class="cover-stamp">
+      <span>NOTEBOOK NO. <strong>19</strong></span>
+      <span class="sep">//</span>
+      <span>YEAR <strong>2026</strong></span>
+      <span class="sep">//</span>
+      <span>OWNER <strong>M. GAJERA</strong></span>
+      <span class="found">if found, please return</span>
+    </div>
+
+    <p class="hi">hi, i'm mahendra</p>
+
+    <h1 class="headline">
+      I architect <em>intelligent systems</em> that <span class="mark">actually ship</span> at enterprise scale.
+    </h1>
+
+    <p class="lede">
+      Nineteen years of doing this. Currently leading AI engineering at <strong>Redwood Software</strong> — I architected and shipped the four-feature <strong>RangerAI suite</strong> in RunMyJobs 2026, work that contributed to Redwood's inclusion in the <strong>Gartner 2025 Magic Quadrant</strong>. Before that, eleven years at <strong>Automation Anywhere</strong> evolving the A360 platform from senior developer to senior development manager — millions of automation runs, two granted US patents along the way.
+    </p>
+
+    <p class="lede">
+      This site is less of a portfolio and more of a notebook. ↓ scroll for the messy bits.
+    </p>
+
+    <div class="cover-meta">
+      <span>based in ahmedabad, india · open to relocation</span>
+      <span>writes python, java, c++, c#, javascript, way too much yaml</span>
+      <span>obsessed with agents, RAG pipelines, evals that actually catch regressions</span>
+      <span>find me <a href="https://www.linkedin.com/in/mahendragajera" target="_blank" rel="noopener">linkedin</a> · <a href="mailto:mahendra.gajera@gmail.com">email</a> · <a href="https://patents.justia.com/inventor/mahendra-gajera" target="_blank" rel="noopener">patents</a></span>
+    </div>
+
+    <div class="self-portrait">
+      <div class="self-mark">MG</div>
+      <p class="self-caption">— that's me. <strong>probably debugging</strong> a prompt that worked yesterday.</p>
+    </div>
+  </header>
+
+  <section>
+    <div class="section-marker"><span class="sym">§</span>01 <span class="slash">//</span> what i'm thinking about</div>
+    <h2 class="section-title">Right <em>now</em>.</h2>
+    <p class="section-lede">A few things on my mind in 2026 — what I'm building, what I'm reading, what I'm done with.</p>
+
+    <div class="thinking-grid">
+      <div class="thought">
+        <div class="thought-tag">building</div>
+        <div class="thought-body">
+          <h3>AI agents that survive contact with enterprise reality</h3>
+          <p>Building demos is easy. Shipping AI features into a workload-automation platform that runs <strong>millions of jobs daily for SAP, Salesforce, and Oracle customers</strong> — that's the job. Right now I'm leading the team behind <strong>RangerAI</strong> at Redwood, a four-feature suite that ships LLMs and RAG into the product surface of RunMyJobs 2026.</p>
+          <span class="thought-note">contributed to the Gartner Magic Quadrant 2025 recognition</span>
+        </div>
+      </div>
+
+      <div class="thought">
+        <div class="thought-tag">obsessed with</div>
+        <div class="thought-body">
+          <h3>Eval-driven development for code-gen</h3>
+          <p>If you ship code that an LLM wrote into an enterprise platform, you have to measure it. For the RangerAI Automation Co-pilot I built a <strong>RAGAS quality gate</strong> with a Golden Script Set — every model update runs against it before merge. Code Faithfulness, API adherence, safety guardrails. <strong>92% syntactical accuracy</strong>, prevented from regressing because the eval gates the deploy.</p>
+          <span class="thought-note">"no eval, no merge" — same energy</span>
+        </div>
+      </div>
+
+      <div class="thought">
+        <div class="thought-tag">reading</div>
+        <div class="thought-body">
+          <h3>The agent protocol wars</h3>
+          <p>MCP, A2A, the whole constellation of specs trying to standardise how agents talk to tools and to each other. I've been integrating MCP into AI-assisted development workflows at Redwood — using Claude Code and OpenAI Codex inside the engineering org and watching how the protocol scaffolding either holds or doesn't. Documentation in this space ages in weeks, so I take notes.</p>
+          <span class="thought-note">playing with both, betting on neither yet</span>
+        </div>
+      </div>
+
+      <div class="thought">
+        <div class="thought-tag">getting better at</div>
+        <div class="thought-body">
+          <h3>Telling the story, not just the stack</h3>
+          <p>Engineers love stack diagrams. Executives need outcome stories. I've been working on translating between the two — explaining why an LLM-powered diagnostic feature mattered for our Gartner positioning without dumbing it down or wrapping it in buzzwords. <strong>30% engineering-productivity gain</strong> is a number a VP can hold; the AI-assisted development plumbing underneath is what made it happen.</p>
+          <span class="thought-note">19 years in. still learning to speak both languages.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-marker"><span class="sym">§</span>02 <span class="slash">//</span> things you can play with</div>
+    <h2 class="section-title">Live <em>demos</em>.</h2>
+    <p class="section-lede">Concepts I've been wrestling with, turned into interactive demos. Click play, mess around, break things. They run entirely in your browser. Part of a series I call <em>"Simplified by Mahendra"</em> — taking AI ideas that get buried in jargon and showing how they actually work.</p>
+
+    <div class="demo-grid">
+      <div class="demo-card">
+        <div>
+          <h3>LangChain &amp; LangGraph</h3>
+          <p>The two libraries powering most production AI agents — explained side-by-side with code snippets and live visualizations. Pipeline vs state machine, when to use which, and a full ReAct agent walkthrough.</p>
+        </div>
+        <div class="demo-actions">
+          <a href="langchain-langgraph-demo.html" class="demo-btn">▶ Run demo</a>
+          <a href="langchain-langgraph-demo.html" target="_blank" rel="noopener" class="demo-link">↗ open in tab</a>
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <div>
+          <h3>RangerAI: project reels</h3>
+          <p>Four 45-second cinematic walkthroughs of the RangerAI features I shipped at Redwood — Troubleshoot, Product Assistant, Automation Co-pilot, Generate. Auto-play with scrubbing, scene jumping, and project switching.</p>
+        </div>
+        <div class="demo-actions">
+          <a href="reels.html" class="demo-btn">▶ Watch reels</a>
+          <a href="reels.html" target="_blank" rel="noopener" class="demo-link">↗ open in tab</a>
+        </div>
+      </div>
+    </div>
+
+    <p class="demo-footer-note">all of these run client-side. no api keys, no backend, no nonsense.</p>
+  </section>
+
+  <section>
+    <div class="section-marker"><span class="sym">§</span>03 <span class="slash">//</span> production work</div>
+    <h2 class="section-title">Things I've <em>shipped</em>.</h2>
+    <p class="section-lede">The serious stuff — work that runs in production at companies you've heard of. Click any card to see the messy details.</p>
+
+    <article class="case open">
+      <div class="case-number">01</div>
+      <h3>Troubleshoot with RangerAI — Intelligent Job Diagnostics</h3>
+      <div class="case-meta">2025 <span class="pin">·</span> REDWOOD RUNMYJOBS 2026 <span class="pin">·</span> PRODUCTION · MODERN UI</div>
+      <p class="case-summary">
+        In complex distributed systems, identifying <em>why</em> a job failed is a needle-in-a-haystack problem. Developers used to sift through massive raw logs, jump across screens, and hypothesise fixes. Every minute of MTTR is a minute the business runs degraded. So I built an LLM-powered diagnostic overlay that turns raw error logs into actionable intelligence — directly inside the monitoring UI.
+      </p>
+      <div class="case-metrics">
+        <div class="case-metric"><div class="n">65%</div><div class="l">Reduction in debugging time</div></div>
+        <div class="case-metric"><div class="n">Auto</div><div class="l">Log parsing &amp; targeting</div></div>
+        <div class="case-metric"><div class="n">1-Click</div><div class="l">Diagnostic workflow</div></div>
+      </div>
+      <button class="case-toggle" aria-expanded="true">
+        <span class="closed-text">show me the messy details</span>
+        <span class="open-text">collapse the messy details</span>
+      </button>
+      <div class="case-details">
+        <div class="case-section">
+          <h4>my approach</h4>
+          <ul>
+            <li><strong>Contextual triggering</strong> — the prompt layer only activates when a Job enters a terminal <em>Error</em> state, so no noise, just signal.</li>
+            <li><strong>Targeted diagnostics</strong> — focused the AI on the <code>stderror.txt</code> stream to isolate the actual failure point.</li>
+            <li><strong>Tri-fold output</strong> — raw evidence (logs), plain-English explanation, proposed remedy. All in one overlay.</li>
+            <li><strong>Portability</strong> — export AI insights directly to Jira tickets and post-mortems.</li>
+          </ul>
+        </div>
+        <div class="case-section">
+          <h4>what's actually under the hood</h4>
+          <ul>
+            <li><strong>LLM pipeline</strong> — fine-tuned GPT-4o-class model optimised for stack traces and proprietary error codes.</li>
+            <li><strong>Log extraction engine</strong> — fetches <code>stderror.txt</code> from S3 / Azure Blobs only when requested to minimise data egress.</li>
+            <li><strong>Prompt engineering</strong> — few-shot prompting with structured JSON output.</li>
+            <li><strong>Conditional UI</strong> — React validates job type and file availability before rendering the entry point.</li>
+          </ul>
+        </div>
+        <div class="case-section">
+          <h4>what i actually did (vs the team)</h4>
+          <ul>
+            <li>Defined the end-to-end architecture from Error-status trigger to the troubleshooting overlay.</li>
+            <li>Iterated system prompts to stop the AI hallucinating fixes for ambiguous hardware failures.</li>
+            <li>Built the API bridge between the Monitoring UI and the LLM inference endpoint.</li>
+            <li>Wrote the Download logic and graceful fallback for missing error logs.</li>
+          </ul>
+        </div>
+        <div class="case-section">
+          <h4>stack</h4>
+          <div class="case-stack">
+            <span>OpenAI GPT-4o</span><span>Python</span><span>React</span><span>Node.js</span><span>TypeScript</span><span>AWS S3</span><span>REST API</span>
+          </div>
+        </div>
+        <div class="case-docs">
+          <a href="reels.html#troubleshoot">▶ watch the reel</a>
+          <a href="https://documentation.runmyjobs.cloud/runmyjobs-2026/Content/AIFeatures/TroubleshootingWithRangerAI.htm" target="_blank" rel="noopener">↗ official docs</a>
+        </div>
+      </div>
+    </article>
+
+    <article class="case">
+      <div class="case-number">02</div>
+      <h3>RangerAI Product Assistant — Conversational Doc Engine</h3>
+      <div class="case-meta">2025 <span class="pin">·</span> REDWOOD RUNMYJOBS 2026 <span class="pin">·</span> RAG <span class="pin">·</span> PRODUCTION</div>
+      <p class="case-summary">
+        Enterprise platforms have thousands of pages of dense technical documentation. Traditional search returns fragments and forces manual synthesis. Users were drowning in information. I led the build of an in-product conversational assistant — grounded in the docs, with 30-minute session memory, that delivers actionable answers without leaving the application.
+      </p>
+      <div class="case-metrics">
+        <div class="case-metric"><div class="n">40%</div><div class="l">Support ticket deflection</div></div>
+        <div class="case-metric"><div class="n">30 min</div><div class="l">Conversational memory</div></div>
+        <div class="case-metric"><div class="n">100%</div><div class="l">Documentation grounding</div></div>
+      </div>
+      <button class="case-toggle" aria-expanded="false">
+        <span class="closed-text">show me the messy details</span>
+        <span class="open-text">collapse the messy details</span>
+      </button>
+      <div class="case-details">
+        <div class="case-section">
+          <h4>my approach</h4>
+          <ul>
+            <li><strong>Information at the point of need</strong> — non-intrusive UI overlay surfaces the entire knowledge base from any screen.</li>
+            <li><strong>Short-term memory architecture</strong> — session handling persists conversation state for 30 minutes for natural follow-ups.</li>
+            <li><strong>Guided discovery</strong> — sample prompts lower the barrier to entry.</li>
+            <li><strong>Grounded reasoning</strong> — system scoped exclusively to RunMyJobs documentation to eliminate hallucinations.</li>
+          </ul>
+        </div>
+        <div class="case-section">
+          <h4>what's actually under the hood</h4>
+          <ul>
+            <li><strong>RAG pipeline</strong> — high-fidelity retrieval-augmented generation over a vector store of crawled, chunked docs.</li>
+            <li><strong>Session management</strong> — custom caching layer; clears context after 30 min idle for privacy.</li>
+            <li><strong>Python backend</strong> — microservice handling NLP, query expansion, and documentation retrieval.</li>
+            <li><strong>Hybrid semantic search</strong> — keyword matching for command syntax + semantic embeddings for concepts.</li>
+          </ul>
+        </div>
+        <div class="case-section">
+          <h4>what i actually did</h4>
+          <ul>
+            <li>Drove the AI strategy — shift from static help to interactive AI; defined deflection ROI.</li>
+            <li>Led the technical design of the memory persistence layer and the RAG ingestion pipeline.</li>
+            <li>Developed system personas and grounding instructions for a technical, professional tone.</li>
+            <li>Partnered with Documentation and UX teams on a shared information architecture.</li>
+          </ul>
+        </div>
+        <div class="case-section">
+          <h4>stack</h4>
+          <div class="case-stack">
+            <span>RAG</span><span>Vector DB</span><span>Python</span><span>OpenAI / LLM</span><span>React</span><span>Session Caching</span><span>NLP</span>
+          </div>
+        </div>
+        <div class="case-docs">
+          <a href="reels.html#assistant">▶ watch the reel</a>
+          <a href="https://documentation.runmyjobs.cloud/runmyjobs-2026/Content/AIFeatures/RangerAIProductAssistant.htm" target="_blank" rel="noopener">↗ official docs</a>
+        </div>
+      </div>
+    </article>
+
+    <article class="case">
+      <div class="case-number">03</div>
+      <h3>RangerAI Automation Co-pilot — RAGAS-Evaluated Code-Gen</h3>
+      <div class="case-meta">2025 <span class="pin">·</span> REDWOOD RUNMYJOBS 2026 <span class="pin">·</span> RAGAS <span class="pin">·</span> CODE-GEN</div>
+      <p class="case-summary">
+        Scaling enterprise automation requires specialised scripting — RedwoodScript — which became a bottleneck when only platform experts could write it. Manual scripting was slow and documentation-heavy. I engineered a co-pilot that translates natural language into production-ready scripts, with a <em>RAGAS</em> quality gate guarding syntactical precision and safety on every model update.
+      </p>
+      <div class="case-metrics">
+        <div class="case-metric"><div class="n">+50%</div><div class="l">Developer velocity</div></div>
+        <div class="case-metric"><div class="n">92%</div><div class="l">Syntactical accuracy</div></div>
+        <div class="case-metric"><div class="n">0-shot</div><div class="l">Code generation</div></div>
+      </div>
+      <button class="case-toggle" aria-expanded="false">
+        <span class="closed-text">show me the messy details</span>
+        <span class="open-text">collapse the messy details</span>
+      </button>
+      <div class="case-details">
+        <div class="case-section">
+          <h4>code-eval dimensions</h4>
+          <ul>
+            <li><strong>Syntactical correctness</strong> — does the generated Java or RedwoodScript compile without errors?</li>
+            <li><strong>API adherence</strong> — does the LLM use proprietary platform classes correctly, or hallucinate generic libraries?</li>
+            <li><strong>Safety guardrails</strong> — destructive operations like <em>"delete all completed jobs"</em> generate with proper safety checks.</li>
+            <li><strong>Context continuity</strong> — does the co-pilot maintain logical state across multi-turn script refinements?</li>
+          </ul>
+        </div>
+        <div class="case-section">
+          <h4>pipeline architecture</h4>
+          <ul>
+            <li><strong>Dual-engine RAG</strong> — ingests thousands of RedwoodScript examples and Java API docs.</li>
+            <li><strong>RAGAS quality gate</strong> — Python validation service runs every update against a <em>Golden Script Set</em>.</li>
+            <li><strong>Stateless-to-stateful bridge</strong> — conversation memory persists for iterative script debugging.</li>
+            <li><strong>Multi-environment support</strong> — specialised prompt templates for Java, Shell, and RedwoodScript runtimes.</li>
+          </ul>
+        </div>
+        <div class="case-section">
+          <h4>what i actually did</h4>
+          <ul>
+            <li>Architected the code-gen logic — multi-prompt strategy distinguishing scripting tools, shell commands, and job actions.</li>
+            <li>Built the RAGAS eval suite — implemented Code Faithfulness metrics to prevent hallucinated parameters.</li>
+            <li>Led the backend-to-frontend integration for <em>Insert Code</em> and <em>Clear History</em>.</li>
+            <li>Hand-curated 200+ complex automation scenarios for the RAGAS evaluation baseline.</li>
+          </ul>
+        </div>
+        <div class="case-section">
+          <h4>stack</h4>
+          <div class="case-stack">
+            <span>RAGAS</span><span>OpenAI GPT-4o</span><span>Python</span><span>RedwoodScript</span><span>Java</span><span>Vector DB</span><span>Azure Pipelines</span><span>React</span>
+          </div>
+        </div>
+        <div class="case-docs">
+          <a href="reels.html#copilot">▶ watch the reel</a>
+          <a href="https://documentation.runmyjobs.cloud/runmyjobs-2026/Content/AIFeatures/RangerAIScriptAssistant.htm" target="_blank" rel="noopener">↗ official docs</a>
+        </div>
+      </div>
+    </article>
+
+    <article class="case">
+      <div class="case-number">04</div>
+      <h3>Generate with RangerAI — Self-Documenting Automation</h3>
+      <div class="case-meta">2025 <span class="pin">·</span> REDWOOD RUNMYJOBS 2026 <span class="pin">·</span> AUTO-DOCUMENTATION</div>
+      <p class="case-summary">
+        Documentation debt is a silent killer in enterprise automation. Engineers build complex nested workflows but never document the logic — maintenance grinds to a halt, audits become risky, the cost compounds quarterly. I built an AI-native documentation generator that synthesizes workflow graphs and job logic into human-readable descriptions with one click.
+      </p>
+      <div class="case-metrics">
+        <div class="case-metric"><div class="n">80%</div><div class="l">Reduction in manual docs</div></div>
+        <div class="case-metric"><div class="n">Instant</div><div class="l">Context synthesis</div></div>
+        <div class="case-metric"><div class="n">Auto-Sync</div><div class="l">Logic-to-text on save</div></div>
+      </div>
+      <button class="case-toggle" aria-expanded="false">
+        <span class="closed-text">show me the messy details</span>
+        <span class="open-text">collapse the messy details</span>
+      </button>
+      <div class="case-details">
+        <div class="case-section">
+          <h4>my approach</h4>
+          <ul>
+            <li><strong>Zero-friction DX</strong> — embedded the AI directly in the editor, where work happens.</li>
+            <li><strong>Contextual ingestion</strong> — system ingests metadata, dependencies, and execution parameters — not just scripts.</li>
+            <li><strong>Non-destructive augmentation</strong> — generator appends AI insights after human notes, preserving institutional knowledge.</li>
+            <li><strong>Structural parsing</strong> — transforms graphical workflows into structured semantic prompts an LLM can interpret.</li>
+          </ul>
+        </div>
+        <div class="case-section">
+          <h4>what's actually under the hood</h4>
+          <ul>
+            <li><strong>Graph serialization</strong> — backend layer flattens multi-step workflow hierarchies into coherent text.</li>
+            <li><strong>Token-aware inference</strong> — context-window monitor detects <em>large definition</em> edge cases and optimises the prompt.</li>
+            <li><strong>Prompt architecture</strong> — high-fidelity system prompts tuned for platform-specific job definitions.</li>
+            <li><strong>Stateful UI integration</strong> — React-based loading and injection updates the Documentation tab without page refresh.</li>
+          </ul>
+        </div>
+        <div class="case-section">
+          <h4>what i actually did</h4>
+          <ul>
+            <li>Proposed and led the shift from manual documentation tabs to an AI-assisted generation model.</li>
+            <li>Wrote the core Python that converts complex workflow objects into LLM-readable descriptions.</li>
+            <li>Solved the <em>Large Definition</em> edge case with a hierarchical summary approach.</li>
+            <li>Defined the one-click UX and safety checks distinguishing AI-generated text from manual entries.</li>
+          </ul>
+        </div>
+        <div class="case-section">
+          <h4>stack</h4>
+          <div class="case-stack">
+            <span>OpenAI API</span><span>Graph Serialization</span><span>Python</span><span>React</span><span>TypeScript</span><span>JSON</span><span>LLM Context Mgmt</span>
+          </div>
+        </div>
+        <div class="case-docs">
+          <a href="reels.html#generate">▶ watch the reel</a>
+          <a href="https://documentation.runmyjobs.cloud/runmyjobs-2026/Content/AIFeatures/GeneratingJobDocsWithRangerAI.htm" target="_blank" rel="noopener">↗ official docs</a>
+        </div>
+      </div>
+    </article>
+
+    <article class="case">
+      <div class="case-number">05</div>
+      <h3>A360 Platform &amp; the Command Factory — 11 years at Automation Anywhere</h3>
+      <div class="case-meta">2012 — 2023 <span class="pin">·</span> AUTOMATION ANYWHERE <span class="pin">·</span> RPA AT SCALE</div>
+      <p class="case-summary">
+        Joined as a Senior Developer in 2012; left in 2023 as a Senior Development Manager. In between: architected the event-driven execution engine, built the Command Factory (30+ reusable automation packages), delivered <em>multi-million-dollar savings</em> through cloud migration (v11.x → A360), and shaved <strong>58% off the runtime</strong> of the Excel Advanced package across ~7M automation runs. Two granted US patents.
+      </p>
+      <div class="case-metrics">
+        <div class="case-metric"><div class="n">$M+</div><div class="l">Migration cost savings</div></div>
+        <div class="case-metric"><div class="n">−58%</div><div class="l">Excel Advanced runtime</div></div>
+        <div class="case-metric"><div class="n">7M+</div><div class="l">Automation runs optimised</div></div>
+        <div class="case-metric"><div class="n">2</div><div class="l">US Patents</div></div>
+      </div>
+      <button class="case-toggle" aria-expanded="false">
+        <span class="closed-text">show me the messy details</span>
+        <span class="open-text">collapse the messy details</span>
+      </button>
+      <div class="case-details">
+        <div class="case-section">
+          <h4>three roles, eleven years</h4>
+          <ul>
+            <li><strong>Senior Developer / Tech Lead</strong> (2012–2016) — core RPA: Citrix automation, SAP integration, UI control recognition, OCR, credential management, Windows auto-login. Tech Lead for the enterprise load-testing platform across HTTP/S, Kerberos, SSO. Veracode VL5 compliance and open-source governance.</li>
+            <li><strong>Development Manager / Architect</strong> (2017–2022) — architected the event-driven execution engine running millions of automations. Built the Command Factory — 30+ reusable packages with seamless interoperability. Delivered the 58% Excel Advanced optimisation. Designed a testing framework that <em>cut testing cycle time by 50%</em>.</li>
+            <li><strong>Senior Development Manager / Tech Lead</strong> (2022–2023) — directed A360 platform strategy across microservices, low-code automation builders, AI-powered decision engines. Architected SAP and Salesforce integrations. Spearheaded IPA embedding ML decision logic into RPA workflows. Orchestrated the v11.x → A360 cloud migration with multi-million-dollar cost efficiencies.</li>
+          </ul>
+        </div>
+        <div class="case-section">
+          <h4>two patents along the way</h4>
+          <ul>
+            <li><strong>US 10,911,546</strong> — Robotic Process Automation with Automated User Login for Multiple Terminal Server Sessions.</li>
+            <li><strong>US 11,782,734</strong> — Method and System for Text Extraction from an Application Window for Robotic Process Automation.</li>
+          </ul>
+        </div>
+        <div class="case-section">
+          <h4>stack</h4>
+          <div class="case-stack">
+            <span>Java</span><span>Python</span><span>C#</span><span>C++</span><span>Automation Anywhere A360</span><span>UiPath</span><span>Citrix</span><span>SAP</span><span>Salesforce</span><span>OCR</span><span>Kerberos / SSO</span><span>Veracode VL5</span>
+          </div>
+        </div>
+        <div class="case-docs">
+          <a href="https://patents.justia.com/patent/10911546" target="_blank" rel="noopener">↗ patent 10,911,546</a>
+          <a href="https://patents.justia.com/patent/11782734" target="_blank" rel="noopener">↗ patent 11,782,734</a>
+        </div>
+      </div>
+    </article>
+
+  </section>
+
+  <section>
+    <div class="section-marker"><span class="sym">§</span>04 <span class="slash">//</span> the long view</div>
+    <h2 class="section-title">Where I've <em>been</em>.</h2>
+    <p class="section-lede">Nineteen years, four employers, two granted US patents. National Innovation Awards from the Government of India for product innovation and commercialisation.</p>
+
+    <div class="timeline-item">
+      <div class="timeline-when">OCT 2023 <span class="arrow">→</span> MAR 2026</div>
+      <div class="timeline-body">
+        <h3>Senior Development Manager</h3>
+        <div class="place">at Redwood Software</div>
+        <p>Defined the enterprise AI architecture roadmap. Led the deployment of <strong>4 large-scale AI agents</strong> (the RangerAI suite) powered by OpenAI LLMs and RAG. Oversaw a <strong>30+ member engineering organisation</strong> securing SAP Premium Certification. Drove <em>30%+ engineering productivity gains</em> by institutionalising Claude Code and OpenAI Codex into CI pipelines. Led CyberArk integration on AWS EKS. Migrated build from Bitbucket Pipelines → GitHub Actions and MinIO → S3 — <strong>30% reduction in pipeline execution time</strong>.</p>
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-when">MAR 2022 <span class="arrow">→</span> AUG 2023</div>
+      <div class="timeline-body">
+        <h3>Senior Development Manager / Tech Lead</h3>
+        <div class="place">at Automation Anywhere</div>
+        <p>Directed the A360 platform — large-scale event-driven automation across microservices, low-code builders, AI-powered decision engines. Architected SAP and Salesforce enterprise integrations. Spearheaded Intelligent Process Automation (IPA). Orchestrated the v11.x → A360 cloud migration — <em>multi-million-dollar cost efficiencies</em>.</p>
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-when">JAN 2017 <span class="arrow">→</span> MAR 2022</div>
+      <div class="timeline-body">
+        <h3>Development Manager / Architect</h3>
+        <div class="place">at Automation Anywhere</div>
+        <p>Architected the event-driven execution engine powering millions of automation runs. Built the <strong>Command Factory</strong> — 30+ reusable automation packages with full interoperability. Delivered the <strong>58% Excel Advanced runtime reduction</strong> across ~7M runs. Designed a testing framework that <em>cut testing cycle time by 50%</em>.</p>
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-when">NOV 2012 <span class="arrow">→</span> DEC 2016</div>
+      <div class="timeline-body">
+        <h3>Senior Developer / Technical Lead</h3>
+        <div class="place">at Automation Anywhere</div>
+        <p>Core RPA capabilities — Citrix automation, SAP integration, UI control recognition, OCR, credential management, Windows auto-login. Technical Lead for the enterprise load-testing platform — HTTP/S, Kerberos, SSO. Established Veracode VL5 compliance and open-source governance.</p>
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-when">JAN 2009 <span class="arrow">→</span> OCT 2010</div>
+      <div class="timeline-body">
+        <h3>Senior Developer</h3>
+        <div class="place">at Silver Touch Technologies</div>
+        <p>Delivered Print Job Scanner (Inepro), Multi-Touch City Information System, iOS mobile applications, Network Tracking Tool.</p>
+      </div>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-when">AUG 2003 <span class="arrow">→</span> DEC 2008<br>NOV 2010 <span class="arrow">→</span> NOV 2012</div>
+      <div class="timeline-body">
+        <h3>Senior Developer / Technical Lead</h3>
+        <div class="place">at Sahajanand Laser &amp; Software</div>
+        <p>Where it started. Lead engineer for SLMark — a vector graphics editor with computer vision. Senior Developer on MARKPPRO (CNC laser marking system) and Airwin Diagnose (diagnostic software). Developer on Power Meter and Multi-Galvo Bruiting projects.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-marker"><span class="sym">§</span>05 <span class="slash">//</span> tools of the trade</div>
+    <h2 class="section-title">The <em>stack</em>.</h2>
+    <p class="section-lede">What I reach for daily. Bold = primary, the rest = comfortable but not married to.</p>
+
+    <div class="stack-grid">
+      <div class="stack-cat">
+        <h4>languages</h4>
+        <p><strong>Python</strong>, <strong>Java</strong>, C++, C#, JavaScript, TypeScript, SQL, Bash</p>
+      </div>
+      <div class="stack-cat">
+        <h4>AI / ML</h4>
+        <p><strong>RAG pipelines</strong>, <strong>RAGAS evals</strong>, <strong>multi-agent systems</strong>, prompt engineering, vector stores, hallucination detection, <strong>LangChain</strong>, <strong>LangGraph</strong>, MCP, OpenAI APIs, Vertex AI</p>
+      </div>
+      <div class="stack-cat">
+        <h4>models</h4>
+        <p><strong>OpenAI GPT-4o</strong>, <strong>Claude</strong>, Gemini, Vertex AI, OpenAI Codex, Claude Code</p>
+      </div>
+      <div class="stack-cat">
+        <h4>cloud &amp; infra</h4>
+        <p><strong>AWS</strong>, <strong>GCP</strong>, <strong>Kubernetes</strong>, <strong>Docker</strong>, AWS EKS, AWS S3, microservices, event-driven architectures</p>
+      </div>
+      <div class="stack-cat">
+        <h4>CI/CD &amp; observability</h4>
+        <p><strong>GitHub Actions</strong>, <strong>Jenkins</strong>, Azure Pipelines, CI/CD pipelines, production monitoring</p>
+      </div>
+      <div class="stack-cat">
+        <h4>automation &amp; RPA</h4>
+        <p><strong>Automation Anywhere A360</strong>, UiPath, IPA, workflow engines, workflow orchestration</p>
+      </div>
+      <div class="stack-cat">
+        <h4>testing &amp; reliability</h4>
+        <p><strong>Selenium</strong>, Cypress, Playwright, load testing, performance testing, production monitoring</p>
+      </div>
+      <div class="stack-cat">
+        <h4>security &amp; compliance</h4>
+        <p><strong>Veracode VL5</strong>, BlackDuck, CyberArk, ClamAV, secure secrets management</p>
+      </div>
+      <div class="stack-cat">
+        <h4>AI tools daily</h4>
+        <p><strong>Claude Code</strong>, <strong>OpenAI Codex</strong>, GitHub Copilot — for code, architecture, prompt iteration</p>
+      </div>
+
+      <div class="recognition">
+        <h4>recognition</h4>
+        <p>National Innovation Awards · Department of Information Technology &amp; Ministry of Science (Government of India) for product innovation &amp; commercialisation · Contributed to <strong>Gartner Magic Quadrant 2025</strong> recognition at Redwood · 2 granted US Patents (10,911,546 &amp; 11,782,734) · B.Sc. Information Technology (Sikkim Manipal University, 2009) · Diploma in Computer Engineering (Technical Education Board, Gandhinagar, 2003)</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="last-page" id="contact">
+    <div class="marker">last page</div>
+    <h2>Want to <em>build something</em>?</h2>
+    <p class="intro">Open to senior engineering and AI leadership roles — <strong>Senior Development Manager, AI Development Director, Head of AI Platform, AI Solutions Architect</strong>. Remote, hybrid, or relocation. The only requirement is interesting problems.</p>
+    <p class="drop-note">drop a note. i read everything.</p>
+    <p class="signoff">— mahendra</p>
+
+    <ul class="contact-list">
+      <li><span class="key">Email</span><a href="mailto:mahendra.gajera@gmail.com">mahendra.gajera@gmail.com</a></li>
+      <li><span class="key">Phone</span><a href="tel:+919825374764">+91 98253 74764</a></li>
+      <li><span class="key">LinkedIn</span><a href="https://www.linkedin.com/in/mahendragajera" target="_blank" rel="noopener">/mahendragajera</a></li>
+      <li><span class="key">Patents</span><a href="https://patents.justia.com/inventor/mahendra-gajera" target="_blank" rel="noopener">on Justia</a></li>
+      <li><span class="key">Based</span><span>Ahmedabad, India</span></li>
+    </ul>
+  </section>
+
+  <footer class="notebook-end">
+    <p>
+      <strong>NOTEBOOK CLOSED</strong><br>
+      © 2026 MAHENDRA GAJERA<br>
+      HAND-WRITTEN, HAND-CODED
+    </p>
+  </footer>
+
+</div>
+
+<script>
+  document.querySelectorAll('.case-toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const card = btn.closest('.case');
+      const open = card.classList.toggle('open');
+      btn.setAttribute('aria-expanded', open);
+    });
+  });
+</script>
+
+</body>
+</html>

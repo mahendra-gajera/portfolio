@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Project Reels — Mahendra Gajera</title>
+<meta name="description" content="Animated project reels for the RangerAI suite — built by Mahendra Gajera at Redwood Software." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600;6..72,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #FAFAF7;
+    --bg-2: #F2EEE5;
+    --surface: #FFFFFF;
+    --ink: #14181F;
+    --ink-2: #2E3440;
+    --ink-muted: #5A6273;
+    --ink-dim: #8B919E;
+    --border: #E8E4DC;
+    --accent: #0F3460;
+    --accent-2: #1E5BA8;
+    --accent-soft: #E8EEF6;
+    --success: #1F7A4D;
+    --success-soft: #E5F2EB;
+    --serif: "Newsreader", Georgia, serif;
+    --sans: "Plus Jakarta Sans", -apple-system, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, monospace;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; text-decoration: none; }
+  button { font: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+
+  /* ===================== PLAYER FRAME ===================== */
+  .reel-player {
+    height: 100%;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    background:
+      radial-gradient(circle at 80% 10%, rgba(15,52,96,0.04) 0%, transparent 50%),
+      radial-gradient(circle at 10% 90%, rgba(15,52,96,0.03) 0%, transparent 50%),
+      var(--bg);
+  }
+
+  /* HEADER */
+  .reel-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    background: rgba(250,250,247,0.85);
+    backdrop-filter: blur(12px);
+    z-index: 10;
+  }
+  .back-link {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    font-size: 0.85rem; font-weight: 500;
+    color: var(--ink-muted);
+    padding: 0.45rem 0.8rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface);
+    transition: all 0.2s;
+  }
+  .back-link:hover { color: var(--ink); border-color: var(--ink-dim); }
+
+  .project-tabs {
+    display: flex; gap: 0.35rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.25rem;
+  }
+  .project-tab {
+    padding: 0.4rem 0.7rem;
+    font-family: var(--mono); font-size: 0.72rem; font-weight: 500;
+    color: var(--ink-muted);
+    border-radius: 5px;
+    transition: all 0.2s;
+    letter-spacing: 0.04em;
+  }
+  .project-tab:hover { background: var(--bg-2); color: var(--ink); }
+  .project-tab.active {
+    background: var(--accent);
+    color: var(--surface);
+  }
+  .reel-brand {
+    font-family: var(--serif); font-size: 0.92rem;
+    font-weight: 500;
+    color: var(--ink-muted);
+    font-style: italic;
+  }
+  @media (max-width: 720px) {
+    .reel-brand { display: none; }
+    .reel-header { padding: 0.75rem 1rem; }
+  }
+
+  /* ===================== STAGE ===================== */
+  .reel-stage {
+    position: relative;
+    overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .scene {
+    position: absolute;
+    inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 2rem clamp(1.5rem, 5vw, 5rem);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.6s ease;
+  }
+  .scene.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .scene.active .anim {
+    animation-play-state: running;
+  }
+
+  .scene-inner {
+    width: 100%;
+    max-width: 980px;
+  }
+
+  /* Universal eyebrow */
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 0.6rem;
+    font-family: var(--mono); font-size: 0.72rem;
+    color: var(--accent); letter-spacing: 0.14em;
+    font-weight: 600; text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    opacity: 0;
+  }
+  .scene.active .eyebrow {
+    animation: fadeUp 0.6s 0.1s forwards;
+  }
+  .eyebrow::before {
+    content: ""; width: 28px; height: 1px;
+    background: var(--accent);
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.94); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  /* ===================== SCENE: TITLE ===================== */
+  .scene-title {
+    text-align: center;
+  }
+  .title-frame {
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 3rem 1rem;
+    position: relative;
+    opacity: 0;
+  }
+  .scene.active .title-frame {
+    animation: fadeUp 0.8s 0.2s forwards;
+  }
+  .title-frame::before, .title-frame::after {
+    content: ""; position: absolute;
+    width: 12px; height: 12px;
+    border: 1px solid var(--accent);
+  }
+  .title-frame::before { top: -6px; left: -6px; border-right: none; border-bottom: none; }
+  .title-frame::after { bottom: -6px; right: -6px; border-left: none; border-top: none; }
+
+  .title-num {
+    font-family: var(--mono); font-size: 0.85rem;
+    color: var(--ink-muted); letter-spacing: 0.12em;
+    margin-bottom: 1.25rem;
+    font-weight: 500;
+  }
+  .title-main {
+    font-family: var(--serif); font-weight: 500;
+    font-size: clamp(2.2rem, 7vw, 5.5rem);
+    line-height: 1.02; letter-spacing: -0.025em;
+    color: var(--ink);
+    margin-bottom: 1rem;
+    font-variation-settings: "opsz" 72;
+  }
+  .title-main em { font-style: italic; color: var(--accent); font-weight: 400; }
+  .title-sub {
+    font-family: var(--serif); font-style: italic;
+    font-size: clamp(1rem, 2vw, 1.35rem);
+    color: var(--ink-muted);
+    font-weight: 400;
+  }
+  .title-byline {
+    margin-top: 2rem;
+    font-family: var(--sans); font-size: 0.82rem;
+    color: var(--ink-dim); letter-spacing: 0.06em;
+    text-transform: uppercase; font-weight: 500;
+    opacity: 0;
+  }
+  .scene.active .title-byline {
+    animation: fadeIn 0.6s 1s forwards;
+  }
+  .title-byline strong { color: var(--ink); font-weight: 600; }
+
+  /* ===================== SCENE: PROBLEM ===================== */
+  .problem-quote {
+    font-family: var(--serif);
+    font-size: clamp(1.5rem, 3.5vw, 2.6rem);
+    line-height: 1.25; letter-spacing: -0.015em;
+    color: var(--ink);
+    font-weight: 400;
+    margin-bottom: 2rem;
+    max-width: 880px;
+    font-variation-settings: "opsz" 48;
+    opacity: 0;
+  }
+  .scene.active .problem-quote { animation: fadeUp 0.7s 0.2s forwards; }
+  .problem-quote em { color: var(--accent); font-style: italic; }
+  .problem-context {
+    font-family: var(--sans); font-size: 1.05rem;
+    color: var(--ink-muted); line-height: 1.65;
+    max-width: 720px;
+    opacity: 0;
+  }
+  .scene.active .problem-context { animation: fadeUp 0.7s 0.5s forwards; }
+
+  /* ===================== SCENE: APPROACH / ROLE ===================== */
+  .scene h2.scene-title-text {
+    font-family: var(--serif); font-weight: 500;
+    font-size: clamp(1.6rem, 3vw, 2.4rem);
+    line-height: 1.1; letter-spacing: -0.02em;
+    margin-bottom: 2rem;
+    color: var(--ink);
+    font-variation-settings: "opsz" 48;
+    opacity: 0;
+  }
+  .scene.active h2.scene-title-text { animation: fadeUp 0.6s 0.2s forwards; }
+  .scene h2.scene-title-text em { font-style: italic; color: var(--accent); }
+
+  .point-list {
+    display: grid;
+    gap: 1.2rem;
+    list-style: none;
+    counter-reset: pt;
+  }
+  .point-list li {
+    display: grid;
+    grid-template-columns: 36px 1fr;
+    gap: 1.25rem;
+    align-items: start;
+    opacity: 0;
+    transform: translateX(-12px);
+    counter-increment: pt;
+  }
+  .scene.active .point-list li {
+    animation: pointIn 0.5s cubic-bezier(0.2,0.8,0.2,1) forwards;
+  }
+  .scene.active .point-list li:nth-child(1) { animation-delay: 0.4s; }
+  .scene.active .point-list li:nth-child(2) { animation-delay: 0.85s; }
+  .scene.active .point-list li:nth-child(3) { animation-delay: 1.3s; }
+  .scene.active .point-list li:nth-child(4) { animation-delay: 1.75s; }
+  @keyframes pointIn {
+    to { opacity: 1; transform: translateX(0); }
+  }
+  .point-list .num {
+    font-family: var(--mono); font-size: 0.78rem;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border: 1px solid rgba(15,52,96,0.12);
+    border-radius: 50%;
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  .point-list .num::before { content: "0" counter(pt); }
+  .point-list .body {
+    padding-top: 0.15rem;
+  }
+  .point-list .body strong {
+    font-family: var(--sans); font-weight: 600;
+    color: var(--ink);
+    font-size: 1.05rem;
+    display: block;
+    margin-bottom: 0.25rem;
+  }
+  .point-list .body span {
+    font-size: 0.95rem;
+    color: var(--ink-muted);
+    line-height: 1.55;
+  }
+
+  /* ===================== SCENE: ARCHITECTURE ===================== */
+  .arch-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+  }
+  .arch-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.35rem;
+    opacity: 0;
+    transform: translateY(14px);
+    box-shadow: 0 1px 2px rgba(20,24,31,0.04);
+  }
+  .scene.active .arch-card {
+    animation: pointIn 0.5s cubic-bezier(0.2,0.8,0.2,1) forwards;
+  }
+  .scene.active .arch-card:nth-child(1) { animation-delay: 0.4s; }
+  .scene.active .arch-card:nth-child(2) { animation-delay: 0.7s; }
+  .scene.active .arch-card:nth-child(3) { animation-delay: 1.0s; }
+  .scene.active .arch-card:nth-child(4) { animation-delay: 1.3s; }
+  .arch-card .icon {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 32px; height: 32px;
+    background: var(--accent-soft);
+    border-radius: 6px;
+    color: var(--accent);
+    font-family: var(--mono); font-size: 0.85rem; font-weight: 600;
+    margin-bottom: 0.85rem;
+  }
+  .arch-card strong {
+    font-family: var(--serif); font-weight: 500;
+    font-size: 1.05rem;
+    color: var(--ink);
+    display: block;
+    margin-bottom: 0.4rem;
+    letter-spacing: -0.01em;
+  }
+  .arch-card span {
+    font-size: 0.88rem;
+    color: var(--ink-muted);
+    line-height: 1.5;
+  }
+
+  /* ===================== SCENE: IMPACT ===================== */
+  .impact-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 8px 24px -8px rgba(20,24,31,0.08);
+    opacity: 0;
+  }
+  .scene.active .impact-row {
+    animation: scaleIn 0.7s 0.3s forwards;
+  }
+  .impact-cell {
+    text-align: center;
+    border-right: 1px solid var(--border);
+    padding: 0 0.5rem;
+  }
+  .impact-cell:last-child { border-right: none; }
+  @media (max-width: 700px) {
+    .impact-cell { border-right: none; border-bottom: 1px solid var(--border); padding-bottom: 1.25rem; }
+    .impact-cell:last-child { border-bottom: none; padding-bottom: 0; }
+  }
+  .impact-num {
+    font-family: var(--serif); font-weight: 500;
+    font-size: clamp(2.5rem, 5vw, 3.8rem);
+    line-height: 1;
+    color: var(--accent);
+    letter-spacing: -0.025em;
+    margin-bottom: 0.6rem;
+    font-variation-settings: "opsz" 72;
+  }
+  .impact-lbl {
+    font-family: var(--sans); font-size: 0.85rem;
+    color: var(--ink-muted);
+    line-height: 1.45;
+  }
+
+  /* ===================== SCENE: OUTRO ===================== */
+  .scene-outro { text-align: center; }
+  .outro-stack {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem;
+    margin-bottom: 2.5rem;
+    max-width: 720px;
+    opacity: 0;
+  }
+  .scene.active .outro-stack { animation: fadeUp 0.6s 0.2s forwards; }
+  .outro-pill {
+    font-family: var(--sans); font-size: 0.82rem; font-weight: 500;
+    padding: 0.4rem 0.85rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--ink-2);
+  }
+  .outro-pill.featured {
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-color: rgba(15,52,96,0.15);
+    font-weight: 600;
+  }
+  .outro-credit {
+    font-family: var(--serif); font-weight: 500;
+    font-size: clamp(1.5rem, 3vw, 2.2rem);
+    line-height: 1.2;
+    color: var(--ink);
+    margin-bottom: 1rem;
+    font-variation-settings: "opsz" 48;
+    opacity: 0;
+  }
+  .scene.active .outro-credit { animation: fadeUp 0.6s 0.6s forwards; }
+  .outro-credit em { font-style: italic; color: var(--accent); }
+  .outro-meta {
+    font-family: var(--mono); font-size: 0.78rem;
+    color: var(--ink-muted); letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0;
+  }
+  .scene.active .outro-meta { animation: fadeUp 0.6s 0.9s forwards; }
+  .outro-cta {
+    margin-top: 2.5rem;
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    font-family: var(--sans); font-size: 0.95rem; font-weight: 500;
+    padding: 0.75rem 1.25rem;
+    background: var(--accent);
+    color: var(--surface);
+    border-radius: 6px;
+    transition: all 0.2s;
+    opacity: 0;
+  }
+  .scene.active .outro-cta { animation: fadeUp 0.6s 1.2s forwards; }
+  .outro-cta:hover { background: var(--accent-2); transform: translateY(-1px); }
+
+  /* ===================== CONTROLS BAR ===================== */
+  .reel-controls {
+    padding: 0.75rem 1.5rem 1rem;
+    border-top: 1px solid var(--border);
+    background: rgba(250,250,247,0.85);
+    backdrop-filter: blur(12px);
+  }
+  .progress-bar {
+    height: 3px;
+    background: var(--border);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 0.75rem;
+    cursor: pointer;
+    position: relative;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    width: 0;
+    transition: width 0.1s linear;
+    border-radius: 999px;
+  }
+  .scene-dots {
+    display: flex; gap: 4px;
+    margin-bottom: 0.85rem;
+  }
+  .scene-dot {
+    flex: 1;
+    height: 2px;
+    background: var(--border);
+    border-radius: 999px;
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+  }
+  .scene-dot::after {
+    content: ""; position: absolute;
+    top: 0; left: 0; height: 100%; width: 0;
+    background: var(--accent);
+    transition: width 0.1s linear;
+  }
+  .scene-dot.done::after { width: 100%; }
+  .scene-dot.current::after { width: var(--p, 0%); }
+
+  .controls-row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 1rem;
+  }
+  .controls-left, .controls-right {
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .ctrl-btn {
+    width: 36px; height: 36px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    border-radius: 6px;
+    color: var(--ink);
+    font-size: 0.95rem;
+    transition: all 0.2s;
+  }
+  .ctrl-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .ctrl-btn.play-pause {
+    width: 44px; height: 44px;
+    background: var(--accent);
+    color: var(--surface);
+    border-color: var(--accent);
+    font-size: 1.1rem;
+  }
+  .ctrl-btn.play-pause:hover {
+    background: var(--accent-2);
+    border-color: var(--accent-2);
+    color: var(--surface);
+  }
+  .timer {
+    font-family: var(--mono); font-size: 0.78rem;
+    color: var(--ink-muted);
+    font-variant-numeric: tabular-nums;
+    min-width: 80px;
+    text-align: center;
+  }
+  .scene-label {
+    font-family: var(--mono); font-size: 0.7rem;
+    color: var(--ink-dim); letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-left: 0.5rem;
+    font-weight: 500;
+  }
+  @media (max-width: 720px) {
+    .scene-label { display: none; }
+    .timer { min-width: 60px; font-size: 0.72rem; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="reel-player">
+
+  <header class="reel-header">
+    <a href="index.html#work" class="back-link">
+      <span>←</span> <span>Portfolio</span>
+    </a>
+    <div class="project-tabs">
+      <button class="project-tab active" data-project="troubleshoot">P / 01</button>
+      <button class="project-tab" data-project="assistant">P / 02</button>
+      <button class="project-tab" data-project="copilot">P / 03</button>
+      <button class="project-tab" data-project="generate">P / 04</button>
+    </div>
+    <span class="reel-brand">Reels · by Mahendra Gajera</span>
+  </header>
+
+  <div class="reel-stage" id="stage">
+    <!-- Scenes rendered by JS -->
+  </div>
+
+  <footer class="reel-controls">
+    <div class="scene-dots" id="sceneDots"></div>
+    <div class="controls-row">
+      <div class="controls-left">
+        <button class="ctrl-btn play-pause" id="playPauseBtn" aria-label="Play / Pause">⏸</button>
+        <button class="ctrl-btn" id="restartBtn" aria-label="Restart">↺</button>
+        <button class="ctrl-btn" id="nextBtn" aria-label="Next scene">⏭</button>
+        <span class="scene-label" id="sceneLabel">Scene 1 of 7</span>
+      </div>
+      <div class="controls-right">
+        <span class="timer" id="timer">0:00 / 0:45</span>
+      </div>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  // ===================== PROJECT DATA =====================
+  const projects = {
+    troubleshoot: {
+      num: "P / 01",
+      title: "Troubleshoot with <em>RangerAI</em>",
+      sub: "Intelligent Job Diagnostics for Enterprise Automation",
+      meta: "Built by <strong>Mahendra Gajera</strong> · Redwood RunMyJobs 2026",
+      problem: {
+        quote: "When a job fails in a distributed system, finding <em>why</em> shouldn't take hours.",
+        context: "Developers used to sift through massive raw logs, jump across multiple screens, and hypothesise fixes. Every minute of MTTR is a minute the business is degraded."
+      },
+      approach: {
+        title: "My <em>approach</em> — bridge raw infrastructure data to developer action",
+        points: [
+          { strong: "Contextual triggering", body: "Smart prompt layer activates only when a Job enters a terminal Error state — no noise, just signal." },
+          { strong: "Targeted diagnostics", body: "Focus the AI on stderror.txt — filter out everything that isn't the failure point." },
+          { strong: "Tri-fold output", body: "Raw evidence, plain-English explanation, and a proposed remedy — all in one overlay." },
+          { strong: "Portability", body: "Export AI insights directly into Jira tickets and post-mortems." }
+        ]
+      },
+      arch: {
+        title: "Under the <em>hood</em>",
+        cards: [
+          { icon: "AI", strong: "LLM Pipeline", body: "Fine-tuned GPT-4o-class model for stack traces and proprietary error codes." },
+          { icon: "S3", strong: "Log Engine", body: "Fetches stderror.txt from S3 / Azure on demand — minimal egress." },
+          { icon: "{ }", strong: "Structured Prompts", body: "Few-shot prompting with JSON output for consistent, technical accuracy." },
+          { icon: "UI", strong: "Conditional UI", body: "React validates job state before exposing the Troubleshoot entry point." }
+        ]
+      },
+      role: {
+        title: "What I <em>actually did</em>",
+        points: [
+          { strong: "Feature architecture", body: "Defined the end-to-end flow from Error trigger to the diagnostic overlay." },
+          { strong: "Prompt design", body: "Iterated to stop the AI from hallucinating fixes for ambiguous hardware failures." },
+          { strong: "API integration", body: "Built the bridge between the Monitoring UI and the LLM inference endpoint." },
+          { strong: "UX & graceful fallbacks", body: "Wrote the Download logic and handled the case of missing error logs." }
+        ]
+      },
+      impact: [
+        { num: "65%", lbl: "Reduction in debugging time (MTTR)" },
+        { num: "Auto", lbl: "stderror.txt log parsing" },
+        { num: "1-Click", lbl: "Diagnostic workflow" }
+      ],
+      stack: [
+        { text: "OpenAI GPT-4o", featured: true },
+        { text: "Python" }, { text: "React" }, { text: "Node.js" },
+        { text: "TypeScript" }, { text: "AWS S3" }, { text: "REST API" }
+      ]
+    },
+
+    assistant: {
+      num: "P / 02",
+      title: "RangerAI Product <em>Assistant</em>",
+      sub: "A Conversational Documentation Engine",
+      meta: "Built by <strong>Mahendra Gajera</strong> · Redwood RunMyJobs 2026",
+      problem: {
+        quote: "Thousands of pages of documentation. Fragmented search results. Users <em>drowning</em> in information.",
+        context: "Enterprise platforms have dense technical docs. Traditional search returns fragments and forces manual synthesis. People need answers, not links."
+      },
+      approach: {
+        title: "My <em>approach</em> — information at the point of need",
+        points: [
+          { strong: "In-product overlay", body: "Surface the entire knowledge base from any screen, without disrupting active workflows." },
+          { strong: "30-minute memory", body: "Session state persists for natural follow-up questions during implementation." },
+          { strong: "Guided discovery", body: "Sample prompts lower the barrier to entry and reveal what the assistant can do." },
+          { strong: "Grounded reasoning", body: "Scope the LLM strictly to RunMyJobs documentation — eliminate hallucinations." }
+        ]
+      },
+      arch: {
+        title: "Under the <em>hood</em>",
+        cards: [
+          { icon: "RAG", strong: "RAG Pipeline", body: "High-fidelity retrieval over a vector store of crawled, chunked docs." },
+          { icon: "30m", strong: "Session Cache", body: "Custom caching layer; clears context after 30 min idle for privacy." },
+          { icon: "Py", strong: "Python Backend", body: "Microservice for NLP, query expansion, and documentation retrieval." },
+          { icon: "K+S", strong: "Hybrid Search", body: "Keyword matching for command syntax plus semantic embeddings for concepts." }
+        ]
+      },
+      role: {
+        title: "What I <em>actually did</em>",
+        points: [
+          { strong: "AI strategy & leadership", body: "Drove the shift from static help files to a conversational AI; defined deflection ROI." },
+          { strong: "Architecture design", body: "Led the technical design of the memory layer and the RAG ingestion pipeline." },
+          { strong: "Prompt engineering", body: "Developed system personas and grounding instructions for a technical, professional tone." },
+          { strong: "Cross-functional alignment", body: "Partnered with Docs and UX teams so the AI's mental model matched the information architecture." }
+        ]
+      },
+      impact: [
+        { num: "40%", lbl: "Support ticket deflection" },
+        { num: "30 min", lbl: "Conversational context persistence" },
+        { num: "100%", lbl: "Documentation grounding" }
+      ],
+      stack: [
+        { text: "RAG", featured: true }, { text: "Vector DB", featured: true },
+        { text: "Python" }, { text: "OpenAI / LLM" }, { text: "React" },
+        { text: "Session Caching" }, { text: "NLP" }
+      ]
+    },
+
+    copilot: {
+      num: "P / 03",
+      title: "RangerAI Automation <em>Co-pilot</em>",
+      sub: "AI-Powered Scripting with a RAGAS Quality Gate",
+      meta: "Built by <strong>Mahendra Gajera</strong> · Redwood RunMyJobs 2026",
+      problem: {
+        quote: "Specialised scripting becomes a <em>bottleneck</em> when only platform experts can write it.",
+        context: "Manual RedwoodScript authoring is slow, error-prone, and heavy on documentation lookup. Enterprise automation can't scale on it."
+      },
+      approach: {
+        title: "Evaluating code generation across <em>four dimensions</em>",
+        points: [
+          { strong: "Syntactical correctness", body: "Does the generated Java or RedwoodScript compile without errors?" },
+          { strong: "API adherence", body: "Does the LLM use proprietary platform classes correctly, or invent generic libraries?" },
+          { strong: "Safety guardrails", body: "Destructive operations generate with proper safety checks and warnings." },
+          { strong: "Context continuity", body: "Does the co-pilot maintain logical state across multi-turn refinements?" }
+        ]
+      },
+      arch: {
+        title: "Pipeline <em>architecture</em>",
+        cards: [
+          { icon: "RAG", strong: "Dual-Engine RAG", body: "Ingests thousands of RedwoodScript examples and Java API docs." },
+          { icon: "Q✓", strong: "RAGAS Quality Gate", body: "Every update runs against a Golden Script Set to prevent regressions." },
+          { icon: "↔", strong: "Stateful Bridge", body: "Conversation memory persists for iterative script debugging." },
+          { icon: "{ }", strong: "Multi-Env Prompts", body: "Specialised templates for Java, Shell, and RedwoodScript runtimes." }
+        ]
+      },
+      role: {
+        title: "What I <em>actually did</em>",
+        points: [
+          { strong: "Code-gen logic", body: "Multi-prompt strategy distinguishing scripting tools, shell commands, and job actions." },
+          { strong: "RAGAS eval suite", body: "Implemented Code Faithfulness metrics so the AI doesn't invent platform parameters." },
+          { strong: "UI/UX bridge", body: "Led the backend-to-frontend integration for Insert Code and Clear History." },
+          { strong: "Dataset curation", body: "Hand-curated 200+ complex automation scenarios for the RAGAS baseline." }
+        ]
+      },
+      impact: [
+        { num: "+50%", lbl: "Developer velocity" },
+        { num: "92%", lbl: "Syntactical accuracy" },
+        { num: "0-shot", lbl: "Code generation" }
+      ],
+      stack: [
+        { text: "RAGAS", featured: true }, { text: "OpenAI GPT-4o", featured: true },
+        { text: "Python" }, { text: "RedwoodScript" }, { text: "Java" },
+        { text: "Vector DB" }, { text: "Azure Pipelines" }
+      ]
+    },
+
+    generate: {
+      num: "P / 04",
+      title: "Generate with <em>RangerAI</em>",
+      sub: "A Self-Documenting Automation Engine",
+      meta: "Built by <strong>Mahendra Gajera</strong> · Redwood RunMyJobs 2026",
+      problem: {
+        quote: "Documentation debt is a <em>silent killer</em> of productivity in enterprise automation.",
+        context: "Engineers build complex nested workflows but never document the logic. Maintenance grinds to a halt. Audits become risky. The cost compounds every quarter."
+      },
+      approach: {
+        title: "My <em>approach</em> — zero-friction documentation at the editor",
+        points: [
+          { strong: "Embedded where work happens", body: "Generation lives in the editor — not a separate workflow." },
+          { strong: "Holistic ingestion", body: "Beyond scripts: metadata, dependencies, and execution parameters all feed the summary." },
+          { strong: "Non-destructive augmentation", body: "AI insights append after human notes — institutional knowledge preserved." },
+          { strong: "Structural parsing", body: "Transforms graphical workflows into semantic prompts an LLM can interpret accurately." }
+        ]
+      },
+      arch: {
+        title: "Under the <em>hood</em>",
+        cards: [
+          { icon: "→", strong: "Graph Serialization", body: "Flattens multi-step workflow hierarchies into coherent text for the LLM." },
+          { icon: "tok", strong: "Token-Aware Inference", body: "Detects Large Definition edge cases and prevents truncation." },
+          { icon: "{ }", strong: "Prompt Architecture", body: "System prompts tuned for RedwoodScript and Java job definitions." },
+          { icon: "UI", strong: "Stateful Injection", body: "React updates the Documentation tab without a page refresh." }
+        ]
+      },
+      role: {
+        title: "What I <em>actually did</em>",
+        points: [
+          { strong: "Architectural vision", body: "Proposed and led the shift from manual documentation tabs to AI-assisted generation." },
+          { strong: "Logic flattening", body: "Wrote the core Python converting workflow objects into LLM-readable descriptions." },
+          { strong: "Large Definition handling", body: "Solved the massive-graph edge case with a hierarchical summary approach." },
+          { strong: "Product strategy", body: "Defined the one-click UX and safety checks distinguishing AI text from manual entries." }
+        ]
+      },
+      impact: [
+        { num: "80%", lbl: "Reduction in manual documentation" },
+        { num: "Instant", lbl: "Context synthesis" },
+        { num: "Sync", lbl: "Logic-to-text on save" }
+      ],
+      stack: [
+        { text: "OpenAI API", featured: true }, { text: "Graph Serialization", featured: true },
+        { text: "Python" }, { text: "React" }, { text: "TypeScript" },
+        { text: "JSON" }, { text: "LLM Context Mgmt" }
+      ]
+    }
+  };
+
+  // ===================== SCENE SEQUENCE =====================
+  const sceneDefs = [
+    { key: "title",   duration: 5000, label: "Title" },
+    { key: "problem", duration: 7500, label: "Problem" },
+    { key: "approach",duration: 8500, label: "Approach" },
+    { key: "arch",    duration: 7500, label: "Architecture" },
+    { key: "role",    duration: 8000, label: "My Role" },
+    { key: "impact",  duration: 5500, label: "Impact" },
+    { key: "outro",   duration: 4500, label: "Stack & Credits" }
+  ];
+  const TOTAL_MS = sceneDefs.reduce((s, sc) => s + sc.duration, 0);
+
+  // ===================== RENDER =====================
+  const stage = document.getElementById('stage');
+  const dotsBar = document.getElementById('sceneDots');
+  const playPauseBtn = document.getElementById('playPauseBtn');
+  const restartBtn = document.getElementById('restartBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const timerEl = document.getElementById('timer');
+  const sceneLabelEl = document.getElementById('sceneLabel');
+  const tabs = document.querySelectorAll('.project-tab');
+
+  function fmt(ms) {
+    const s = Math.floor(ms / 1000);
+    return `0:${String(s).padStart(2, '0')}`;
+  }
+
+  function buildScene(key, data) {
+    const div = document.createElement('div');
+    div.className = `scene scene-${key}`;
+    div.dataset.scene = key;
+    const inner = document.createElement('div');
+    inner.className = 'scene-inner';
+
+    if (key === 'title') {
+      inner.innerHTML = `
+        <div class="title-frame">
+          <div class="title-num">${data.num} · RANGERAI SUITE</div>
+          <h1 class="title-main">${data.title}</h1>
+          <p class="title-sub">${data.sub}</p>
+        </div>
+        <p class="title-byline">${data.meta}</p>`;
+    } else if (key === 'problem') {
+      inner.innerHTML = `
+        <span class="eyebrow">The problem</span>
+        <p class="problem-quote">${data.problem.quote}</p>
+        <p class="problem-context">${data.problem.context}</p>`;
+    } else if (key === 'approach') {
+      const pts = data.approach.points.map(p =>
+        `<li><span class="num"></span><div class="body"><strong>${p.strong}</strong><span>${p.body}</span></div></li>`
+      ).join('');
+      inner.innerHTML = `
+        <span class="eyebrow">My approach</span>
+        <h2 class="scene-title-text">${data.approach.title}</h2>
+        <ol class="point-list">${pts}</ol>`;
+    } else if (key === 'arch') {
+      const cards = data.arch.cards.map(c =>
+        `<div class="arch-card"><span class="icon">${c.icon}</span><strong>${c.strong}</strong><span>${c.body}</span></div>`
+      ).join('');
+      inner.innerHTML = `
+        <span class="eyebrow">Under the hood</span>
+        <h2 class="scene-title-text">${data.arch.title}</h2>
+        <div class="arch-grid">${cards}</div>`;
+    } else if (key === 'role') {
+      const pts = data.role.points.map(p =>
+        `<li><span class="num"></span><div class="body"><strong>${p.strong}</strong><span>${p.body}</span></div></li>`
+      ).join('');
+      inner.innerHTML = `
+        <span class="eyebrow">What I did</span>
+        <h2 class="scene-title-text">${data.role.title}</h2>
+        <ol class="point-list">${pts}</ol>`;
+    } else if (key === 'impact') {
+      const cells = data.impact.map(m =>
+        `<div class="impact-cell"><div class="impact-num">${m.num}</div><div class="impact-lbl">${m.lbl}</div></div>`
+      ).join('');
+      inner.innerHTML = `
+        <span class="eyebrow">The impact</span>
+        <div class="impact-row">${cells}</div>`;
+    } else if (key === 'outro') {
+      const stack = data.stack.map(s =>
+        `<span class="outro-pill ${s.featured ? 'featured' : ''}">${s.text}</span>`
+      ).join('');
+      inner.innerHTML = `
+        <div class="outro-stack">${stack}</div>
+        <h2 class="outro-credit">Built by <em>Mahendra Gajera</em></h2>
+        <p class="outro-meta">Redwood RunMyJobs 2026 · Production · Modern UI</p>
+        <a href="mailto:mahendra.gajera@gmail.com" class="outro-cta">Get in touch →</a>`;
+    }
+
+    div.appendChild(inner);
+    return div;
+  }
+
+  function renderProject(projectKey) {
+    const data = projects[projectKey];
+    stage.innerHTML = '';
+    sceneDefs.forEach(sc => stage.appendChild(buildScene(sc.key, data)));
+    dotsBar.innerHTML = sceneDefs.map((_, i) => `<div class="scene-dot" data-idx="${i}"></div>`).join('');
+    // Activate first
+    state.sceneIdx = 0;
+    state.sceneStart = performance.now();
+    state.totalElapsed = 0;
+    state.playing = true;
+    playPauseBtn.textContent = '⏸';
+    setActiveScene(0);
+
+    // Bind dot clicks
+    dotsBar.querySelectorAll('.scene-dot').forEach(dot => {
+      dot.addEventListener('click', () => jumpToScene(+dot.dataset.idx));
+    });
+    // Update tabs
+    tabs.forEach(t => t.classList.toggle('active', t.dataset.project === projectKey));
+  }
+
+  function setActiveScene(idx) {
+    const scenes = stage.querySelectorAll('.scene');
+    scenes.forEach((s, i) => s.classList.toggle('active', i === idx));
+    const dots = dotsBar.querySelectorAll('.scene-dot');
+    dots.forEach((d, i) => {
+      d.classList.toggle('done', i < idx);
+      d.classList.toggle('current', i === idx);
+      if (i !== idx) d.style.setProperty('--p', '0%');
+    });
+    sceneLabelEl.textContent = `Scene ${idx + 1} of ${sceneDefs.length} — ${sceneDefs[idx].label}`;
+  }
+
+  // ===================== PLAYBACK ENGINE =====================
+  const state = {
+    sceneIdx: 0,
+    sceneStart: 0,
+    totalElapsed: 0,
+    playing: true,
+    rafId: null,
+    project: 'troubleshoot'
+  };
+
+  function tick(now) {
+    if (!state.playing) return;
+    const sceneDef = sceneDefs[state.sceneIdx];
+    const elapsedInScene = now - state.sceneStart;
+    const sceneProgress = Math.min(elapsedInScene / sceneDef.duration, 1);
+
+    // Update current scene dot
+    const dot = dotsBar.querySelector(`.scene-dot[data-idx="${state.sceneIdx}"]`);
+    if (dot) dot.style.setProperty('--p', (sceneProgress * 100) + '%');
+
+    // Update timer
+    const totalElapsed = state.totalElapsed + elapsedInScene;
+    timerEl.textContent = `${fmt(totalElapsed)} / ${fmt(TOTAL_MS)}`;
+
+    if (sceneProgress >= 1) {
+      state.totalElapsed += sceneDef.duration;
+      if (state.sceneIdx < sceneDefs.length - 1) {
+        state.sceneIdx++;
+        state.sceneStart = now;
+        setActiveScene(state.sceneIdx);
+      } else {
+        // End of reel
+        state.playing = false;
+        playPauseBtn.textContent = '↺';
+        playPauseBtn.setAttribute('aria-label', 'Restart');
+        return;
+      }
+    }
+    state.rafId = requestAnimationFrame(tick);
+  }
+
+  function play() {
+    if (state.sceneIdx >= sceneDefs.length - 1) {
+      const lastDot = dotsBar.querySelector(`.scene-dot[data-idx="${sceneDefs.length - 1}"]`);
+      if (lastDot && parseFloat(getComputedStyle(lastDot).getPropertyValue('--p')) >= 99) {
+        // Restart from beginning
+        renderProject(state.project);
+        state.rafId = requestAnimationFrame(tick);
+        return;
+      }
+    }
+    state.playing = true;
+    state.sceneStart = performance.now();
+    playPauseBtn.textContent = '⏸';
+    state.rafId = requestAnimationFrame(tick);
+  }
+
+  function pause() {
+    state.playing = false;
+    cancelAnimationFrame(state.rafId);
+    // Bank elapsed time
+    const elapsedInScene = performance.now() - state.sceneStart;
+    state.totalElapsed += Math.min(elapsedInScene, sceneDefs[state.sceneIdx].duration);
+    state.sceneStart = performance.now() - 0;
+    playPauseBtn.textContent = '▶';
+  }
+
+  function jumpToScene(idx) {
+    cancelAnimationFrame(state.rafId);
+    state.sceneIdx = Math.max(0, Math.min(idx, sceneDefs.length - 1));
+    state.totalElapsed = sceneDefs.slice(0, state.sceneIdx).reduce((s, sc) => s + sc.duration, 0);
+    state.sceneStart = performance.now();
+    setActiveScene(state.sceneIdx);
+    if (state.playing) {
+      state.rafId = requestAnimationFrame(tick);
+    } else {
+      // Force one tick to update visuals
+      const dot = dotsBar.querySelector(`.scene-dot[data-idx="${state.sceneIdx}"]`);
+      if (dot) dot.style.setProperty('--p', '0%');
+      timerEl.textContent = `${fmt(state.totalElapsed)} / ${fmt(TOTAL_MS)}`;
+    }
+  }
+
+  playPauseBtn.addEventListener('click', () => {
+    if (playPauseBtn.textContent === '↺') {
+      renderProject(state.project);
+      state.rafId = requestAnimationFrame(tick);
+    } else if (state.playing) pause();
+    else play();
+  });
+  restartBtn.addEventListener('click', () => {
+    renderProject(state.project);
+    state.rafId = requestAnimationFrame(tick);
+  });
+  nextBtn.addEventListener('click', () => {
+    const next = state.sceneIdx + 1;
+    if (next < sceneDefs.length) jumpToScene(next);
+  });
+
+  // Project switching
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      state.project = tab.dataset.project;
+      history.replaceState(null, '', `#${state.project}`);
+      renderProject(state.project);
+      state.rafId = requestAnimationFrame(tick);
+    });
+  });
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', (e) => {
+    if (e.key === ' ') { e.preventDefault(); playPauseBtn.click(); }
+    else if (e.key === 'ArrowRight') nextBtn.click();
+    else if (e.key === 'ArrowLeft') jumpToScene(state.sceneIdx - 1);
+    else if (e.key.toLowerCase() === 'r') restartBtn.click();
+  });
+
+  // Init from URL hash
+  const initial = (location.hash || '#troubleshoot').slice(1);
+  state.project = projects[initial] ? initial : 'troubleshoot';
+  renderProject(state.project);
+  state.rafId = requestAnimationFrame(tick);
+</script>
+
+</body>
+</html>
