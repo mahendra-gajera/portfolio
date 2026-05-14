@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tokens & Tokenization: The Currency of AI — Simplified by Mahendra Gajera</title>
+<style>
+:root{--bg:#0a0a0f;--card:#12121a;--card2:#1a1a28;--border:#2a2a3d;--text:#e8e8f0;--sub:#7a7a9a;--gold:#f0b232;--green:#34d399;--blue:#60a5fa;--red:#f87171;--purple:#a78bfa;--cyan:#22d3ee;--orange:#fb923c;--pink:#f472b6;--lime:#a3e635;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Courier New','SF Mono',monospace;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6;}
+.app{max-width:900px;margin:0 auto;padding:28px 16px 50px;}
+
+.hdr{text-align:center;margin-bottom:30px;position:relative;}
+.hdr::before{content:'';position:absolute;top:40%;left:50%;transform:translate(-50%,-50%);width:400px;height:200px;background:radial-gradient(ellipse,rgba(240,178,50,.1),transparent 70%);pointer-events:none;}
+.hdr .coin{font-size:2.8rem;display:block;margin-bottom:6px;filter:drop-shadow(0 0 12px rgba(240,178,50,.4));}
+.hdr h1{font-family:Georgia,serif;font-size:2.1rem;line-height:1.2;}
+.hdr h1 em{font-style:normal;color:var(--gold);}
+.hdr .sub{font-size:.85rem;color:var(--sub);margin-top:6px;font-family:Georgia,serif;}
+.hdr .sub b{color:var(--gold);}
+
+.prog{display:flex;gap:3px;margin-bottom:24px;}
+.prog .s{flex:1;height:4px;border-radius:2px;background:var(--border);transition:background .3s;}
+.prog .s.done{background:var(--gold);}
+.prog .s.on{background:var(--gold);box-shadow:0 0 8px rgba(240,178,50,.5);}
+
+.nav{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:22px;padding:8px;background:var(--card);border-radius:10px;border:1px solid var(--border);}
+.nav button{padding:5px 11px;border-radius:6px;border:1px solid transparent;background:none;color:var(--sub);font-size:.72rem;font-family:inherit;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.nav button:hover{color:var(--text);background:var(--card2);}
+.nav button.on{color:var(--gold);border-color:var(--gold);background:rgba(240,178,50,.08);}
+
+.crd{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;min-height:400px;}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:4px 14px;border-radius:20px;font-size:.8rem;font-weight:700;margin-bottom:14px;border:1px solid;}
+.ctitle{font-family:Georgia,serif;font-size:1.3rem;color:var(--text);margin-bottom:6px;}
+.cdesc{font-size:.85rem;color:var(--sub);margin-bottom:18px;line-height:1.7;font-family:Georgia,serif;}
+.cdesc b{color:var(--text);}
+
+.code{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px;margin:12px 0;overflow-x:auto;font-size:.8rem;line-height:1.7;position:relative;}
+.code.hf{padding-top:32px;}
+.code::before{content:attr(data-f);position:absolute;top:0;left:0;right:0;padding:4px 12px;background:var(--card2);border-bottom:1px solid var(--border);border-radius:8px 8px 0 0;font-size:.68rem;color:var(--sub);}
+.kw{color:var(--purple);}
+.fn{color:var(--blue);}
+.st{color:var(--green);}
+.cm{color:var(--sub);font-style:italic;}
+.nb{color:var(--orange);}
+.ty{color:var(--cyan);}
+
+.arch{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center;margin:14px 0;padding:14px;background:var(--bg);border:1px solid var(--border);border-radius:10px;}
+.abox{padding:10px 14px;border-radius:10px;border:1.5px solid;text-align:center;font-size:.76rem;font-weight:700;min-width:85px;transition:transform .2s;}
+.abox:hover{transform:translateY(-2px);}
+.abox .ic{font-size:1.3rem;display:block;margin-bottom:2px;}
+.aarr{font-size:1.1rem;color:var(--sub);}
+
+.metrics{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0;}
+.metric{flex:1;min-width:110px;padding:12px;border-radius:10px;background:var(--bg);border:1px solid var(--border);text-align:center;}
+.metric .v{font-size:1.5rem;font-weight:800;}
+.metric .l{font-size:.7rem;color:var(--sub);margin-top:2px;}
+
+.term{background:#000;border:1px solid var(--border);border-radius:8px;padding:12px;margin:12px 0;font-size:.78rem;line-height:1.8;}
+.term .p{color:var(--green);}
+.term .c{color:var(--text);}
+.term .o{color:var(--sub);}
+.term .ok{color:var(--green);}
+
+.ftr{text-align:center;margin-top:30px;font-size:.85rem;color:var(--sub);}
+.ftr b{color:var(--gold);}
+
+/* Token visualizer */
+.tok-vis{display:flex;flex-wrap:wrap;gap:3px;margin:10px 0;padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;}
+.tok{padding:4px 8px;border-radius:5px;font-size:.82rem;font-weight:700;border:1px solid;cursor:default;transition:transform .15s;}
+.tok:hover{transform:scale(1.08);}
+
+/* Cost calculator */
+.calc-row{display:flex;gap:10px;align-items:center;margin:6px 0;flex-wrap:wrap;}
+.calc-label{font-size:.82rem;color:var(--sub);min-width:100px;}
+.calc-input{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px 10px;color:var(--text);font-family:inherit;font-size:.85rem;width:120px;}
+.calc-input:focus{outline:none;border-color:var(--gold);}
+.calc-result{padding:14px;border-radius:10px;background:rgba(240,178,50,.06);border:1px solid rgba(240,178,50,.25);text-align:center;margin:12px 0;}
+.calc-result .big{font-size:1.8rem;font-weight:800;color:var(--gold);font-family:'Courier New',monospace;}
+
+/* Bar chart */
+.bar-row{display:flex;align-items:center;gap:8px;margin:5px 0;font-size:.78rem;}
+.bar-label{min-width:130px;color:var(--sub);text-align:right;}
+.bar-fill{height:20px;border-radius:4px;transition:width .5s;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;font-size:.7rem;font-weight:700;color:var(--bg);}
+
+@media(max-width:600px){.hdr h1{font-size:1.6rem;}.crd{padding:16px;}.calc-input{width:90px;}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="hdr">
+    <span class="coin">🪙</span>
+    <h1>Tokens & Tokenization:<br><em>The Currency of AI</em></h1>
+    <div class="sub">Everything you need to know about AI's money system · <b>by Mahendra Gajera</b></div>
+    <button id="toggleSound" style="position:absolute;top:10px;right:20px;padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:none;color:var(--sub);font-size:.7rem;cursor:pointer;transition:all .2s">🔊 Sound</button>
+  </div>
+  <div class="prog" id="prog"></div>
+  <div class="nav" id="nav"></div>
+  
+  <!-- Live Token Counter -->
+  <div id="tokenCounter" style="margin-bottom:16px;padding:12px;border-radius:10px;background:var(--card);border:1px solid var(--border);display:none">
+    <div style="font-size:.82rem;font-weight:700;color:var(--gold);margin-bottom:8px">⚡ Live Token Counter</div>
+    <textarea id="tokenInput" placeholder="Paste or type text here to count tokens..." style="width:100%;height:80px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text);padding:8px;font-family:monospace;font-size:.78rem;resize:vertical;margin-bottom:8px"></textarea>
+    <div style="display:flex;gap:8px;align-items:center">
+      <div style="flex:1;font-size:.8rem;color:var(--sub)">Estimated tokens: <span id="tokenCount" style="color:var(--gold);font-weight:700">0</span></div>
+      <div style="font-size:.72rem;color:var(--sub)">~<span id="costEst" style="color:var(--gold)">$0.00</span>/1M in</div>
+    </div>
+  </div>
+  
+  <div class="crd" id="crd"></div>
+  
+  <!-- Completion Achievement -->
+  <div id="achievement" style="position:fixed;bottom:20px;right:20px;padding:12px 16px;border-radius:10px;background:var(--card);border:2px solid var(--gold);display:none;z-index:1000;animation:slideInRight .3s ease-out">
+    <div style="font-size:.9rem;color:var(--gold);font-weight:700">🏆 Section Complete!</div>
+    <div style="font-size:.72rem;color:var(--sub);margin-top:2px" id="achievementText"></div>
+  </div>
+  
+  <div class="ftr">🪙 <b>Tokens Guide by Mahendra Gajera</b> 🪙 · Press ← → to navigate</div>
+</div>
+
+<style>
+@keyframes slideInRight {
+  from { transform: translateX(400px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+@keyframes fadeInSection {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes countUp {
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+#crd { animation: fadeInSection .4s ease-out; }
+.expandable { cursor: pointer; user-select: none; }
+.expandable:hover { color: var(--gold); }
+.expandable::before { content: "▶ "; display: inline-block; transition: transform .2s; color: var(--gold); }
+.expandable.open::before { transform: rotate(90deg); }
+.expandable-content { display: none; margin-top: 8px; padding: 10px; border-left: 2px solid var(--gold); background: var(--bg); border-radius: 6px; }
+.expandable.open + .expandable-content { display: block; animation: fadeInSection .2s ease-out; }
+.copy-btn { padding: 3px 8px; font-size: .68rem; border: 1px solid var(--border); border-radius: 4px; background: var(--bg); color: var(--sub); cursor: pointer; transition: all .2s; margin-left: 8px; float: right; }
+.copy-btn:hover { border-color: var(--gold); color: var(--gold); background: rgba(240,178,50,.1); }
+.copy-btn.copied { color: var(--green); border-color: var(--green); }
+.tooltip { position: relative; cursor: help; border-bottom: 1px dotted var(--gold); }
+.tooltip:hover::after { content: attr(data-tooltip); position: absolute; bottom: 120%; left: 0; background: var(--card2); color: var(--gold); padding: 6px 10px; border-radius: 6px; font-size: .7rem; white-space: nowrap; z-index: 1000; border: 1px solid var(--gold); }
+.counter { display: inline-block; animation: countUp .5s ease-out; }
+</style>
+
+<script>
+// ═════ CONFIG ═════
+var soundEnabled = true;
+var ST=[
+  {id:"what",n:0,t:"What Are Tokens?",ic:"🪙",c:"var(--gold)"},
+  {id:"how",n:1,t:"How Tokenization Works",ic:"✂️",c:"var(--blue)"},
+  {id:"types",n:2,t:"Tokenizer Types",ic:"🔤",c:"var(--purple)"},
+  {id:"count",n:3,t:"Counting Tokens",ic:"🔢",c:"var(--green)"},
+  {id:"context",n:4,t:"Context Windows",ic:"📏",c:"var(--cyan)"},
+  {id:"money",n:5,t:"Tokens = Money",ic:"💰",c:"var(--gold)"},
+  {id:"calc",n:6,t:"Cost Calculator",ic:"🧮",c:"var(--orange)"},
+  {id:"save",n:7,t:"Save Tokens",ic:"💡",c:"var(--lime)"},
+  {id:"manage",n:8,t:"Token Management",ic:"⚙️",c:"var(--blue)"},
+  {id:"prod",n:9,t:"Production Tips",ic:"🚀",c:"var(--red)"},
+];
+
+var cur=0,timers=[];
+var nav=document.getElementById("nav"),prog=document.getElementById("prog"),crd=document.getElementById("crd");
+
+// ═════ UTILITIES ═════
+function clr(){for(var i=0;i<timers.length;i++){clearInterval(timers[i]);clearTimeout(timers[i]);}timers=[];}
+function h(tag,sty,html){var e=document.createElement(tag);if(sty)for(var k in sty)e.style[k]=sty[k];if(html!==undefined)e.innerHTML=html;return e;}
+function bg(i){var s=ST[i];return '<div class="badge" style="color:'+s.c+';border-color:'+s.c+'">'+s.ic+' Step '+s.n+'</div>';}
+function playSound(type){if(!soundEnabled)return;var ctx=new(window.AudioContext||window.webkitAudioContext)(),osc=ctx.createOscillator(),env=ctx.createGain();ctx.destination.connect(env);env.connect(ctx.destination);var now=ctx.currentTime;env.setValueAtTime(.1,now);env.exponentialRampToValueAtTime(.01,now+.1);osc.connect(env);osc.type='sine';osc.frequency.setValueAtTime(type==='click'?800:1200,now);osc.start(now);osc.stop(now+.1);}
+function animateCounter(el,from,to,suffix){
+  var step=(to-from)/30,curr=from,started=Date.now();
+  function update(){
+    curr+=step;
+    if(step>0?curr>=to:curr<=to){curr=to;}
+    el.textContent=Math.floor(curr)+suffix;
+    if(curr!==to){timers.push(requestAnimationFrame(update));}
+  }
+  update();
+}
+function showAchievement(msg){
+  var a=document.getElementById("achievement");
+  document.getElementById("achievementText").textContent=msg;
+  a.style.display="block";
+  playSound('click');
+  timers.push(setTimeout(function(){a.style.display="none";},2500));
+}
+
+// ═════ TOKEN COUNTER ═════
+function initTokenCounter(){
+  var inp=document.getElementById("tokenInput"),counter=document.getElementById("tokenCounter");
+  if(!inp)return;
+  inp.oninput=function(){
+    var text=inp.value;
+    var tokens=Math.ceil(text.length/4);
+    document.getElementById("tokenCount").textContent=tokens;
+    document.getElementById("costEst").textContent="$"+(tokens/1e6*.15).toFixed(5);
+  };
+}
+
+// ═════ COPY TO CLIPBOARD ═════
+function addCopyButtons(){
+  var codes=crd.querySelectorAll(".code");
+  for(var i=0;i<codes.length;i++){
+    var code=codes[i],btn=h("button");
+    btn.className="copy-btn";
+    btn.textContent="📋 Copy";
+    btn.onclick=(function(c){return function(){
+      var text=c.textContent.replace(/^[^\n]+\n/,'');
+      navigator.clipboard.writeText(text);
+      playSound('click');
+      btn.textContent="✓ Copied!";
+      btn.className="copy-btn copied";
+      timers.push(setTimeout(function(){btn.textContent="📋 Copy";btn.className="copy-btn";},1500));
+    };})(code);
+    code.parentNode.insertBefore(btn,code.nextSibling);
+  }
+}
+
+// ═════ EXPANDABLE SECTIONS ═════
+function makeExpandable(titleText){
+  return '<div class="expandable" onclick="this.classList.toggle(\'open\');playSound(\'click\')" style="color:var(--sub);font-weight:700;margin:12px 0;font-size:.85rem">'+titleText+'</div>';
+}
+
+// ═════ ANIMATED COUNTER ═════
+function countNum(num,suffix){
+  return '<span class="counter" data-count="'+num+'" data-suffix="'+suffix+'">'+num+suffix+'</span>';
+}
+
+// ═════ NAV & PROGRESS ═════
+for(var i=0;i<ST.length;i++){
+  var sg=document.createElement("div");sg.className="s";sg.id="sg_"+i;prog.appendChild(sg);
+  (function(i){var b=document.createElement("button");b.textContent=ST[i].ic+" "+ST[i].t;b.id="nb_"+i;b.onclick=function(){go(i);};nav.appendChild(b);})(i);
+}
+
+// ═════ NAVIGATION ═════
+function go(idx){
+  clr();cur=idx;
+  for(var j=0;j<ST.length;j++){
+    document.getElementById("sg_"+j).className="s"+(j<idx?" done":"")+(j===idx?" on":"");
+    document.getElementById("nb_"+j).className=j===idx?"on":"";
+  }
+  crd.innerHTML="";D[ST[idx].id]();
+  playSound('click');
+  addCopyButtons();
+  makeCodeBlocksInteractive();
+  setTimeout(function(){animateAllCounters();initTokenCounter();},100);
+  showAchievement("Section "+cur+" loaded");
+}
+
+// ═════ KEYBOARD NAV ═════
+document.addEventListener("keydown",function(e){
+  if(e.key==="ArrowRight"&&cur<9){go(cur+1);}
+  else if(e.key==="ArrowLeft"&&cur>0){go(cur-1);}
+});
+
+// ═════ SOUND TOGGLE ═════
+document.getElementById("toggleSound").onclick=function(){
+  soundEnabled=!soundEnabled;
+  this.style.opacity=soundEnabled?"1":".5";
+  playSound('click');
+};
+
+// ═════ MAKE CODE BLOCKS INTERACTIVE ═════
+function makeCodeBlocksInteractive(){
+  var codes=crd.querySelectorAll(".code");
+  for(var i=0;i<codes.length;i++){
+    codes[i].style.cursor="pointer";
+    codes[i].style.transition="all .2s";
+    codes[i].onmouseover=function(){this.style.borderColor="var(--gold)";this.style.boxShadow="0 0 12px rgba(240,178,50,.15)";};
+    codes[i].onmouseout=function(){this.style.borderColor="var(--border)";this.style.boxShadow="none";};
+  }
+}
+
+// ═════ ANIMATE COUNTERS ═════
+function animateAllCounters(){
+  var counters=crd.querySelectorAll(".counter");
+  for(var i=0;i<counters.length;i++){
+    var c=counters[i],num=parseInt(c.getAttribute("data-count")),suffix=c.getAttribute("data-suffix")||"";
+    animateCounter(c,0,num,suffix);
+  }
+}
+
+// ═════ NEXT/PREV BUTTONS ═════
+function nb(i){
+  var d=h("div",{display:"flex",justifyContent:"space-between",marginTop:"20px"});
+  if(i>0){var b=document.createElement("button");b.style.cssText="padding:6px 14px;border-radius:6px;border:1px solid var(--border);background:none;color:var(--sub);font-size:.78rem;font-family:inherit;cursor:pointer;transition:all .2s";b.onmouseover=function(){this.style.borderColor="var(--gold)";this.style.color="var(--gold)";};b.onmouseout=function(){this.style.borderColor="var(--border)";this.style.color="var(--sub)";};b.textContent="← "+ST[i-1].t;b.onclick=function(){go(i-1);};d.appendChild(b);}else d.appendChild(h("div"));
+  if(i<9){var b=document.createElement("button");b.style.cssText="padding:6px 14px;border-radius:6px;border:1px solid var(--gold);background:rgba(240,178,50,.08);color:var(--gold);font-size:.78rem;font-family:inherit;cursor:pointer;transition:all .2s";b.onmouseover=function(){this.style.background="rgba(240,178,50,.15)";};b.onmouseout=function(){this.style.background="rgba(240,178,50,.08)";};b.textContent=ST[i+1].t+" →";b.onclick=function(){go(i+1);};d.appendChild(b);}
+  return d;
+}
+
+var D={};
+
+// ─── 0. WHAT ARE TOKENS ───
+D.what=function(){
+  crd.innerHTML=bg(0)+'<div class="ctitle">What Exactly Is a Token?</div>'
+  +'<div class="cdesc">A <b>token</b> is the smallest unit AI reads. Not a word, not a character — something in between. Think of it as AI\'s alphabet. Every single thing an AI reads, thinks about, or writes is measured in tokens.</div>';
+
+  // Visual
+  crd.innerHTML+='<div style="font-size:.82rem;font-weight:700;color:var(--gold);margin:12px 0 6px">🪙 See it in action (click to reveal):</div>';
+
+  var examples=[
+    {text:"Hello world",tokens:["Hello"," world"],colors:["#f0b232","#60a5fa"],count:2},
+    {text:"Tokenization is fascinating!",tokens:["Token","ization"," is"," fascinating","!"],colors:["#f0b232","#34d399","#60a5fa","#a78bfa","#fb923c"],count:5},
+    {text:"I'm learning AI",tokens:["I","'m"," learning"," AI"],colors:["#f0b232","#f87171","#22d3ee","#a78bfa"],count:4},
+  ];
+
+  for(var i=0;i<examples.length;i++){
+    var ex=examples[i];
+    var row=h("div",{marginBottom:"10px",padding:"8px",borderRadius:"6px",background:"var(--bg)",cursor:"pointer",transition:"all .2s",border:"1px solid var(--border)"});
+    row.onclick=(function(row,ex){return function(){row.classList.toggle("open");playSound("click");};})(row,ex);
+    row.innerHTML='<div style="font-size:.78rem;color:var(--sub);margin-bottom:4px;font-weight:700">"'+ex.text+'" → <span class="counter" data-count="'+ex.count+'" data-suffix=" tokens" style="color:var(--gold);font-weight:700">0 tokens</span></div>';
+    var vis=h("div",{display:"flex",flexWrap:"wrap",gap:"3px"});
+    for(var j=0;j<ex.tokens.length;j++){
+      vis.innerHTML+='<span class="tok" style="color:'+ex.colors[j]+';border-color:'+ex.colors[j]+'40;background:'+ex.colors[j]+'12;transition:all .2s" onmouseover="this.style.transform=\'scale(1.15)\'" onmouseout="this.style.transform=\'scale(1)\'">'+ex.tokens[j].replace(/ /g,"·")+'</span>';
+    }
+    row.appendChild(vis);
+    crd.appendChild(row);
+  }
+
+  // Key insight - expandable
+  var keyBox=h("div",{marginTop:"16px",padding:"14px",borderRadius:"10px",background:"rgba(240,178,50,.06)",border:"1px solid rgba(240,178,50,.25)"});
+  keyBox.innerHTML='<div style="font-size:.85rem;font-weight:700;color:var(--gold);margin-bottom:6px;cursor:pointer" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display===\'none\'?\'block\':\'none\';playSound(\'click\')" style="cursor:pointer">💡 Key Insight [Click to expand]</div>'
+    +'<div style="font-size:.82rem;color:var(--sub);line-height:1.7;font-family:Georgia,serif">'
+    +'<b style="color:var(--text)">1 token ≈ 4 characters ≈ ¾ of a word</b> (in English)<br>'
+    +'• "ChatGPT" = '+countNum(3,'')+ ' tokens (Chat + G + PT)<br>'
+    +'• "a" = '+countNum(1,'')+ ' token, "the" = '+countNum(1,'')+ ' token<br>'
+    +'• "extraordinary" = '+countNum(3,'')+ ' tokens<br>'
+    +'• Emojis & special chars = multiple tokens<br>'
+    +'• Non-English text = more tokens per word</div>';
+  crd.appendChild(keyBox);
+  
+  // Add token counter for this section
+  crd.innerHTML+='<div style="margin-top:14px;padding:10px;border-radius:8px;background:var(--bg);border:1px solid var(--border)">'
+  +'<div style="font-size:.78rem;color:var(--sub);margin-bottom:6px;font-weight:700">Try it: Count tokens in any text</div>'
+  +'<input type="text" placeholder="Type something..." style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:4px;background:var(--bg);color:var(--text);font-size:.78rem;font-family:monospace" oninput="var t=this.value.length;this.parentNode.querySelector(\'.tok-result\').textContent=Math.ceil(t/4)+" tokens (~$"+(Math.ceil(t/4)/1e6*.15).toFixed(5)+")">'
+  +'<div class="tok-result" style="margin-top:6px;font-size:.78rem;color:var(--gold);font-weight:700">0 tokens</div>'
+  +'</div>';
+  
+  crd.appendChild(nb(0));
+};
+
+// ─── 1. HOW TOKENIZATION WORKS ───
+D.how=function(){
+  crd.innerHTML=bg(1)+'<div class="ctitle">How Tokenization Actually Works</div>'
+  +'<div class="cdesc">The AI doesn\'t see text like you do. It breaks everything into <b>tokens</b> using a trained vocabulary, then converts each token into a number (ID). These numbers are what the model actually processes.</div>';
+
+  // Step by step flow
+  var steps=[
+    {ic:"📝",label:"Raw Text",val:'"The cat sat on the mat"',c:"var(--text)"},
+    {ic:"✂️",label:"Tokenize",val:'["The", " cat", " sat", " on", " the", " mat"]',c:"var(--blue)"},
+    {ic:"🔢",label:"Token IDs",val:"[464, 3797, 3332, 319, 262, 2603]",c:"var(--gold)"},
+    {ic:"📊",label:"Embeddings",val:"[[0.02, -0.15, ...], [0.84, 0.31, ...], ...]",c:"var(--purple)"},
+  ];
+  for(var i=0;i<steps.length;i++){
+    var s=steps[i];
+    crd.innerHTML+='<div style="display:flex;align-items:flex-start;gap:10px;padding:10px;margin:4px 0;border-radius:8px;background:var(--bg);border:1px solid var(--border)">'
+      +'<span style="font-size:1.2rem">'+s.ic+'</span>'
+      +'<div><div style="font-size:.78rem;font-weight:700;color:'+s.c+'">'+s.label+'</div>'
+      +'<div style="font-size:.78rem;color:var(--sub);font-family:Courier New,monospace;margin-top:2px;word-break:break-all">'+s.val+'</div></div></div>';
+    if(i<steps.length-1)crd.innerHTML+='<div style="text-align:center;color:var(--sub);font-size:.9rem">↓</div>';
+  }
+
+  crd.innerHTML+='<div style="margin-top:14px;font-size:.82rem;color:var(--sub);font-family:Georgia,serif"><b style="color:var(--text)">Why not just use characters?</b> Because "cat" as 3 characters has no meaning to the model. But "cat" as 1 token carries the <b>full semantic meaning</b> learned during training. Tokens balance vocabulary size with meaning density.</div>';
+  crd.appendChild(nb(1));
+};
+
+// ─── 2. TOKENIZER TYPES ───
+D.types=function(){
+  crd.innerHTML=bg(2)+'<div class="ctitle">Types of Tokenizers</div>'
+  +'<div class="cdesc">Different AI models use different tokenization strategies. The tokenizer determines how text is split and how many tokens you\'ll use.</div>';
+
+  var types=[
+    {name:"BPE (Byte-Pair Encoding)",who:"GPT-4, Claude, LLaMA",desc:"Starts with characters, merges most frequent pairs iteratively. The most popular approach today.",c:"var(--gold)",ex:'"playing" → "play" + "ing"'},
+    {name:"WordPiece",who:"BERT, DistilBERT",desc:"Similar to BPE but uses likelihood-based merging. Prefixes subwords with ## to mark continuations.",c:"var(--blue)",ex:'"unbelievable" → "un" + "##believ" + "##able"'},
+    {name:"SentencePiece",who:"T5, mBART, PaLM",desc:"Language-agnostic. Treats text as raw bytes, works great for multilingual models.",c:"var(--purple)",ex:'"こんにちは" → "▁こん" + "にち" + "は"'},
+    {name:"Tiktoken",who:"OpenAI GPT-3.5/4",desc:"OpenAI\'s fast BPE implementation. The standard for counting tokens in OpenAI models.",c:"var(--green)",ex:'100k vocab, optimized for code + text'},
+  ];
+
+  for(var i=0;i<types.length;i++){
+    var t=types[i];
+    var card=h("div",{padding:"12px",borderRadius:"8px",border:"1px solid var(--border)",marginBottom:"8px",background:"var(--bg)",cursor:"pointer",transition:"all .2s"});
+    card.onmouseover=function(){this.style.borderColor=t.c;this.style.boxShadow="0 0 12px "+t.c+"20";};
+    card.onmouseout=function(){this.style.borderColor="var(--border)";this.style.boxShadow="none";};
+    card.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">'
+      +'<span style="font-weight:700;color:'+t.c+';font-size:.9rem">'+t.name+'</span>'
+      +'<span style="font-size:.7rem;color:var(--sub);padding:2px 8px;border:1px solid var(--border);border-radius:10px;background:'+t.c+'10">'+t.who+'</span></div>'
+      +'<div style="font-size:.8rem;color:var(--sub);margin:6px 0;font-family:Georgia,serif">'+t.desc+'</div>'
+      +'<div style="font-size:.78rem;color:'+t.c+';font-family:Courier New,monospace;background:var(--card);padding:4px 10px;border-radius:4px;display:inline-block">'+t.ex+'</div>';
+    crd.appendChild(card);
+  }
+  crd.appendChild(nb(2));
+};
+
+// ─── 3. COUNTING TOKENS ───
+D.count=function(){
+  crd.innerHTML=bg(3)+'<div class="ctitle">Count Tokens in Code</div>'
+  +'<div class="cdesc">Before sending anything to an API, you should know how many tokens it costs. Here\'s how to count them.</div>';
+
+  crd.innerHTML+='<div class="code hf" data-f="📄 count_tokens.py — OpenAI (tiktoken)">'
+    +'<span class="kw">import</span> tiktoken<br><br>'
+    +'<span class="cm"># Load the tokenizer for GPT-4</span><br>'
+    +'enc = tiktoken.<span class="fn">encoding_for_model</span>(<span class="st">"gpt-4o"</span>)<br><br>'
+    +'text = <span class="st">"Tokens are the currency of AI"</span><br>'
+    +'tokens = enc.<span class="fn">encode</span>(text)<br><br>'
+    +'<span class="fn">print</span>(<span class="st">f"Text: {text}"</span>)<br>'
+    +'<span class="fn">print</span>(<span class="st">f"Tokens: {tokens}"</span>)<br>'
+    +'<span class="fn">print</span>(<span class="st">f"Count: {len(tokens)}"</span>)<br><br>'
+    +'<span class="cm"># Output:</span><br>'
+    +'<span class="cm"># Text: Tokens are the currency of AI</span><br>'
+    +'<span class="cm"># Tokens: [Tok, ens, are, the, currency, of, AI]</span><br>'
+    +'<span class="cm"># Count: 7</span>'
+    +'</div>';
+
+  crd.innerHTML+='<div class="code hf" data-f="📄 count_tokens.py — Anthropic (Claude)">'
+    +'<span class="kw">import</span> anthropic<br><br>'
+    +'client = anthropic.<span class="fn">Anthropic</span>()<br><br>'
+    +'<span class="cm"># Claude uses its own tokenizer</span><br>'
+    +'<span class="cm"># Count via the API response:</span><br>'
+    +'response = client.messages.<span class="fn">create</span>(<br>'
+    +'&nbsp;&nbsp;model=<span class="st">"claude-sonnet-4-20250514"</span>,<br>'
+    +'&nbsp;&nbsp;max_tokens=<span class="nb">100</span>,<br>'
+    +'&nbsp;&nbsp;messages=[{<span class="st">"role"</span>:<span class="st">"user"</span>,<br>'
+    +'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="st">"content"</span>:<span class="st">"Hello!"</span>}]<br>'
+    +')<br><br>'
+    +'<span class="fn">print</span>(response.usage)<br>'
+    +'<span class="cm"># Usage(input_tokens=10, output_tokens=32)</span>'
+    +'</div>';
+
+  // Quick reference
+  crd.innerHTML+='<div style="font-size:.82rem;font-weight:700;color:var(--text);margin:14px 0 8px">📐 Quick Token Estimates</div>'
+    +'<div style="display:flex;gap:8px;flex-wrap:wrap">'
+    +'<div style="flex:1;min-width:140px;padding:10px;border-radius:8px;background:var(--bg);border:1px solid var(--border);text-align:center;font-size:.78rem"><div style="font-size:1.2rem;font-weight:800;color:var(--gold)">~750</div><div style="color:var(--sub)">tokens per 1K words</div></div>'
+    +'<div style="flex:1;min-width:140px;padding:10px;border-radius:8px;background:var(--bg);border:1px solid var(--border);text-align:center;font-size:.78rem"><div style="font-size:1.2rem;font-weight:800;color:var(--blue)">~4</div><div style="color:var(--sub)">chars per token (English)</div></div>'
+    +'<div style="flex:1;min-width:140px;padding:10px;border-radius:8px;background:var(--bg);border:1px solid var(--border);text-align:center;font-size:.78rem"><div style="font-size:1.2rem;font-weight:800;color:var(--purple)">~2</div><div style="color:var(--sub)">chars per token (non-English)</div></div></div>';
+  crd.appendChild(nb(3));
+};
+
+// ─── 4. CONTEXT WINDOWS ───
+D.context=function(){
+  crd.innerHTML=bg(4)+'<div class="ctitle">Context Windows: The Token Limit</div>'
+  +'<div class="cdesc">Every model has a <b>context window</b> — the maximum number of tokens it can handle in one conversation. This includes BOTH your input AND the model\'s output.</div>';
+
+  // Visual
+  crd.innerHTML+='<div style="padding:14px;border-radius:10px;background:var(--bg);border:1px solid var(--border);margin:12px 0">'
+    +'<div style="font-size:.82rem;font-weight:700;color:var(--text);margin-bottom:10px">📏 Context Window = Input + Output</div>'
+    +'<div style="display:flex;height:30px;border-radius:6px;overflow:hidden;margin-bottom:6px">'
+    +'<div style="flex:3;background:rgba(96,165,250,.3);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:var(--blue)">System Prompt</div>'
+    +'<div style="flex:4;background:rgba(240,178,50,.3);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:var(--gold)">User Messages + History</div>'
+    +'<div style="flex:2;background:rgba(52,211,153,.3);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:var(--green)">RAG Context</div>'
+    +'<div style="flex:3;background:rgba(248,113,113,.3);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:var(--red)">Model Output</div></div>'
+    +'<div style="font-size:.7rem;color:var(--sub);text-align:center">← Total context window (e.g., 128K tokens) →</div></div>';
+
+  // Model comparison
+  crd.innerHTML+='<div style="font-size:.82rem;font-weight:700;color:var(--text);margin:14px 0 8px">🏆 Model Context Window Sizes</div>';
+  var models=[
+    {name:"GPT-4o",tokens:"128K",bar:100,c:"var(--green)"},
+    {name:"Claude Opus 4",tokens:"200K",bar:100,c:"var(--gold)"},
+    {name:"Claude Sonnet 4",tokens:"200K",bar:100,c:"var(--gold)"},
+    {name:"Gemini 1.5 Pro",tokens:"1M",bar:100,c:"var(--cyan)"},
+    {name:"GPT-4o mini",tokens:"128K",bar:85,c:"var(--blue)"},
+    {name:"GPT-3.5 Turbo",tokens:"16K",bar:12,c:"var(--sub)"},
+    {name:"Original GPT-3",tokens:"4K",bar:3,c:"var(--sub)"},
+  ];
+  for(var i=0;i<models.length;i++){
+    var m=models[i];
+    crd.innerHTML+='<div class="bar-row"><span class="bar-label">'+m.name+'</span>'
+      +'<div style="flex:1;background:var(--border);border-radius:4px;overflow:hidden"><div class="bar-fill" style="width:'+m.bar+'%;background:'+m.c+'">'+m.tokens+'</div></div></div>';
+  }
+
+  crd.innerHTML+='<div style="margin-top:14px;font-size:.82rem;color:var(--sub);font-family:Georgia,serif"><b style="color:var(--text)">What happens when you exceed the limit?</b> The model either throws an error, or old messages get silently dropped. This is why managing tokens is critical in production.</div>';
+  crd.appendChild(nb(4));
+};
+
+// ─── 5. TOKENS = MONEY ───
+D.money=function(){
+  crd.innerHTML=bg(5)+'<div class="ctitle">Tokens = Real Money 💸</div>'
+  +'<div class="cdesc">Every API call costs money based on <b>how many tokens</b> you send (input) and receive (output). Output tokens typically cost <b>3-5x more</b> than input tokens.</div>';
+
+  // Pricing table
+  crd.innerHTML+='<div style="overflow-x:auto;margin:12px 0"><table style="width:100%;border-collapse:collapse;font-size:.78rem">'
+    +'<tr style="border-bottom:1px solid var(--border)"><th style="text-align:left;padding:8px;color:var(--sub)">Model</th><th style="padding:8px;color:var(--sub)">Input/1M</th><th style="padding:8px;color:var(--sub)">Output/1M</th><th style="padding:8px;color:var(--sub)">Sweet Spot</th></tr>'
+    +'<tr style="border-bottom:1px solid var(--border)"><td style="padding:8px;color:var(--green)">GPT-4o mini</td><td style="padding:8px;text-align:center">$0.15</td><td style="padding:8px;text-align:center">$0.60</td><td style="padding:8px;text-align:center">Best value 🏆</td></tr>'
+    +'<tr style="border-bottom:1px solid var(--border)"><td style="padding:8px;color:var(--blue)">GPT-4o</td><td style="padding:8px;text-align:center">$2.50</td><td style="padding:8px;text-align:center">$10.00</td><td style="padding:8px;text-align:center">Complex tasks</td></tr>'
+    +'<tr style="border-bottom:1px solid var(--border)"><td style="padding:8px;color:var(--gold)">Claude Sonnet 4</td><td style="padding:8px;text-align:center">$3.00</td><td style="padding:8px;text-align:center">$15.00</td><td style="padding:8px;text-align:center">Coding & reasoning</td></tr>'
+    +'<tr style="border-bottom:1px solid var(--border)"><td style="padding:8px;color:var(--gold)">Claude Haiku 3.5</td><td style="padding:8px;text-align:center">$0.80</td><td style="padding:8px;text-align:center">$4.00</td><td style="padding:8px;text-align:center">Speed + cost</td></tr>'
+    +'<tr><td style="padding:8px;color:var(--cyan)">Gemini Flash</td><td style="padding:8px;text-align:center">$0.075</td><td style="padding:8px;text-align:center">$0.30</td><td style="padding:8px;text-align:center">Cheapest</td></tr>'
+    +'</table></div>';
+
+  // Real-world examples
+  crd.innerHTML+='<div style="font-size:.82rem;font-weight:700;color:var(--text);margin:14px 0 8px">💸 Real-World Cost Examples (GPT-4o)</div>';
+  var exs=[
+    {task:"Single chatbot message",input:"500",output:"200",cost:"$0.003"},
+    {task:"Summarize a 10-page doc",input:"4,000",output:"500",cost:"$0.015"},
+    {task:"RAG query (with context)",input:"3,000",output:"300",cost:"$0.011"},
+    {task:"Translate 50 pages",input:"40,000",output:"40,000",cost:"$0.50"},
+    {task:"10K daily chatbot users",input:"5M",output:"2M",cost:"$32.50/day"},
+  ];
+  for(var i=0;i<exs.length;i++){
+    var e=exs[i];
+    crd.innerHTML+='<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid var(--border);font-size:.8rem">'
+      +'<span style="color:var(--sub);flex:2">'+e.task+'</span>'
+      +'<span style="color:var(--blue);flex:1;text-align:center">↑'+e.input+'</span>'
+      +'<span style="color:var(--red);flex:1;text-align:center">↓'+e.output+'</span>'
+      +'<span style="color:var(--gold);font-weight:700;flex:1;text-align:right">'+e.cost+'</span></div>';
+  }
+  crd.appendChild(nb(5));
+};
+
+// ─── 6. COST CALCULATOR ───
+D.calc=function(){
+  crd.innerHTML=bg(6)+'<div class="ctitle">Token Cost Calculator</div>'
+  +'<div class="cdesc">Estimate your monthly AI costs. Adjust the numbers to match your use case. <span style="color:var(--gold);font-weight:700">Try changing values in real-time!</span></div>';
+
+  var calcDiv=h("div",{});
+  calcDiv.innerHTML='<div class="calc-row"><span class="calc-label" style="color:var(--blue)">Daily requests:</span><input class="calc-input" id="c_req" type="number" value="1000"></div>'
+    +'<div class="calc-row"><span class="calc-label" style="color:var(--green)">Avg input tokens:</span><input class="calc-input" id="c_in" type="number" value="800"></div>'
+    +'<div class="calc-row"><span class="calc-label" style="color:var(--red)">Avg output tokens:</span><input class="calc-input" id="c_out" type="number" value="300"></div>'
+    +'<div class="calc-row"><span class="calc-label" style="color:var(--purple)">Model:</span>'
+    +'<select class="calc-input" id="c_model" style="width:180px;cursor:pointer">'
+    +'<option value="0.15,0.60">💚 GPT-4o mini ($0.15/$0.60)</option>'
+    +'<option value="2.50,10.00">⚡ GPT-4o ($2.50/$10)</option>'
+    +'<option value="3.00,15.00">🎯 Claude Sonnet 4 ($3/$15)</option>'
+    +'<option value="0.80,4.00">🏃 Claude Haiku 3.5 ($0.80/$4)</option>'
+    +'<option value="0.075,0.30">💰 Gemini Flash ($0.075/$0.30)</option>'
+    +'</select></div>';
+
+  var result=h("div",{});
+  result.id="calc_result";
+  calcDiv.appendChild(result);
+  crd.appendChild(calcDiv);
+
+  function calc(){
+    var req=+(document.getElementById("c_req").value)||0;
+    var inp=+(document.getElementById("c_in").value)||0;
+    var out=+(document.getElementById("c_out").value)||0;
+    var prices=document.getElementById("c_model").value.split(",");
+    var pi=+prices[0],po=+prices[1];
+    var dailyIn=req*inp,dailyOut=req*out;
+    var dailyCost=(dailyIn/1e6)*pi+(dailyOut/1e6)*po;
+    var monthlyCost=dailyCost*30;
+    var yearCost=monthlyCost*12;
+    var rd=document.getElementById("calc_result");
+    rd.innerHTML='<div class="calc-result" style="animation:fadeInSection .3s ease-out"><div style="font-size:.78rem;color:var(--sub)">Estimated Monthly Cost</div><div class="big">$'+monthlyCost.toFixed(2)+'</div>'
+      +'<div style="font-size:.78rem;color:var(--sub);margin-top:6px">'
+      +'Daily: <b style="color:var(--gold)">$'+dailyCost.toFixed(2)+'</b> · '
+      +'Yearly: <b style="color:var(--gold)">$'+yearCost.toFixed(2)+'</b></div>'
+      +'<div style="font-size:.72rem;color:var(--sub);margin-top:4px">'
+      +(dailyIn/1e6).toFixed(2)+'M input + '+(dailyOut/1e6).toFixed(2)+'M output tokens/day</div>'
+      +'<div style="margin-top:10px;padding:8px;border-radius:6px;background:'+((monthlyCost<100)?'rgba(52,211,153,.1);color:var(--green)':'rgba(248,113,113,.1);color:var(--red)')+';font-size:.75rem;font-weight:700">'
+      +((monthlyCost<100)?'✓ Budget-friendly':'⚠ High cost')+' tier</div></div>';
+    playSound('click');
+  }
+
+  document.getElementById("c_req").oninput=calc;
+  document.getElementById("c_in").oninput=calc;
+  document.getElementById("c_out").oninput=calc;
+  document.getElementById("c_model").onchange=calc;
+  calc();
+  
+  // Add preset quick calc buttons
+  crd.innerHTML+='<div style="margin-top:14px;font-size:.82rem;font-weight:700;color:var(--text);margin-bottom:8px">⚡ Quick Presets (click to load):</div>'
+  +'<div style="display:flex;gap:6px;flex-wrap:wrap">';
+  var presets=[
+    {name:"Small Chatbot",req:100,inp:500,out:200},
+    {name:"RAG App",req:500,inp:2000,out:500},
+    {name:"Scale-up",req:5000,inp:1500,out:400},
+  ];
+  for(var i=0;i<presets.length;i++){
+    var p=presets[i];
+    crd.innerHTML+='<button style="padding:6px 12px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--sub);font-size:.75rem;cursor:pointer;transition:all .2s" onclick="document.getElementById(\'c_req\').value='+p.req+';document.getElementById(\'c_in\').value='+p.inp+';document.getElementById(\'c_out\').value='+p.out+';var evt=new Event(\'input\',{bubbles:true});document.getElementById(\'c_req\').dispatchEvent(evt);playSound(\'click\')" onmouseover="this.style.borderColor=\'var(--gold)\';this.style.color=\'var(--gold)\'" onmouseout="this.style.borderColor=\'var(--border)\';this.style.color=\'var(--sub)\'">'+p.name+'</button>';
+  }
+  crd.innerHTML+='</div>';
+  
+  crd.appendChild(nb(6));
+};
+
+// ─── 7. SAVE TOKENS ───
+D.save=function(){
+  crd.innerHTML=bg(7)+'<div class="ctitle">10 Ways to Save Tokens (and Money)</div>'
+  +'<div class="cdesc">Every token saved is money saved. These techniques can reduce costs by <b>30-80%</b>.</div>';
+
+  var tips=[
+    {ic:"📝",t:"Shorter system prompts",d:"Cut your system prompt in half. Remove filler words. Every token counts.",save:"15-30%",c:"var(--gold)"},
+    {ic:"🗜️",t:"Compress chat history",d:"Summarize old messages instead of sending full history. Keep last 3-5 turns.",save:"40-60%",c:"var(--green)"},
+    {ic:"💾",t:"Cache common responses",d:"Use Redis/Memcached to cache identical queries. Don't pay twice for the same answer.",save:"30-50%",c:"var(--blue)"},
+    {ic:"✂️",t:"Trim RAG context",d:"Send only top 3 chunks, not 10. Use a reranker to pick the best ones.",save:"20-40%",c:"var(--purple)"},
+    {ic:"🤖",t:"Use smaller models first",d:"Route simple questions to GPT-4o-mini. Only use GPT-4o for complex tasks.",save:"80-90%",c:"var(--cyan)"},
+    {ic:"📏",t:"Set max_tokens wisely",d:'Don\'t set max_tokens to 4096 if you need 200. Prevent runaway output.',save:"20-30%",c:"var(--orange)"},
+    {ic:"🔄",t:"Batch API calls",d:"OpenAI Batch API gives 50% discount. Queue non-urgent requests.",save:"50%",c:"var(--gold)"},
+    {ic:"📊",t:"Structured output",d:"Ask for JSON instead of prose. More information in fewer tokens.",save:"15-25%",c:"var(--lime)"},
+    {ic:"🚫",t:"Stop sequences",d:"Use stop tokens to end generation early when you have enough.",save:"10-20%",c:"var(--red)"},
+    {ic:"🔍",t:"Prompt caching",d:"Anthropic & OpenAI offer prompt caching — reuse long system prompts cheaply.",save:"50-90%",c:"var(--pink)"},
+  ];
+  for(var i=0;i<tips.length;i++){
+    var t=tips[i];
+    crd.innerHTML+='<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);font-size:.82rem">'
+      +'<span style="font-size:1.1rem;flex-shrink:0">'+t.ic+'</span>'
+      +'<div style="flex:1"><span style="font-weight:700;color:'+t.c+'">'+t.t+'</span>'
+      +'<div style="color:var(--sub);font-family:Georgia,serif;margin-top:2px">'+t.d+'</div></div>'
+      +'<span style="padding:2px 8px;border-radius:10px;background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.3);color:var(--green);font-size:.72rem;font-weight:700;white-space:nowrap;flex-shrink:0">↓'+t.save+'</span></div>';
+  }
+  crd.appendChild(nb(7));
+};
+
+// ─── 8. TOKEN MANAGEMENT ───
+D.manage=function(){
+  crd.innerHTML=bg(8)+'<div class="ctitle">Token Management in Production</div>'
+  +'<div class="cdesc">In production, you need to <b>track, limit, and optimize</b> token usage. Here\'s a complete management system.</div>';
+
+  crd.innerHTML+='<div class="code hf" data-f="📄 token_manager.py">'
+    +'<span class="kw">import</span> tiktoken<br>'
+    +'<span class="kw">from</span> datetime <span class="kw">import</span> datetime<br>'
+    +'<span class="kw">import</span> redis<br><br>'
+    +'<span class="kw">class</span> <span class="ty">TokenManager</span>:<br>'
+    +'&nbsp;&nbsp;<span class="kw">def</span> <span class="fn">__init__</span>(self, model=<span class="st">"gpt-4o"</span>,<br>'
+    +'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;daily_limit=<span class="nb">1_000_000</span>):<br>'
+    +'&nbsp;&nbsp;&nbsp;&nbsp;self.enc = tiktoken.<span class="fn">encoding_for_model</span>(model)<br>'
+    +'&nbsp;&nbsp;&nbsp;&nbsp;self.limit = daily_limit<br>'
+    +'&nbsp;&nbsp;&nbsp;&nbsp;self.redis = redis.<span class="fn">Redis</span>()<br><br>'
+    +'&nbsp;&nbsp;<span class="kw">def</span> <span class="fn">count</span>(self, text):<br>'
+    +'&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">return</span> <span class="fn">len</span>(self.enc.<span class="fn">encode</span>(text))<br><br>'
+    +'&nbsp;&nbsp;<span class="kw">def</span> <span class="fn">track_usage</span>(self, user_id, tokens):<br>'
+    +'&nbsp;&nbsp;&nbsp;&nbsp;key = <span class="st">f"tokens:{user_id}:{datetime.now():%Y-%m-%d}"</span><br>'
+    +'&nbsp;&nbsp;&nbsp;&nbsp;self.redis.<span class="fn">incrby</span>(key, tokens)<br>'
+    +'&nbsp;&nbsp;&nbsp;&nbsp;self.redis.<span class="fn">expire</span>(key, <span class="nb">86400</span>)<br><br>'
+    +'&nbsp;&nbsp;<span class="kw">def</span> <span class="fn">check_budget</span>(self, user_id):<br>'
+    +'&nbsp;&nbsp;&nbsp;&nbsp;key = <span class="st">f"tokens:{user_id}:{datetime.now():%Y-%m-%d}"</span><br>'
+    +'&nbsp;&nbsp;&nbsp;&nbsp;used = <span class="fn">int</span>(self.redis.<span class="fn">get</span>(key) <span class="kw">or</span> <span class="nb">0</span>)<br>'
+    +'&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">return</span> used < self.limit<br><br>'
+    +'&nbsp;&nbsp;<span class="kw">def</span> <span class="fn">trim_history</span>(self, messages, max_tokens):<br>'
+    +'&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm"># Keep system + last N messages within budget</span><br>'
+    +'&nbsp;&nbsp;&nbsp;&nbsp;total = <span class="nb">0</span><br>'
+    +'&nbsp;&nbsp;&nbsp;&nbsp;kept = [messages[<span class="nb">0</span>]]&nbsp;&nbsp;<span class="cm"># always keep system</span><br>'
+    +'&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">for</span> msg <span class="kw">in</span> <span class="fn">reversed</span>(messages[<span class="nb">1</span>:]):<br>'
+    +'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;t = self.<span class="fn">count</span>(msg[<span class="st">"content"</span>])<br>'
+    +'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">if</span> total + t > max_tokens: <span class="kw">break</span><br>'
+    +'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;kept.<span class="fn">insert</span>(<span class="nb">1</span>, msg)<br>'
+    +'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;total += t<br>'
+    +'&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">return</span> kept<br>'
+    +'</div>';
+
+  // Architecture
+  crd.innerHTML+='<div style="font-size:.82rem;font-weight:700;color:var(--text);margin:14px 0 8px">🏗️ Token Management Architecture</div>';
+  var a=h("div");a.className="arch";
+  a.innerHTML='<div class="abox" style="border-color:var(--blue);color:var(--blue)"><span class="ic">👤</span>Request</div>'
+    +'<span class="aarr">→</span>'
+    +'<div class="abox" style="border-color:var(--orange);color:var(--orange)"><span class="ic">🔢</span>Count<br>Tokens</div>'
+    +'<span class="aarr">→</span>'
+    +'<div class="abox" style="border-color:var(--red);color:var(--red)"><span class="ic">🛡️</span>Budget<br>Check</div>'
+    +'<span class="aarr">→</span>'
+    +'<div class="abox" style="border-color:var(--purple);color:var(--purple)"><span class="ic">✂️</span>Trim if<br>Needed</div>'
+    +'<span class="aarr">→</span>'
+    +'<div class="abox" style="border-color:var(--green);color:var(--green)"><span class="ic">✨</span>Call LLM</div>'
+    +'<span class="aarr">→</span>'
+    +'<div class="abox" style="border-color:var(--gold);color:var(--gold)"><span class="ic">📊</span>Log<br>Usage</div>';
+  crd.appendChild(a);
+  crd.appendChild(nb(8));
+};
+
+// ─── 9. PRODUCTION TIPS ───
+D.prod=function(){
+  crd.innerHTML=bg(9)+'<div class="ctitle">Production Token Tips 🚀</div>'
+  +'<div class="cdesc">Battle-tested strategies for running AI at scale without burning your budget.</div>';
+
+  crd.innerHTML+='<div class="code hf" data-f="📄 smart_router.py — Model Routing by Complexity">'
+    +'<span class="kw">def</span> <span class="fn">route_request</span>(query, context_tokens):<br>'
+    +'&nbsp;&nbsp;<span class="cm"># Route to cheapest model that can handle it</span><br>'
+    +'&nbsp;&nbsp;<span class="kw">if</span> context_tokens < <span class="nb">500</span> <span class="kw">and</span> is_simple(query):<br>'
+    +'&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">return</span> <span class="st">"gpt-4o-mini"</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm"># $0.15/1M in</span><br>'
+    +'&nbsp;&nbsp;<span class="kw">elif</span> context_tokens < <span class="nb">4000</span>:<br>'
+    +'&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">return</span> <span class="st">"claude-haiku-3.5"</span>&nbsp;<span class="cm"># $0.80/1M in</span><br>'
+    +'&nbsp;&nbsp;<span class="kw">else</span>:<br>'
+    +'&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">return</span> <span class="st">"gpt-4o"</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm"># big guns</span><br>'
+    +'</div>';
+
+  crd.innerHTML+='<div class="code hf" data-f="📄 monitoring.py — Cost Alerts">'
+    +'<span class="kw">def</span> <span class="fn">check_cost_alert</span>(daily_spend, budget=<span class="nb">50.0</span>):<br>'
+    +'&nbsp;&nbsp;<span class="kw">if</span> daily_spend > budget * <span class="nb">0.8</span>:<br>'
+    +'&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">send_slack_alert</span>(<br>'
+    +'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="st">f"⚠️ AI spend at ${daily_spend:.2f}"</span><br>'
+    +'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="st">f" ({daily_spend/budget*100:.0f}% of budget)"</span><br>'
+    +'&nbsp;&nbsp;&nbsp;&nbsp;)<br>'
+    +'&nbsp;&nbsp;<span class="kw">if</span> daily_spend > budget:<br>'
+    +'&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">enable_rate_limiting</span>()<br>'
+    +'&nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">fallback_to_cached_responses</span>()<br>'
+    +'</div>';
+
+  // Monitoring dashboard mockup
+  crd.innerHTML+='<div style="font-size:.82rem;font-weight:700;color:var(--text);margin:14px 0 8px">📊 What to Monitor</div>'
+    +'<div class="metrics">'
+    +'<div class="metric"><div class="v" style="color:var(--gold)">$42.5</div><div class="l">Daily Spend</div></div>'
+    +'<div class="metric"><div class="v" style="color:var(--blue)">2.1M</div><div class="l">Tokens Today</div></div>'
+    +'<div class="metric"><div class="v" style="color:var(--green)">340ms</div><div class="l">Avg Latency</div></div>'
+    +'<div class="metric"><div class="v" style="color:var(--purple)">94%</div><div class="l">Cache Hit Rate</div></div></div>';
+
+  // Final checklist
+  crd.innerHTML+='<div style="font-size:.82rem;font-weight:700;color:var(--text);margin:14px 0 8px">✅ Production Token Checklist</div>';
+  var checks=[
+    {ic:"🔢",t:"Pre-count tokens before every API call",c:"var(--gold)"},
+    {ic:"💰",t:"Set per-user daily/monthly token budgets",c:"var(--green)"},
+    {ic:"🤖",t:"Route requests to cheapest capable model",c:"var(--blue)"},
+    {ic:"💾",t:"Cache responses for repeated queries (Redis)",c:"var(--cyan)"},
+    {ic:"✂️",t:"Trim conversation history to stay in context window",c:"var(--purple)"},
+    {ic:"📊",t:"Log every request: tokens in, tokens out, cost, latency",c:"var(--orange)"},
+    {ic:"🚨",t:"Set cost alerts at 80% and kill switch at 100% of budget",c:"var(--red)"},
+    {ic:"🔄",t:"Use prompt caching for repeated system prompts",c:"var(--pink)"},
+    {ic:"📉",t:"Review weekly: find wasteful patterns, optimize prompts",c:"var(--lime)"},
+    {ic:"🧪",t:"A/B test models — sometimes smaller = same quality + 90% cheaper",c:"var(--gold)"},
+  ];
+  for(var i=0;i<checks.length;i++){
+    var c=checks[i];
+    crd.innerHTML+='<div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);font-size:.8rem">'
+      +'<span style="color:'+c.c+'">'+c.ic+'</span>'
+      +'<span style="color:var(--sub)">'+c.t+'</span></div>';
+  }
+
+  // Closing
+  crd.innerHTML+='<div style="margin-top:18px;padding:14px;border-radius:10px;background:rgba(240,178,50,.06);border:1px solid rgba(240,178,50,.25);text-align:center;font-family:Georgia,serif">'
+    +'<div style="font-size:1rem;font-weight:700;color:var(--gold)">🪙 Master tokens, master AI costs.</div>'
+    +'<div style="font-size:.82rem;color:var(--sub);margin-top:4px">Every token counted is a dollar saved. Build smart, measure everything.</div></div>';
+
+  var d=h("div",{display:"flex",justifyContent:"space-between",marginTop:"20px"});
+  var b=document.createElement("button");b.style.cssText="padding:6px 14px;border-radius:6px;border:1px solid var(--border);background:none;color:var(--sub);font-size:.78rem;font-family:inherit;cursor:pointer";b.textContent="← "+ST[8].t;b.onclick=function(){go(8);};d.appendChild(b);
+  d.appendChild(h("div"));
+  crd.appendChild(d);
+};
+
+// ─── START ───
+go(0);
+</script>
+</body>
+</html>

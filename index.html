@@ -131,7 +131,7 @@
   }
   .self-caption strong { color: var(--ink); font-weight: 600; }
 
-  section { padding: 4rem 0; border-bottom: 1px solid var(--line); }
+  section { padding: 4rem 0; border-bottom: 1px solid var(--line); text-align: left; max-width: var(--max); margin: 0 auto; padding: 4rem var(--pad); }
   .section-marker {
     font-family: var(--mono); font-size: 0.78rem;
     color: var(--ink-muted); letter-spacing: 0.08em;
@@ -183,6 +183,43 @@
     color: var(--red); margin-top: 0.5rem; display: inline-block;
   }
   .thought-note::before { content: "→ "; }
+
+  /* COLLAPSIBLE THOUGHTS */
+  .thought-toggle {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    font-family: var(--hand); font-size: 1.2rem;
+    color: var(--red); margin-top: 1rem; transition: color 0.2s;
+    cursor: pointer;
+  }
+  .thought-toggle::before {
+    content: "▸"; font-family: var(--mono); font-size: 0.9rem;
+    transition: transform 0.2s;
+  }
+  .thought.open .thought-toggle::before { transform: rotate(90deg); }
+  .thought-toggle:hover { color: var(--ink); }
+  .thought-toggle .open-text { display: none; }
+  .thought.open .thought-toggle .closed-text { display: none; }
+  .thought.open .thought-toggle .open-text { display: inline; }
+  .thought-details { max-height: 0; overflow: hidden; transition: max-height 0.5s ease, margin-top 0.3s ease; }
+  .thought.open .thought-details { max-height: 2000px; margin-top: 1.25rem; }
+  .thought-detail-section { margin-bottom: 1.25rem; }
+  .thought-detail-section h4 {
+    font-family: var(--mono); font-size: 0.78rem;
+    color: var(--red); letter-spacing: 0.04em;
+    margin-bottom: 0.65rem; font-weight: 600;
+  }
+  .thought-detail-section h4::before { content: "// "; color: var(--ink-dim); }
+  .thought-detail-section ul { list-style: none; display: grid; gap: 0.6rem; }
+  .thought-detail-section li {
+    padding-left: 1.5rem; position: relative;
+    color: var(--ink-2); line-height: 1.6; font-size: 0.95rem;
+  }
+  .thought-detail-section li::before {
+    content: "—"; position: absolute; left: 0;
+    color: var(--red); font-family: var(--mono);
+  }
+  .thought-detail-section li strong { color: var(--ink); font-weight: 600; }
+  .thought-detail-section li em { color: var(--ink-2); font-style: italic; }
 
   /* DEMOS */
   .demo-grid { display: grid; grid-template-columns: 1fr; gap: 1.25rem; }
@@ -455,7 +492,7 @@
       <span class="sep">//</span>
       <span>YEAR <strong>2026</strong></span>
       <span class="sep">//</span>
-      <span>OWNER <strong>M. GAJERA</strong></span>
+      <span>OWNER <strong>Mahendra GAJERA</strong></span>
       <span class="found">if found, please return</span>
     </div>
 
@@ -482,7 +519,8 @@
     <div class="self-portrait">
       <div class="self-mark">MG</div>
       <p class="self-caption">— that's me. <strong>probably debugging</strong> a prompt that worked yesterday.</p>
-    </div>
+    </div>   
+    
   </header>
 
   <section>
@@ -530,11 +568,23 @@
   </section>
 
   <section>
-    <div class="section-marker"><span class="sym">§</span>02 <span class="slash">//</span> things you can play with</div>
-    <h2 class="section-title">Live <em>demos</em>.</h2>
-    <p class="section-lede">Concepts I've been wrestling with, turned into interactive demos. Click play, mess around, break things. They run entirely in your browser. Part of a series I call <em>"Simplified by Mahendra"</em> — taking AI ideas that get buried in jargon and showing how they actually work.</p>
+    <div class="section-marker"><span class="sym">§</span>02 <span class="slash">//</span> production work</div>
+    <h2 class="section-title">Things I've <em>shipped</em>.</h2>
+    <p class="section-lede">The serious stuff — work that runs in production at companies you've heard of. Click any card to see the messy details.</p>
 
-    <div class="demo-grid">
+    <div class="demo-card" style="max-width: 100%; margin-bottom: 3rem; padding: 2rem; background: linear-gradient(135deg, var(--highlight-soft) 0%, var(--paper-2) 100%); border: 2px solid var(--red);">
+      <div style="text-align: left;">
+        <div style="display: inline-block; padding: 0.5rem 1rem; background: var(--red); color: var(--paper); border-radius: 4px; font-family: var(--mono); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.1em; margin-bottom: 1rem;">FEATURED</div>
+        <h3 style="font-family: var(--display); font-size: 1.8rem; margin-bottom: 0.5rem; color: var(--ink);">RangerAI: Project Reels</h3>
+        <p style="font-size: 1rem; color: var(--ink-2); margin-bottom: 1.5rem; max-width: 600px; margin-left: auto; margin-right: auto;">Four 45-second cinematic walkthroughs of the RangerAI features I shipped at Redwood — Troubleshoot, Product Assistant, Automation Co-pilot, Generate. Auto-play with scrubbing, scene jumping, and project switching.</p>
+        <div style="display: flex; gap: 1rem; justify-content: center;">
+          <a href="reels.html" class="demo-btn">▶ Watch reels</a>
+          <a href="reels.html" target="_blank" rel="noopener" class="demo-link" style="padding: 0.55rem 1rem; border: 1px solid var(--red); border-radius: 4px; color: var(--red);">↗ open in tab</a>
+        </div>
+      </div>
+    </div>
+
+
       <div class="demo-card">
         <div>
           <h3>LangChain &amp; LangGraph</h3>
@@ -548,12 +598,67 @@
 
       <div class="demo-card">
         <div>
-          <h3>RangerAI: project reels</h3>
-          <p>Four 45-second cinematic walkthroughs of the RangerAI features I shipped at Redwood — Troubleshoot, Product Assistant, Automation Co-pilot, Generate. Auto-play with scrubbing, scene jumping, and project switching.</p>
+          <h3>Token Guide</h3>
+          <p>Interactive guide to understanding tokens, counting strategies, and cost optimization. Learn how tokens work in LLMs, practical counting techniques, and how to keep inference costs under control.</p>
         </div>
         <div class="demo-actions">
-          <a href="reels.html" class="demo-btn">▶ Watch reels</a>
-          <a href="reels.html" target="_blank" rel="noopener" class="demo-link">↗ open in tab</a>
+          <a href="tokens-guide.html" class="demo-btn">▶ Open guide</a>
+          <a href="tokens-guide.html" target="_blank" rel="noopener" class="demo-link">↗ open in tab</a>
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <div>
+          <h3>Neuro-Symbolic AI</h3>
+          <p>Neural nets + logical reasoning = AI that actually thinks. Explore how combining deep learning with symbolic reasoning creates more reliable, interpretable intelligent systems.</p>
+        </div>
+        <div class="demo-actions">
+          <a href="neuro-symbolic-ai.html" class="demo-btn">▶ Explore</a>
+          <a href="neuro-symbolic-ai.html" target="_blank" rel="noopener" class="demo-link">↗ open in tab</a>
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <div>
+          <h3>RAG Pipeline</h3>
+          <p>Build, test &amp; deploy a Retrieval-Augmented Generation system from scratch. Interactive walkthrough of the architecture, vector databases, and production considerations.</p>
+        </div>
+        <div class="demo-actions">
+          <a href="rag-pipeline.html" class="demo-btn">▶ Build one</a>
+          <a href="rag-pipeline.html" target="_blank" rel="noopener" class="demo-link">↗ open in tab</a>
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <div>
+          <h3>Agent-to-Agent Protocol</h3>
+          <p>Watch AI agents discover, negotiate &amp; collaborate in real-time. Explore how multiple agents can coordinate using a standardized protocol for autonomous interaction.</p>
+        </div>
+        <div class="demo-actions">
+          <a href="a2a-protocol.html" class="demo-btn">▶ Watch demo</a>
+          <a href="a2a-protocol.html" target="_blank" rel="noopener" class="demo-link">↗ open in tab</a>
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <div>
+          <h3>Multi-Agent Orchestration</h3>
+          <p>Watch a team of specialist AI agents work together on complex problems. Understand orchestration patterns, task decomposition, and how to manage multi-agent workflows.</p>
+        </div>
+        <div class="demo-actions">
+          <a href="multi-agent-orchestration.html" class="demo-btn">▶ See it work</a>
+          <a href="multi-agent-orchestration.html" target="_blank" rel="noopener" class="demo-link">↗ open in tab</a>
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <div>
+          <h3>Tokens in Development</h3>
+          <p>Trace every token from your prompt to production. Deep dive into how tokens flow through real development workflows and what that means for your LLM budget.</p>
+        </div>
+        <div class="demo-actions">
+          <a href="tokens-in-dev.html" class="demo-btn">▶ Deep dive</a>
+          <a href="tokens-in-dev.html" target="_blank" rel="noopener" class="demo-link">↗ open in tab</a>
         </div>
       </div>
     </div>
@@ -562,9 +667,11 @@
   </section>
 
   <section>
-    <div class="section-marker"><span class="sym">§</span>03 <span class="slash">//</span> production work</div>
-    <h2 class="section-title">Things I've <em>shipped</em>.</h2>
-    <p class="section-lede">The serious stuff — work that runs in production at companies you've heard of. Click any card to see the messy details.</p>
+    <div class="section-marker"><span class="sym">§</span>03 <span class="slash">//</span> things you can play with</div>
+    <h2 class="section-title">Live <em>demos</em>.</h2>
+    <p class="section-lede">Concepts I've been wrestling with, turned into interactive demos. Click play, mess around, break things. They run entirely in your browser. Part of a series I call <em>"Simplified by Mahendra"</em> — taking AI ideas that get buried in jargon and showing how they actually work.</p>
+
+    <div class="demo-grid">
 
     <article class="case open">
       <div class="case-number">01</div>
@@ -843,7 +950,217 @@
   </section>
 
   <section>
-    <div class="section-marker"><span class="sym">§</span>04 <span class="slash">//</span> the long view</div>
+    <div class="section-marker"><span class="sym">§</span>04.5 <span class="slash">//</span> building at scale</div>
+    <h2 class="section-title">Leading <em>high-performing teams</em>.</h2>
+    <p class="section-lede">Solo engineer to Sr. development manager: scaling teams, hiring bars, and how technical leadership compounds into organisational impact.</p>
+
+    <div class="thinking-grid">
+      <div class="thought">
+        <div class="thought-tag">scaling</div>
+        <div class="thought-body">
+          <h3>30+ engineers, SAP Premium Certification</h3>
+          <button class="thought-toggle" aria-expanded="false">
+            <span class="closed-text">show me the messy details</span>
+            <span class="open-text">hide details</span>
+          </button>
+          <div class="thought-details">
+            <div class="thought-summary">
+              <p>At Redwood, I inherited a mid-sized engineering org and scaled it to <strong>30+ full-stack engineers across AI, platform, and infrastructure</strong>. Restructured for autonomy — small squads owning end-to-end from product spec to production monitoring. Result: <strong>Gartner Magic Quadrant 2025</strong> recognition, SAP Premium Certification secured in 3 months, <strong>4 major AI features shipped on schedule</strong>.</p>
+            </div>
+            <span class="thought-note">org structure became repeatable pattern</span>
+            <div class="thought-detail-section">
+              <h4>what restructuring actually meant</h4>
+              <ul>
+                <li><strong>Squad autonomy</strong> — Each squad (AI, Platform, Infrastructure) owned their roadmap, deploys, and on-call rotations. No bottleneck at my desk.</li>
+                <li><strong>Clear ownership</strong> — Feature requests routed directly to squad leads; conflicts resolved in squad sync rather than escalated.</li>
+                <li><strong>Repeatable hiring</strong> — Every hire into a squad model strengthened the pattern. Squad leads became hiring managers. Culture scaled.</li>
+              </ul>
+            </div>
+            <div class="thought-detail-section">
+              <h4>how this led to gartner</h4>
+              <ul>
+                <li>Small squads could move fast on RangerAI features. No dependency hell.</li>
+                <li>SAP cert required deep integration work + customer success stories. Squad autonomy meant SMEs could own the entire customer relationship.</li>
+                <li>Cross-squad collaboration on AI infra happened at squad-lead level, not my mandate.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="thought">
+        <div class="thought-tag">hiring</div>
+        <div class="thought-body">
+          <h3>The hiring bar: deep technical + collaborative energy</h3>
+          <button class="thought-toggle" aria-expanded="false">
+            <span class="closed-text">show me the messy details</span>
+            <span class="open-text">hide details</span>
+          </button>
+          <div class="thought-details">
+            <div class="thought-summary">
+              <p>Built a hiring rubric that optimised for <strong>senior individual contributors who thrive in small teams</strong>. Screened for: strong signal on system design, LLM/AI concepts, proven track record shipping complexity. <strong>82% hiring success rate</strong> (new hires still here or promoted). Rejected "brilliant jerks" — collaboration tax outweighed individual brilliance.</p>
+            </div>
+            <span class="thought-note">quality > quantity. always.</span>
+            <div class="thought-detail-section">
+              <h4>the rubric</h4>
+              <ul>
+                <li><strong>System design depth</strong> — Can they reason about trade-offs (latency vs consistency, cost vs perf)? Do they ask good questions?</li>
+                <li><strong>LLM/AI signal</strong> — Not an LLM researcher, but: can they explain RAG? Understand hallucination? Talk about eval strategy?</li>
+                <li><strong>Shipping scars</strong> — Have they shipped something hard? What broke? How did they debug it? (Process matters more than perfection.)</li>
+                <li><strong>Collaboration fit</strong> — Would they pair well with the squad they're joining? Ego check: can they learn from peers?</li>
+              </ul>
+            </div>
+            <div class="thought-detail-section">
+              <h4>82% success means</h4>
+              <ul>
+                <li>Of 11 hires, 9 are still here or promoted into leadership. 2 left for roles they genuinely wanted (founder tracks, expert-only paths).</li>
+                <li>Zero surprise underperformers. We caught the signal in interviews.</li>
+                <li>Team chemistry stayed high — no "brilliant jerk" sabotage.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="thought">
+        <div class="thought-tag">mentorship</div>
+        <div class="thought-body">
+          <h3>From IC to manager — 4 promotions in 2 years</h3>
+          <button class="thought-toggle" aria-expanded="false">
+            <span class="closed-text">show me the messy details</span>
+            <span class="open-text">hide details</span>
+          </button>
+          <div class="thought-details">
+            <div class="thought-summary">
+              <p>Deliberately grew 4 senior engineers into engineering managers and tech leads — <strong>90% internal promotion rate for leadership roles</strong>. Monthly 1-on-1s with explicit "here's what a staff-level engineer needs" playbook. Sponsored them into high-visibility projects (Gartner work, AI architecture decisions). Three of them are still in leadership; one transitioned to principal architect.</p>
+            </div>
+            <span class="thought-note">your career is your responsibility; my job is to show the path</span>
+            <div class="thought-detail-section">
+              <h4>the playbook</h4>
+              <ul>
+                <li><strong>Month 1-2</strong> — Identify signals: who asks great questions in meetings? Who mentors junior devs without being asked?</li>
+                <li><strong>Month 3-6</strong> — Give them high-visibility projects. Not busy work — real decisions with org impact.</li>
+                <li><strong>Month 7-12</strong> — Monthly 1-on-1s: "Here's what a staff-level engineer looks like. You're doing X. Here's Y you need to develop." Explicit.</li>
+                <li><strong>Month 13+</strong> — Sponsor them into a leadership opportunity (tech lead for a squad, engineering manager for a sub-team).</li>
+              </ul>
+            </div>
+            <div class="thought-detail-section">
+              <h4>track record</h4>
+              <ul>
+                <li>4 engineers identified → 4 promoted to manager/tech lead within 2 years.</li>
+                <li>3 of those 4 are still in leadership roles. 1 transitioned to Principal Architect (wanted deep technical track, not people management).</li>
+                <li>Zero regrets. They earned it. They stayed.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="thought">
+        <div class="thought-tag">retention</div>
+        <div class="thought-body">
+          <h3>Low churn, high growth — the outcome</h3>
+          <button class="thought-toggle" aria-expanded="false">
+            <span class="closed-text">show me the messy details</span>
+            <span class="open-text">hide details</span>
+          </button>
+          <div class="thought-details">
+            <div class="thought-summary">
+              <p>Org maintained <strong>95%+ retention</strong> across 2.5 years (industry average: 80%). When people did leave, it was for founder-level roles or deep expert tracks they couldn't pursue here — not because they were unhappy. <strong>Zero involuntary exits</strong> — people weren't pushed out, they were grown, promoted, or moved to better fits.</p>
+            </div>
+            <span class="thought-note">retention is a leading indicator of culture</span>
+            <div class="thought-detail-section">
+              <h4>why people stayed</h4>
+              <ul>
+                <li><strong>Growth path was obvious</strong> — You could see the promotion pipeline. ICs → Leads → Managers. Transparent.</li>
+                <li><strong>Work was meaningful</strong> — Gartner, Certification, shipping features millions used. Not busywork.</li>
+                <li><strong>Autonomy existed</strong> — Squad owned decisions. Not micromanaged.</li>
+                <li><strong>People genuinely liked each other</strong> — Squad cohesion mattered in hiring/onboarding.</li>
+              </ul>
+            </div>
+            <div class="thought-detail-section">
+              <h4>the exits</h4>
+              <ul>
+                <li>1 left to cofound a startup (reached out to me for advice first).</li>
+                <li>1 went to a Principal Architect role at a competitor (deep technical expert path, which I didn't have room for).</li>
+                <li>Both stays in touch. Would rehire both instantly.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="thought">
+        <div class="thought-tag">cross-team</div>
+        <div class="thought-body">
+          <h3>Connecting silos: engineering + product + security</h3>
+          <button class="thought-toggle" aria-expanded="false">
+            <span class="closed-text">show me the messy details</span>
+            <span class="open-text">hide details</span>
+          </button>
+          <div class="thought-details">
+            <div class="thought-summary">
+              <p>Engineering didn't own AI strategy in isolation. Built <strong>weekly strategy sessions with Product, Security, Infra,Support</strong> — unified vision on feature prioritisation, risk gates, infrastructure constraints. Result: <em>no rework</em> cycles where engineering shipped something and product pushed back. <strong>30% faster time-to-market</strong> because decisions happened at the intersection.</p>
+            </div>
+            <span class="thought-note">org structure determines outcomes</span>
+            <div class="thought-detail-section">
+              <h4>the weekly syncs</h4>
+              <ul>
+                <li><strong>Product leadership</strong> — Early visibility into AI roadmap, feature definitions, user stories, customer feedback.</li>
+                <li><strong>Security architects</strong> — Real-time risk assessment on LLM ingress/egress, data privacy, compliance. No surprises at audit time.</li>
+                <li><strong>Infrastructure leads</strong> — Cloud cost forecasting, compute availability, API rate limits, monitoring strategy.</li>
+                <li><strong>Support/Customer Success</strong> — Direct feedback loop on user pain points, common issues, feature requests.</li>
+              </ul>
+            </div>
+            <div class="thought-detail-section">
+              <h4>the impact</h4>
+              <ul>
+                <li><strong>No late-stage feature cuts</strong> — All stakeholders aligned from ideation to ship.</li>
+                <li><strong>Faster issue resolution</strong> — Support knew who to ping on which team for specific bugs.</li>
+                <li><strong>Holistic risk management</strong> — Security got a seat at the table early, not as a gate.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="thought">
+        <div class="thought-tag">technical debt</div>
+        <div class="thought-body">
+          <h3>The "50-20-30" rule: shipping smart</h3>
+          <button class="thought-toggle" aria-expanded="false">
+            <span class="closed-text">show me the messy details</span>
+            <span class="open-text">hide details</span>
+          </button>
+          <div class="thought-details">
+            <div class="thought-summary">
+              <p>Enforced a budgeting model: <strong>50% new features, 20% tech debt reduction, 30% operational load</strong> (on-call, support, compliance). This prevented the classic burnout trap where engineering drowns in operational work. Tech debt got addressed with intention. New features got room to breathe. The org stayed healthy and predictable.</p>
+            </div>
+            <span class="thought-note">burnout isn't a badge. it's a management failure.</span>
+            <div class="thought-detail-section">
+              <h4>the budget model in practice</h4>
+              <ul>
+                <li><strong>50% new features</strong> — This was sacred. No exceptions. It kept product/engineering aligned on innovation.</li>
+                <li><strong>20% tech debt</strong> — Dedicated sprint capacity. Engineers chose their own debt to tackle, fostering ownership.</li>
+                <li><strong>30% operational load</strong> — On-call rotation, support escalations, compliance work, small bug fixes. Guarded fiercely.</li>
+              </ul>
+            </div>
+            <div class="thought-detail-section">
+              <h4>impact on burnout</h4>
+              <ul>
+                <li>Predictable cycles. Engineers knew when they'd be building vs. paying down debt vs. operational.</li>
+                <li>Sense of control. Not just reacting to emergencies, but proactively improving the system.</li>
+                <li>No one felt like they were drowning. Workload was balanced.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-marker"><span class="sym">§</span>05 <span class="slash">//</span> the long view</div>
     <h2 class="section-title">Where I've <em>been</em>.</h2>
     <p class="section-lede">Nineteen years, four employers, two granted US patents. National Innovation Awards from the Government of India for product innovation and commercialisation.</p>
 
@@ -903,7 +1220,7 @@
   </section>
 
   <section>
-    <div class="section-marker"><span class="sym">§</span>05 <span class="slash">//</span> tools of the trade</div>
+    <div class="section-marker"><span class="sym">§</span>06 <span class="slash">//</span> tools of the trade</div>
     <h2 class="section-title">The <em>stack</em>.</h2>
     <p class="section-lede">What I reach for daily. Bold = primary, the rest = comfortable but not married to.</p>
 
@@ -982,6 +1299,14 @@
     btn.addEventListener('click', () => {
       const card = btn.closest('.case');
       const open = card.classList.toggle('open');
+      btn.setAttribute('aria-expanded', open);
+    });
+  });
+
+  document.querySelectorAll('.thought-toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const thought = btn.closest('.thought');
+      const open = thought.classList.toggle('open');
       btn.setAttribute('aria-expanded', open);
     });
   });

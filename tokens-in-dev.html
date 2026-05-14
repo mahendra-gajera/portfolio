@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How Tokens Flow in Development Work — Simplified by Mahendra Gajera</title>
+<style>
+:root{--bg:#06070a;--card:#0e1018;--card2:#151822;--border:#1e2333;--text:#e4e8f1;--sub:#6e7590;--gold:#f0b232;--green:#34d399;--blue:#60a5fa;--red:#f87171;--purple:#a78bfa;--cyan:#22d3ee;--orange:#fb923c;--pink:#f472b6;--lime:#a3e635;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Courier New',monospace;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6;}
+.app{max-width:920px;margin:0 auto;padding:28px 16px 50px;}
+
+.hdr{text-align:center;margin-bottom:30px;position:relative;}
+.hdr::before{content:'';position:absolute;top:30%;left:50%;transform:translate(-50%,-50%);width:400px;height:200px;background:radial-gradient(ellipse,rgba(240,178,50,.08),transparent 70%);pointer-events:none;}
+.hdr .coin{font-size:2.6rem;display:block;margin-bottom:6px;filter:drop-shadow(0 0 12px rgba(240,178,50,.4));}
+.hdr .tag{display:inline-block;padding:3px 14px;border:1px solid var(--gold);border-radius:20px;font-size:.68rem;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
+.hdr h1{font-family:Georgia,serif;font-size:2rem;line-height:1.2;}
+.hdr h1 em{font-style:normal;color:var(--gold);}
+.hdr .sub{font-size:.84rem;color:var(--sub);margin-top:6px;font-family:Georgia,serif;}
+.hdr .sub b{color:var(--gold);}
+
+.prog{display:flex;gap:3px;margin-bottom:24px;}.prog .s{flex:1;height:4px;border-radius:2px;background:var(--border);transition:background .3s;}.prog .s.done{background:var(--gold);}.prog .s.on{background:var(--gold);box-shadow:0 0 8px rgba(240,178,50,.5);}
+.nav{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:24px;padding:10px;background:var(--card);border-radius:12px;border:1px solid var(--border);}.nav button{padding:6px 12px;border-radius:8px;border:1px solid transparent;background:none;color:var(--sub);font-size:.72rem;font-family:inherit;cursor:pointer;transition:all .2s;white-space:nowrap;}.nav button:hover{color:var(--text);background:var(--card2);}.nav button.on{color:var(--gold);border-color:var(--gold);background:rgba(240,178,50,.06);}
+
+.crd{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:26px;min-height:400px;position:relative;overflow:hidden;}.crd::before{content:'';position:absolute;top:-1px;left:20%;right:20%;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:.4;}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:4px 16px;border-radius:20px;font-size:.8rem;font-weight:700;margin-bottom:16px;border:1px solid var(--gold);color:var(--gold);}
+.ctitle{font-family:Georgia,serif;font-size:1.35rem;color:var(--text);margin-bottom:8px;}
+.cdesc{font-size:.86rem;color:var(--sub);margin-bottom:18px;line-height:1.75;font-family:Georgia,serif;}.cdesc b{color:var(--text);}
+
+.code{background:#08090d;border:1px solid var(--border);border-radius:10px;padding:16px;margin:14px 0;overflow-x:auto;font-size:.78rem;line-height:1.75;position:relative;}.code.hf{padding-top:34px;}.code::before{content:attr(data-f);position:absolute;top:0;left:0;right:0;padding:5px 14px;background:var(--card2);border-bottom:1px solid var(--border);border-radius:10px 10px 0 0;font-size:.68rem;color:var(--sub);}
+.kw{color:var(--purple);}.fn{color:var(--blue);}.st{color:var(--green);}.cm{color:var(--sub);font-style:italic;}.nb{color:var(--orange);}.ty{color:var(--cyan);}
+
+.arch{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;align-items:center;margin:16px 0;padding:16px;background:var(--bg);border:1px solid var(--border);border-radius:12px;}
+.abox{padding:12px 16px;border-radius:12px;border:1.5px solid;text-align:center;font-size:.76rem;font-weight:700;min-width:90px;background:var(--card);transition:all .2s;}.abox:hover{transform:translateY(-2px);}.abox .ic{font-size:1.4rem;display:block;margin-bottom:3px;}.aarr{font-size:1rem;color:var(--sub);}
+
+.metrics{display:flex;gap:12px;flex-wrap:wrap;margin:14px 0;}.metric{flex:1;min-width:100px;padding:14px;border-radius:12px;background:var(--bg);border:1px solid var(--border);text-align:center;}.metric .v{font-size:1.5rem;font-weight:800;}.metric .l{font-size:.7rem;color:var(--sub);margin-top:3px;}
+.hint{padding:14px;border-radius:10px;margin:14px 0;font-size:.84rem;line-height:1.7;font-family:Georgia,serif;}
+.tbl{width:100%;border-collapse:collapse;font-size:.78rem;margin:12px 0;}.tbl th{text-align:left;padding:10px;color:var(--sub);border-bottom:1px solid var(--border);font-size:.72rem;}.tbl td{padding:10px;border-bottom:1px solid var(--border);}
+
+.btn{padding:10px 24px;border-radius:8px;border:none;font-weight:700;cursor:pointer;font-size:.88rem;font-family:inherit;}.btn:hover{opacity:.85;}
+.btn2{padding:8px 16px;border-radius:8px;border:2px solid var(--border);background:none;color:var(--sub);font-weight:700;cursor:pointer;font-size:.84rem;font-family:inherit;}
+
+/* Simulation */
+.sim-log{background:#000;border:1px solid var(--border);border-radius:10px;padding:12px;max-height:260px;overflow-y:auto;font-size:.75rem;line-height:1.8;margin:12px 0;}
+.sim-msg{padding:4px 8px;border-radius:6px;margin:3px 0;animation:fadeIn .3s;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* Token flow visual */
+.flow-step{display:flex;align-items:flex-start;gap:14px;padding:14px;margin:8px 0;border-radius:12px;background:var(--bg);border:1px solid var(--border);}
+.flow-num{min-width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.82rem;font-weight:800;flex-shrink:0;}
+.flow-tokens{display:inline-block;padding:3px 10px;border-radius:12px;font-size:.72rem;font-weight:700;margin-top:4px;}
+
+.ftr{text-align:center;margin-top:32px;font-size:.84rem;color:var(--sub);}.ftr b{color:var(--gold);}
+@media(max-width:600px){.hdr h1{font-size:1.6rem;}.crd{padding:18px;}}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="hdr"><span class="coin">🪙</span><div class="tag">deep dive · developer edition</div><h1>How Tokens Flow in<br><em>Real Development Work</em></h1><div class="sub">Trace every token from your prompt to production · <b>Simplified by Mahendra Gajera</b></div></div>
+<div class="prog" id="prog"></div><div class="nav" id="nav"></div><div class="crd" id="crd"></div>
+<div class="ftr">🪙 <b>Simplified by Mahendra Gajera</b> 🪙</div>
+</div>
+
+<script>
+var ST=[
+  {id:"assign",n:0,t:"How Tokens Get Assigned",ic:"🏷️"},
+  {id:"anatomy",n:1,t:"Anatomy of a Dev Request",ic:"🔬"},
+  {id:"coding",n:2,t:"Coding Session Simulation",ic:"💻"},
+  {id:"pr",n:3,t:"Code Review & PR",ic:"🔍"},
+  {id:"cicd",n:4,t:"CI/CD & Testing",ic:"🔄"},
+  {id:"rag",n:5,t:"RAG in Dev Workflows",ic:"📚"},
+  {id:"team",n:6,t:"Team Token Budgets",ic:"👥"},
+  {id:"optimize",n:7,t:"Optimization Playbook",ic:"⚡"},
+];
+var cur=0,timers=[];
+var nav=document.getElementById("nav"),prog=document.getElementById("prog"),crd=document.getElementById("crd");
+function clr(){for(var i=0;i<timers.length;i++){clearInterval(timers[i]);clearTimeout(timers[i]);}timers=[];}
+for(var i=0;i<ST.length;i++){var sg=document.createElement("div");sg.className="s";sg.id="sg_"+i;prog.appendChild(sg);(function(i){var b=document.createElement("button");b.textContent=ST[i].ic+" "+ST[i].t;b.id="nb_"+i;b.onclick=function(){go(i);};nav.appendChild(b);})(i);}
+function go(idx){clr();cur=idx;for(var j=0;j<ST.length;j++){document.getElementById("sg_"+j).className="s"+(j<idx?" done":"")+(j===idx?" on":"");document.getElementById("nb_"+j).className=j===idx?"on":"";}crd.innerHTML="";D[ST[idx].id]();crd.scrollIntoView({behavior:'smooth',block:'nearest'});}
+function bg(){return'<div class="badge">🪙 Step '+(cur+1)+'/8</div>';}
+function nb(){var d='<div style="display:flex;justify-content:space-between;margin-top:22px">';if(cur>0)d+='<button class="btn2" onclick="go('+(cur-1)+')">← '+ST[cur-1].t+'</button>';else d+='<div></div>';if(cur<7)d+='<button class="btn" style="background:var(--gold);color:var(--bg)" onclick="go('+(cur+1)+')">'+ST[cur+1].t+' →</button>';d+='</div>';return d;}
+
+var D={};
+
+// ═══ 0. HOW TOKENS GET ASSIGNED ═══
+D.assign=function(){
+  crd.innerHTML=bg()+'<div class="ctitle">How Tokens Get Assigned</div>'
+  +'<div class="cdesc">When you send a message to an AI API (Claude, GPT, Gemini), here\'s exactly what happens behind the scenes with tokens:</div>';
+
+  // The flow
+  var steps=[
+    {n:1,t:"Your Code Sends a Request",d:"Your app calls the API with a prompt — system message + user message + conversation history.",c:"var(--blue)",tok:"Input tokens counted here",ex:"api.messages.create({system: '...', messages: [{role:'user', content:'...'}]})"},
+    {n:2,t:"Tokenizer Breaks Text Into Tokens",d:"The model's tokenizer (BPE/tiktoken) splits every character of your input into tokens. Each model has its own vocabulary.",c:"var(--gold)",tok:"'Build a REST API' → ['Build', ' a', ' REST', ' API'] = 4 tokens",ex:"Spaces, punctuation, code syntax all become separate tokens"},
+    {n:3,t:"Tokens Get IDs (Numbers)",d:"Each token maps to a number in the model's vocabulary (e.g., 'function' → 3221). These IDs are what the model actually processes.",c:"var(--purple)",tok:"['Build', ' a', ' REST', ' API'] → [16686, 264, 27420, 5765]",ex:"The vocabulary can have 100K+ entries"},
+    {n:4,t:"Model Processes Through Layers",d:"Token IDs pass through transformer layers — attention, feed-forward, normalization. Each token interacts with every other token.",c:"var(--cyan)",tok:"128 layers × all tokens = the 'thinking' part",ex:"This is where compute cost comes from"},
+    {n:5,t:"Output Tokens Generated One-by-One",d:"The model predicts the next token, appends it, and repeats. Each output token costs MORE than input tokens (3-5x).",c:"var(--green)",tok:"Output generated token by token until stop",ex:"'def' → 'create' → '_user' → '(' → 'name' → ':' → ' str'..."},
+    {n:6,t:"Usage Counted & Billed",d:"API response includes exact token counts. You're billed for input_tokens + output_tokens at different rates.",c:"var(--gold)",tok:"usage: {input_tokens: 340, output_tokens: 892}",ex:"Total cost = (340 × $3/1M) + (892 × $15/1M) = $0.01"},
+  ];
+  steps.forEach(function(s){
+    crd.innerHTML+='<div class="flow-step"><div class="flow-num" style="background:'+s.c+'20;border:2px solid '+s.c+';color:'+s.c+'">'+s.n+'</div><div style="flex:1"><div style="font-weight:700;color:'+s.c+';font-size:.88rem">'+s.t+'</div><div style="font-size:.82rem;color:var(--sub);font-family:Georgia,serif;margin:3px 0">'+s.d+'</div><div class="flow-tokens" style="background:'+s.c+'10;border:1px solid '+s.c+'25;color:'+s.c+'">🪙 '+s.tok+'</div><div style="font-size:.74rem;color:var(--sub);margin-top:4px;font-family:Courier New,monospace">'+s.ex+'</div></div></div>';
+  });
+  crd.innerHTML+=nb();
+};
+
+// ═══ 1. ANATOMY OF A DEV REQUEST ═══
+D.anatomy=function(){
+  crd.innerHTML=bg()+'<div class="ctitle">Anatomy of a Developer\'s API Call</div>'
+  +'<div class="cdesc">Let\'s trace <b>exactly where tokens go</b> when a developer asks Claude to build a function. Every part costs tokens.</div>';
+
+  crd.innerHTML+='<div class="code hf" data-f="📤 What Gets Sent to the API (and token cost of each part)">'
+  +'<span class="cm">// ─── SYSTEM PROMPT (~200 tokens) ─────────────────</span><br>'
+  +'<span class="cm">// This is sent with EVERY request. It adds up fast!</span><br>'
+  +'{<br>'
+  +'&nbsp;&nbsp;<span class="st">"system"</span>: <span class="st">"You are a senior Python developer.<br>'
+  +'&nbsp;&nbsp;&nbsp;&nbsp;Follow PEP 8. Use type hints. Write tests.<br>'
+  +'&nbsp;&nbsp;&nbsp;&nbsp;Use async where possible..."</span>,<br>'
+  +'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">// ~200 tokens 🪙</span><br><br>'
+  +'<span class="cm">// ─── CONVERSATION HISTORY (~800 tokens) ──────────</span><br>'
+  +'<span class="cm">// Previous messages in chat — grows over time!</span><br>'
+  +'&nbsp;&nbsp;<span class="st">"messages"</span>: [<br>'
+  +'&nbsp;&nbsp;&nbsp;&nbsp;{<span class="st">"role"</span>:<span class="st">"user"</span>, <span class="st">"content"</span>:<span class="st">"Set up the project"</span>},<br>'
+  +'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">// ~80 tokens 🪙</span><br>'
+  +'&nbsp;&nbsp;&nbsp;&nbsp;{<span class="st">"role"</span>:<span class="st">"assistant"</span>, <span class="st">"content"</span>:<span class="st">"Here\'s the setup..."</span>},<br>'
+  +'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">// ~500 tokens 🪙</span><br>'
+  +'&nbsp;&nbsp;&nbsp;&nbsp;{<span class="st">"role"</span>:<span class="st">"user"</span>, <span class="st">"content"</span>:<span class="st">"Now add auth"</span>},<br>'
+  +'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">// ~40 tokens 🪙</span><br><br>'
+  +'<span class="cm">// ─── CURRENT MESSAGE (~100 tokens) ───────────────</span><br>'
+  +'&nbsp;&nbsp;&nbsp;&nbsp;{<span class="st">"role"</span>:<span class="st">"user"</span>, <span class="st">"content"</span>:<span class="st">"Build a JWT<br>'
+  +'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;authentication middleware with refresh<br>'
+  +'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tokens and role-based access control"</span>}<br>'
+  +'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">// ~100 tokens 🪙</span><br>'
+  +'&nbsp;&nbsp;]<br>'
+  +'}<br><br>'
+  +'<span class="cm">// TOTAL INPUT: ~1,120 tokens</span><br>'
+  +'<span class="cm">// INPUT COST: 1,120 × $3/1M = $0.003</span><br><br>'
+  +'<span class="cm">// ─── MODEL OUTPUT (~2,000 tokens) ────────────────</span><br>'
+  +'<span class="cm">// Claude generates the code + explanation</span><br>'
+  +'<span class="cm">// OUTPUT COST: 2,000 × $15/1M = $0.030</span><br><br>'
+  +'<span class="cm">// 💰 TOTAL COST FOR THIS REQUEST: $0.033</span>'
+  +'</div>';
+
+  crd.innerHTML+='<div class="hint" style="background:rgba(240,178,50,.04);border:1px solid rgba(240,178,50,.15)"><b style="color:var(--gold)">⚠️ The Hidden Cost:</b> Notice the <b>system prompt (200 tokens)</b> and <b>conversation history (800 tokens)</b> are sent with <b>every single request</b>. In a 20-message coding session, you pay for the system prompt 20 times and the growing history balloons costs exponentially.</div>';
+
+  // Token breakdown visual
+  crd.innerHTML+='<div style="font-size:.84rem;font-weight:700;color:var(--text);margin:16px 0 8px">📊 Where Your Tokens Actually Go</div>'
+  +'<div style="display:flex;height:30px;border-radius:8px;overflow:hidden;margin:8px 0">'
+  +'<div style="flex:2;background:var(--purple);display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;color:var(--bg)">System 18%</div>'
+  +'<div style="flex:5;background:var(--orange);display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;color:var(--bg)">History 45%</div>'
+  +'<div style="flex:1;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;color:var(--bg)">Query 9%</div>'
+  +'<div style="flex:3;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;color:var(--bg)">Output 28%</div></div>'
+  +'<div style="font-size:.72rem;color:var(--sub);margin-top:4px">Most of your tokens go to <b style="color:var(--orange)">conversation history</b> — not your actual question!</div>';
+  crd.innerHTML+=nb();
+};
+
+// ═══ 2. CODING SESSION SIMULATION ═══
+D.coding=function(){
+  crd.innerHTML=bg()+'<div class="ctitle">Live Simulation: Full Coding Session</div>'
+  +'<div class="cdesc">Watch a realistic 8-message coding session. Track how <b>token costs grow</b> with each message as history accumulates.</div>';
+
+  crd.innerHTML+='<div style="text-align:center;margin-bottom:14px"><button class="btn" style="background:var(--gold);color:var(--bg)" onclick="runSession()">▶ Start Coding Session</button> <button class="btn2" onclick="resetSession()">↺ Reset</button></div>';
+
+  crd.innerHTML+='<div class="metrics"><div class="metric"><div class="v" id="s_msgs" style="color:var(--blue)">0</div><div class="l">Messages</div></div><div class="metric"><div class="v" id="s_in" style="color:var(--orange)">0</div><div class="l">Input Tokens</div></div><div class="metric"><div class="v" id="s_out" style="color:var(--green)">0</div><div class="l">Output Tokens</div></div><div class="metric"><div class="v" id="s_cost" style="color:var(--gold)">$0.00</div><div class="l">Total Cost</div></div></div>';
+
+  crd.innerHTML+='<div class="sim-log" id="slog"></div>';
+
+  // Cost growth chart
+  crd.innerHTML+='<div id="chart_area"></div>';
+  crd.innerHTML+=nb();
+};
+
+var sessionMsgs=[
+  {role:"user",text:"Set up a FastAPI project with Poetry",inTok:50,outTok:800},
+  {role:"user",text:"Add SQLAlchemy models for User and Post",inTok:60,outTok:1200},
+  {role:"user",text:"Create CRUD endpoints for both models",inTok:55,outTok:1500},
+  {role:"user",text:"Add JWT authentication middleware",inTok:70,outTok:1800},
+  {role:"user",text:"Write unit tests for the auth module",inTok:65,outTok:1400},
+  {role:"user",text:"Add rate limiting and error handling",inTok:75,outTok:1100},
+  {role:"user",text:"Create a Dockerfile and docker-compose",inTok:60,outTok:900},
+  {role:"user",text:"Add CI/CD pipeline with GitHub Actions",inTok:70,outTok:1200},
+];
+var sysTokens=200,running=false,totalIn=0,totalOut=0,totalCost=0,historyTokens=0;
+
+window.resetSession=function(){
+  clr();running=false;totalIn=0;totalOut=0;totalCost=0;historyTokens=0;
+  document.getElementById("s_msgs").textContent="0";
+  document.getElementById("s_in").textContent="0";
+  document.getElementById("s_out").textContent="0";
+  document.getElementById("s_cost").textContent="$0.00";
+  document.getElementById("slog").innerHTML="";
+  document.getElementById("chart_area").innerHTML="";
+};
+
+window.runSession=function(){
+  if(running)return;resetSession();running=true;
+  var log=document.getElementById("slog");
+  function addLog(html,col){var d=document.createElement("div");d.className="sim-msg";d.style.cssText="border-left:3px solid "+col+";padding-left:8px;color:"+col;d.innerHTML=html;log.appendChild(d);log.scrollTop=log.scrollHeight;}
+
+  var costHistory=[];
+  var idx=0;
+  function next(){
+    if(idx>=sessionMsgs.length||!running){
+      running=false;
+      addLog("<b>📊 Session Complete!</b> Total: "+totalIn.toLocaleString()+" in + "+totalOut.toLocaleString()+" out = <b>$"+totalCost.toFixed(3)+"</b>","var(--gold)");
+      drawCostChart(costHistory);
+      return;
+    }
+    var m=sessionMsgs[idx];
+    var thisIn=sysTokens+historyTokens+m.inTok;
+    var thisOut=m.outTok;
+    var thisCost=(thisIn*3/1e6)+(thisOut*15/1e6);
+
+    totalIn+=thisIn;totalOut+=thisOut;totalCost+=thisCost;
+    historyTokens+=m.inTok+m.outTok;// history grows!
+
+    addLog("👤 <b>You:</b> \""+m.text+"\"","var(--blue)");
+
+    timers.push(setTimeout(function(){
+      addLog("&nbsp;&nbsp;📊 Input: <b>"+thisIn+"</b> tokens (system:"+sysTokens+" + history:"+Math.round(historyTokens-m.inTok-m.outTok)+" + query:"+m.inTok+")","var(--sub)");
+    },300));
+
+    timers.push(setTimeout(function(){
+      addLog("🤖 <b>Claude:</b> [generated "+thisOut+" tokens of code + explanation]","var(--green)");
+      addLog("&nbsp;&nbsp;💰 This request: <b>$"+thisCost.toFixed(4)+"</b> | Running total: <b>$"+totalCost.toFixed(3)+"</b>","var(--gold)");
+      if(historyTokens>3000)addLog("&nbsp;&nbsp;⚠️ History now "+historyTokens+" tokens — consider summarizing!","var(--orange)");
+      document.getElementById("s_msgs").textContent=idx+1;
+      document.getElementById("s_in").textContent=totalIn.toLocaleString();
+      document.getElementById("s_out").textContent=totalOut.toLocaleString();
+      document.getElementById("s_cost").textContent="$"+totalCost.toFixed(3);
+      costHistory.push({msg:idx+1,cost:totalCost,histTok:historyTokens});
+      idx++;
+      timers.push(setTimeout(next,600));
+    },700));
+  }
+  addLog("🚀 Starting coding session... (Claude Sonnet 4: $3/$15 per 1M tokens)","var(--gold)");
+  addLog("📋 System prompt: "+sysTokens+" tokens (sent with every message)","var(--purple)");
+  timers.push(setTimeout(next,500));
+};
+
+function drawCostChart(data){
+  var el=document.getElementById("chart_area");
+  el.innerHTML='<div style="font-size:.84rem;font-weight:700;color:var(--text);margin:16px 0 8px">📈 Cost Growth Over Session (history accumulation effect)</div>';
+  var max=data.length?data[data.length-1].cost:1;
+  data.forEach(function(d){
+    var pct=Math.round((d.cost/max)*100);
+    el.innerHTML+='<div style="display:flex;align-items:center;gap:8px;margin:3px 0;font-size:.76rem"><span style="min-width:50px;color:var(--sub);text-align:right">Msg '+d.msg+'</span><div style="flex:1;background:var(--border);border-radius:4px;overflow:hidden;height:18px"><div style="height:100%;width:'+pct+'%;background:linear-gradient(90deg,var(--gold),var(--orange));border-radius:4px;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;font-size:.68rem;font-weight:700;color:var(--bg)">$'+d.cost.toFixed(3)+'</div></div><span style="min-width:60px;color:var(--sub);font-size:.68rem">hist:'+d.histTok+'</span></div>';
+  });
+  el.innerHTML+='<div style="font-size:.78rem;color:var(--orange);margin-top:8px;font-family:Georgia,serif">⚠️ Notice: Each message costs MORE than the last because history keeps growing. Message 8 costs ~3x what message 1 cost!</div>';
+}
+
+// ═══ 3. CODE REVIEW & PR ═══
+D.pr=function(){
+  crd.innerHTML=bg()+'<div class="ctitle">Tokens in Code Review & Pull Requests</div>'
+  +'<div class="cdesc">When AI reviews a PR, it reads the <b>entire diff</b> as input tokens. Large PRs = massive token costs.</div>';
+
+  crd.innerHTML+='<div style="font-size:.84rem;font-weight:700;color:var(--text);margin:12px 0 8px">📋 Token Cost by PR Size</div>'
+  +'<table class="tbl"><tr><th>PR Size</th><th>Lines Changed</th><th>Input Tokens</th><th>Output Tokens</th><th>Cost (Sonnet 4)</th></tr>'
+  +'<tr><td style="color:var(--green)">Small fix</td><td>~50 lines</td><td style="color:var(--blue)">~800</td><td style="color:var(--green)">~400</td><td style="color:var(--gold)">$0.008</td></tr>'
+  +'<tr><td style="color:var(--cyan)">Feature</td><td>~200 lines</td><td style="color:var(--blue)">~3,000</td><td style="color:var(--green)">~1,200</td><td style="color:var(--gold)">$0.027</td></tr>'
+  +'<tr><td style="color:var(--orange)">Large feature</td><td>~800 lines</td><td style="color:var(--blue)">~12,000</td><td style="color:var(--green)">~3,000</td><td style="color:var(--gold)">$0.081</td></tr>'
+  +'<tr><td style="color:var(--red)">Refactor</td><td>~3000 lines</td><td style="color:var(--blue)">~45,000</td><td style="color:var(--green)">~5,000</td><td style="color:var(--gold)">$0.210</td></tr></table>';
+
+  crd.innerHTML+='<div class="code hf" data-f="📄 ai_code_review.py — Efficient PR Review">'
+  +'<span class="kw">def</span> <span class="fn">review_pr</span>(diff, model=<span class="st">"claude-sonnet-4"</span>):<br>'
+  +'&nbsp;&nbsp;<span class="cm"># Smart: only send changed files, not full repo</span><br>'
+  +'&nbsp;&nbsp;chunks = <span class="fn">split_diff_by_file</span>(diff)<br><br>'
+  +'&nbsp;&nbsp;<span class="cm"># Review each file separately (smaller context)</span><br>'
+  +'&nbsp;&nbsp;reviews = []<br>'
+  +'&nbsp;&nbsp;<span class="kw">for</span> chunk <span class="kw">in</span> chunks:<br>'
+  +'&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm"># Small files → cheap model</span><br>'
+  +'&nbsp;&nbsp;&nbsp;&nbsp;m = <span class="st">"haiku-3.5"</span> <span class="kw">if</span> <span class="fn">len</span>(chunk) < <span class="nb">500</span> <span class="kw">else</span> model<br>'
+  +'&nbsp;&nbsp;&nbsp;&nbsp;review = client.messages.<span class="fn">create</span>(<br>'
+  +'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;model=m,<br>'
+  +'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;system=<span class="st">"Review this code diff. Be concise."</span>,<br>'
+  +'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;messages=[{<span class="st">"role"</span>:<span class="st">"user"</span>,<br>'
+  +'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="st">"content"</span>: chunk}],<br>'
+  +'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;max_tokens=<span class="nb">500</span>&nbsp;&nbsp;<span class="cm"># limit output!</span><br>'
+  +'&nbsp;&nbsp;&nbsp;&nbsp;)<br>'
+  +'&nbsp;&nbsp;&nbsp;&nbsp;reviews.<span class="fn">append</span>(review)<br>'
+  +'&nbsp;&nbsp;<span class="kw">return</span> reviews</div>';
+
+  crd.innerHTML+='<div class="hint" style="background:rgba(52,211,153,.04);border:1px solid rgba(52,211,153,.15)"><b style="color:var(--green)">💡 Pro Tips for PR Reviews:</b><br>• Split large diffs by file — review each separately<br>• Use cheap models (Haiku) for simple files<br>• Set <code>max_tokens=500</code> to prevent verbose reviews<br>• Cache reviews — same diff = same review<br>• Skip auto-generated files (lock files, migrations)</div>';
+  crd.innerHTML+=nb();
+};
+
+// ═══ 4. CI/CD & TESTING ═══
+D.cicd=function(){
+  crd.innerHTML=bg()+'<div class="ctitle">Tokens in CI/CD Pipelines</div>'
+  +'<div class="cdesc">AI is increasingly used in CI/CD: auto-generating tests, reviewing commits, writing changelogs. Each step costs tokens. Here\'s a typical pipeline.</div>';
+
+  crd.innerHTML+='<div class="arch">'
+  +'<div class="abox" style="border-color:var(--blue);color:var(--blue)"><span class="ic">📝</span>Commit<br><span style="font-size:.6rem;color:var(--sub)">Dev pushes code</span></div>'
+  +'<span class="aarr">→</span>'
+  +'<div class="abox" style="border-color:var(--purple);color:var(--purple)"><span class="ic">🔍</span>AI Review<br><span style="font-size:.6rem;color:var(--sub)">~3K tokens</span></div>'
+  +'<span class="aarr">→</span>'
+  +'<div class="abox" style="border-color:var(--green);color:var(--green)"><span class="ic">🧪</span>Gen Tests<br><span style="font-size:.6rem;color:var(--sub)">~5K tokens</span></div>'
+  +'<span class="aarr">→</span>'
+  +'<div class="abox" style="border-color:var(--orange);color:var(--orange)"><span class="ic">🏃</span>Run Tests<br><span style="font-size:.6rem;color:var(--sub)">0 tokens (local)</span></div>'
+  +'<span class="aarr">→</span>'
+  +'<div class="abox" style="border-color:var(--cyan);color:var(--cyan)"><span class="ic">📋</span>Changelog<br><span style="font-size:.6rem;color:var(--sub)">~1K tokens</span></div>'
+  +'<span class="aarr">→</span>'
+  +'<div class="abox" style="border-color:var(--gold);color:var(--gold)"><span class="ic">🚀</span>Deploy<br><span style="font-size:.6rem;color:var(--sub)">0 tokens</span></div></div>';
+
+  crd.innerHTML+='<div style="font-size:.84rem;font-weight:700;color:var(--text);margin:16px 0 8px">💰 Monthly CI/CD Token Budget (50 devs, 200 commits/day)</div>'
+  +'<table class="tbl"><tr><th>Pipeline Step</th><th>Tokens/Commit</th><th>Daily (200 commits)</th><th>Monthly Cost</th></tr>'
+  +'<tr><td style="color:var(--purple)">AI Code Review</td><td>~4,000</td><td>800K</td><td style="color:var(--gold)">$108</td></tr>'
+  +'<tr><td style="color:var(--green)">Test Generation</td><td>~6,000</td><td>1.2M</td><td style="color:var(--gold)">$162</td></tr>'
+  +'<tr><td style="color:var(--cyan)">Changelog</td><td>~1,500</td><td>300K</td><td style="color:var(--gold)">$41</td></tr>'
+  +'<tr><td style="color:var(--blue)">Commit Summaries</td><td>~800</td><td>160K</td><td style="color:var(--gold)">$22</td></tr>'
+  +'<tr style="font-weight:700"><td style="color:var(--gold)">TOTAL</td><td>~12,300</td><td>2.46M</td><td style="color:var(--gold)">$333/mo</td></tr></table>';
+
+  crd.innerHTML+='<div class="hint" style="background:rgba(240,178,50,.04);border:1px solid rgba(240,178,50,.15)"><b style="color:var(--gold)">💡 Savings:</b> Use Haiku for simple reviews ($0.80 vs $3/1M input). Cache identical diffs. Skip reviews on docs/config changes. Run test gen only for new files. This can cut costs by <b>60%</b>.</div>';
+  crd.innerHTML+=nb();
+};
+
+// ═══ 5. RAG IN DEV WORKFLOWS ═══
+D.rag=function(){
+  crd.innerHTML=bg()+'<div class="ctitle">RAG Tokens in Dev Workflows</div>'
+  +'<div class="cdesc">When you use AI with your codebase (Cursor, Claude Code, Copilot), it uses <b>RAG (Retrieval-Augmented Generation)</b> to find relevant code. This adds tokens for retrieved context.</div>';
+
+  crd.innerHTML+='<div class="arch">'
+  +'<div class="abox" style="border-color:var(--blue);color:var(--blue)"><span class="ic">❓</span>Your Question<br><span style="font-size:.6rem;color:var(--sub)">~50 tokens</span></div>'
+  +'<span class="aarr">→</span>'
+  +'<div class="abox" style="border-color:var(--purple);color:var(--purple)"><span class="ic">🔍</span>Search Codebase<br><span style="font-size:.6rem;color:var(--sub)">0 tokens (local)</span></div>'
+  +'<span class="aarr">→</span>'
+  +'<div class="abox" style="border-color:var(--orange);color:var(--orange)"><span class="ic">📄</span>Retrieved Code<br><span style="font-size:.6rem;color:var(--sub)">~3,000 tokens!</span></div>'
+  +'<span class="aarr">→</span>'
+  +'<div class="abox" style="border-color:var(--green);color:var(--green)"><span class="ic">🧠</span>LLM Generates<br><span style="font-size:.6rem;color:var(--sub)">~1,500 tokens out</span></div></div>';
+
+  crd.innerHTML+='<div style="display:flex;height:30px;border-radius:8px;overflow:hidden;margin:14px 0">'
+  +'<div style="flex:1;background:var(--purple);display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;color:var(--bg)">System 6%</div>'
+  +'<div style="flex:1;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;color:var(--bg)">Query 1%</div>'
+  +'<div style="flex:6;background:var(--orange);display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;color:var(--bg)">Retrieved Code Context 65%</div>'
+  +'<div style="flex:3;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;color:var(--bg)">Output 28%</div></div>'
+  +'<div style="font-size:.74rem;color:var(--orange);margin-top:4px">⚠️ In RAG workflows, <b>65%+ of tokens are retrieved context</b> — not your question!</div>';
+
+  crd.innerHTML+='<div class="code hf" data-f="📄 Efficient RAG for Code — Only Send What Matters">'
+  +'<span class="cm"># BAD: Send entire files as context</span><br>'
+  +'context = <span class="fn">read_file</span>(<span class="st">"auth.py"</span>)&nbsp;&nbsp;<span class="cm"># 5,000 tokens!</span><br><br>'
+  +'<span class="cm"># GOOD: Send only relevant functions</span><br>'
+  +'context = <span class="fn">extract_functions</span>(<br>'
+  +'&nbsp;&nbsp;<span class="st">"auth.py"</span>,<br>'
+  +'&nbsp;&nbsp;related_to=<span class="st">"JWT verification"</span><br>'
+  +')&nbsp;&nbsp;<span class="cm"># 800 tokens — 6x cheaper!</span><br><br>'
+  +'<span class="cm"># BEST: Use AST to send signatures + docstrings</span><br>'
+  +'context = <span class="fn">extract_signatures</span>(<br>'
+  +'&nbsp;&nbsp;<span class="st">"auth.py"</span><br>'
+  +')&nbsp;&nbsp;<span class="cm"># 200 tokens — 25x cheaper!</span>'
+  +'</div>';
+  crd.innerHTML+=nb();
+};
+
+// ═══ 6. TEAM TOKEN BUDGETS ═══
+D.team=function(){
+  crd.innerHTML=bg()+'<div class="ctitle">Setting Up Team Token Budgets</div>'
+  +'<div class="cdesc">In production teams, you need to <b>allocate token budgets per developer, per project, per environment</b>. Here\'s a real-world setup.</div>';
+
+  crd.innerHTML+='<div class="code hf" data-f="📄 team_budget.py — Token Budget Manager">'
+  +'<span class="kw">class</span> <span class="ty">TeamBudget</span>:<br>'
+  +'&nbsp;&nbsp;BUDGETS = {<br>'
+  +'&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm"># Monthly token limits per role</span><br>'
+  +'&nbsp;&nbsp;&nbsp;&nbsp;<span class="st">"junior_dev"</span>:&nbsp;&nbsp;&nbsp;<span class="nb">2_000_000</span>,&nbsp;&nbsp;<span class="cm"># $15/mo</span><br>'
+  +'&nbsp;&nbsp;&nbsp;&nbsp;<span class="st">"senior_dev"</span>:&nbsp;&nbsp;&nbsp;<span class="nb">5_000_000</span>,&nbsp;&nbsp;<span class="cm"># $38/mo</span><br>'
+  +'&nbsp;&nbsp;&nbsp;&nbsp;<span class="st">"tech_lead"</span>:&nbsp;&nbsp;&nbsp;&nbsp;<span class="nb">10_000_000</span>,&nbsp;<span class="cm"># $75/mo</span><br>'
+  +'&nbsp;&nbsp;&nbsp;&nbsp;<span class="st">"ci_pipeline"</span>:&nbsp;&nbsp;<span class="nb">20_000_000</span>,&nbsp;<span class="cm"># $150/mo</span><br>'
+  +'&nbsp;&nbsp;}<br><br>'
+  +'&nbsp;&nbsp;MODEL_ROUTING = {<br>'
+  +'&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm"># Route to cheapest capable model</span><br>'
+  +'&nbsp;&nbsp;&nbsp;&nbsp;<span class="st">"autocomplete"</span>:&nbsp;&nbsp;<span class="st">"haiku-3.5"</span>,&nbsp;&nbsp;&nbsp;<span class="cm"># $0.80/1M</span><br>'
+  +'&nbsp;&nbsp;&nbsp;&nbsp;<span class="st">"code_review"</span>:&nbsp;&nbsp;&nbsp;<span class="st">"haiku-3.5"</span>,&nbsp;&nbsp;&nbsp;<span class="cm"># fast & cheap</span><br>'
+  +'&nbsp;&nbsp;&nbsp;&nbsp;<span class="st">"complex_code"</span>:&nbsp;&nbsp;<span class="st">"sonnet-4"</span>,&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm"># $3/$15</span><br>'
+  +'&nbsp;&nbsp;&nbsp;&nbsp;<span class="st">"architecture"</span>:&nbsp;&nbsp;<span class="st">"opus-4"</span>,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm"># big tasks only</span><br>'
+  +'&nbsp;&nbsp;}<br>'
+  +'</div>';
+
+  crd.innerHTML+='<div style="font-size:.84rem;font-weight:700;color:var(--text);margin:16px 0 8px">💰 Sample Monthly Budget: 10-Person Dev Team</div>'
+  +'<table class="tbl"><tr><th>Category</th><th>Tokens/Month</th><th>Model</th><th>Cost</th></tr>'
+  +'<tr><td style="color:var(--blue)">Coding assistance (8 devs)</td><td>30M</td><td>Sonnet 4</td><td style="color:var(--gold)">$540</td></tr>'
+  +'<tr><td style="color:var(--purple)">Code reviews (CI)</td><td>15M</td><td>Haiku 3.5</td><td style="color:var(--gold)">$72</td></tr>'
+  +'<tr><td style="color:var(--green)">Test generation</td><td>10M</td><td>Haiku 3.5</td><td style="color:var(--gold)">$48</td></tr>'
+  +'<tr><td style="color:var(--orange)">Architecture decisions</td><td>2M</td><td>Opus 4</td><td style="color:var(--gold)">$60</td></tr>'
+  +'<tr><td style="color:var(--cyan)">Documentation</td><td>5M</td><td>Sonnet 4</td><td style="color:var(--gold)">$90</td></tr>'
+  +'<tr style="font-weight:700;border-top:2px solid var(--gold)"><td style="color:var(--gold)">TOTAL</td><td>62M</td><td>Mixed</td><td style="color:var(--gold)">$810/mo</td></tr></table>';
+
+  crd.innerHTML+='<div class="hint" style="background:rgba(52,211,153,.04);border:1px solid rgba(52,211,153,.15)"><b style="color:var(--green)">💡 Key insight:</b> By routing tasks to the <b>cheapest capable model</b>, this team saves ~$2,400/mo compared to using Sonnet for everything. Autocomplete and simple reviews don\'t need expensive models.</div>';
+  crd.innerHTML+=nb();
+};
+
+// ═══ 7. OPTIMIZATION PLAYBOOK ═══
+D.optimize=function(){
+  crd.innerHTML=bg()+'<div class="ctitle">Developer Token Optimization Playbook</div>'
+  +'<div class="cdesc">Battle-tested strategies from teams running AI-assisted development at scale.</div>';
+
+  var tips=[
+    {ic:"🗜️",t:"Summarize History Every 5 Messages",d:"Instead of sending all 20 messages, summarize older ones into a 200-token summary. Saves 60-80% on long sessions.",save:"60-80%",c:"var(--green)",code:"if len(messages) > 5: messages = [system, summarize(old_msgs)] + last_3_msgs"},
+    {ic:"📋",t:"Use Prompt Caching",d:"Anthropic & OpenAI offer prompt caching — your system prompt is stored and reused. Pay only once instead of every request.",save:"50-90%",c:"var(--gold)",code:'headers={"anthropic-beta": "prompt-caching-2024-07-31"}'},
+    {ic:"🤖",t:"Route by Complexity",d:"Use Haiku for autocomplete ($0.80/1M). Sonnet for coding ($3/1M). Opus only for architecture ($15/1M). Never use a cannon to kill a fly.",save:"70%",c:"var(--blue)",code:'model = "haiku-3.5" if task.simple else "sonnet-4"'},
+    {ic:"✂️",t:"Send Code Signatures, Not Full Files",d:"For RAG context, extract function signatures + docstrings instead of entire files. 25x fewer tokens, same quality.",save:"90%",c:"var(--cyan)",code:'context = extract_signatures("auth.py")  # 200 vs 5,000 tokens'},
+    {ic:"💾",t:"Cache Identical Requests",d:"Same code review on same diff = same result. Cache in Redis with a hash key. Don't pay twice.",save:"30-50%",c:"var(--purple)",code:'cache_key = hashlib.sha256(diff.encode()).hexdigest()'},
+    {ic:"📏",t:"Set max_tokens Precisely",d:"Don't default to 4096. If you need a function, set max_tokens=500. Prevents runaway output costs.",save:"20-40%",c:"var(--orange)",code:'max_tokens=500  # not 4096!'},
+    {ic:"🔄",t:"Batch Non-Urgent Work",d:"OpenAI Batch API: 50% off. Queue code reviews, docs, changelogs. Process overnight.",save:"50%",c:"var(--gold)",code:'client.batches.create(requests=review_jobs)  # 50% off!'},
+    {ic:"📊",t:"Track Everything",d:"Log tokens per developer, per project, per model. You can't optimize what you don't measure.",save:"∞",c:"var(--red)",code:'logger.info(f"user={dev_id} tokens={usage} cost=${cost:.4f}")'},
+  ];
+
+  tips.forEach(function(t){
+    crd.innerHTML+='<div style="padding:14px;margin:8px 0;border-radius:12px;background:var(--bg);border:1px solid var(--border)">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:6px">'
+    +'<span style="font-weight:700;color:'+t.c+';font-size:.9rem">'+t.ic+' '+t.t+'</span>'
+    +'<span style="font-size:.7rem;padding:3px 10px;border-radius:12px;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.2);color:var(--green)">↓ '+t.save+' savings</span></div>'
+    +'<div style="font-size:.82rem;color:var(--sub);font-family:Georgia,serif;margin-bottom:6px">'+t.d+'</div>'
+    +'<div style="font-size:.74rem;color:'+t.c+';font-family:Courier New,monospace;background:'+t.c+'08;padding:5px 10px;border-radius:6px;border:1px solid '+t.c+'18">'+t.code+'</div></div>';
+  });
+
+  // Final takeaway
+  crd.innerHTML+='<div style="margin-top:18px;padding:16px;border-radius:14px;background:linear-gradient(135deg,rgba(240,178,50,.04),rgba(52,211,153,.04));border:1px solid var(--border);text-align:center">'
+  +'<div style="font-size:1.05rem;font-weight:700;color:var(--gold);margin-bottom:8px">🪙 Master Token Management = Ship Faster, Spend Less</div>'
+  +'<div style="font-size:.84rem;color:var(--sub);font-family:Georgia,serif;line-height:1.7">Every token counted is a dollar saved.<br>Route smart, cache aggressively, trim history, and measure everything.<br>Your AI bills should go <b style="color:var(--green)">down</b> as your team gets <b style="color:var(--gold)">better</b> at using AI.</div></div>';
+
+  crd.innerHTML+='<div style="display:flex;justify-content:flex-start;margin-top:22px"><button class="btn2" onclick="go(6)">← Team Budgets</button></div>';
+};
+
+go(0);
+</script>
+</body>
+</html>

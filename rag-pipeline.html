@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RAG Pipeline: Zero to Production — Simplified by Mahendra Gajera</title>
+<style>
+:root{--bg:#0d1117;--card:#161b22;--card2:#1c2333;--border:#30363d;--text:#e6edf3;--sub:#8b949e;--green:#3fb950;--blue:#58a6ff;--orange:#d29922;--red:#f85149;--purple:#bc8cff;--cyan:#39d4d4;--accent:#f0883e;--pink:#f778ba;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Courier New','SF Mono',monospace;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6;}
+.app{max-width:920px;margin:0 auto;padding:28px 16px 50px;}
+
+/* Header */
+.hdr{text-align:center;margin-bottom:32px;position:relative;}
+.hdr::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:300px;height:300px;background:radial-gradient(circle,rgba(240,136,62,.08),transparent 70%);pointer-events:none;}
+.hdr .tag{display:inline-block;padding:4px 12px;border:1px solid var(--accent);border-radius:20px;font-size:.7rem;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;}
+.hdr h1{font-family:Georgia,'Times New Roman',serif;font-size:2.2rem;font-weight:700;line-height:1.2;color:var(--text);}
+.hdr h1 em{font-style:normal;color:var(--accent);}
+.hdr .sub{font-size:.85rem;color:var(--sub);margin-top:6px;}
+.hdr .sub b{color:var(--accent);}
+
+/* Progress bar */
+.progress{display:flex;gap:3px;margin-bottom:28px;padding:0 4px;}
+.progress .seg{flex:1;height:4px;border-radius:2px;background:var(--border);transition:background .3s;}
+.progress .seg.done{background:var(--green);}
+.progress .seg.active{background:var(--accent);box-shadow:0 0 8px rgba(240,136,62,.4);}
+
+/* Nav */
+.nav{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:24px;padding:8px;background:var(--card);border-radius:10px;border:1px solid var(--border);}
+.nav button{padding:6px 12px;border-radius:6px;border:1px solid transparent;background:none;color:var(--sub);font-size:.72rem;font-family:inherit;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.nav button:hover{color:var(--text);background:var(--card2);}
+.nav button.on{color:var(--accent);border-color:var(--accent);background:rgba(240,136,62,.1);}
+
+/* Card */
+.crd{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;min-height:420px;}
+.crd-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 14px;border-radius:20px;font-size:.8rem;font-weight:700;margin-bottom:14px;border:1px solid;}
+.crd-title{font-family:Georgia,serif;font-size:1.3rem;color:var(--text);margin-bottom:6px;}
+.crd-desc{font-size:.85rem;color:var(--sub);margin-bottom:18px;line-height:1.7;font-family:Georgia,serif;}
+.crd-desc b{color:var(--text);}
+
+/* Code block */
+.code{background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:16px;margin:12px 0;overflow-x:auto;font-size:.82rem;line-height:1.7;position:relative;}
+.code::before{content:attr(data-file);position:absolute;top:0;left:0;right:0;padding:4px 12px;background:var(--card2);border-bottom:1px solid var(--border);border-radius:8px 8px 0 0;font-size:.7rem;color:var(--sub);}
+.code.has-file{padding-top:34px;}
+.kw{color:var(--purple);}
+.fn{color:var(--blue);}
+.st{color:var(--green);}
+.cm{color:var(--sub);font-style:italic;}
+.nb{color:var(--orange);}
+.op{color:var(--red);}
+.ty{color:var(--cyan);}
+
+/* Architecture diagram */
+.arch{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;align-items:center;margin:16px 0;padding:16px;background:var(--bg);border:1px solid var(--border);border-radius:10px;}
+.arch-box{padding:12px 16px;border-radius:10px;border:1.5px solid;text-align:center;font-size:.78rem;font-weight:700;min-width:100px;transition:transform .2s;}
+.arch-box:hover{transform:translateY(-2px);}
+.arch-box .icon{font-size:1.4rem;margin-bottom:4px;display:block;}
+.arch-arrow{font-size:1.2rem;color:var(--sub);}
+
+/* Checklist */
+.checklist{margin:12px 0;}
+.check-item{display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);font-size:.85rem;}
+.check-item:last-child{border-bottom:none;}
+.check-icon{font-size:.9rem;flex-shrink:0;margin-top:2px;}
+
+/* Terminal */
+.term{background:#000;border:1px solid var(--border);border-radius:8px;padding:14px;margin:12px 0;font-size:.8rem;line-height:1.8;}
+.term .prompt{color:var(--green);}
+.term .cmd{color:var(--text);}
+.term .out{color:var(--sub);}
+.term .err{color:var(--red);}
+.term .ok{color:var(--green);}
+
+/* Metrics */
+.metrics{display:flex;gap:12px;flex-wrap:wrap;margin:12px 0;}
+.metric{flex:1;min-width:120px;padding:14px;border-radius:10px;background:var(--bg);border:1px solid var(--border);text-align:center;}
+.metric .val{font-size:1.6rem;font-weight:800;}
+.metric .lbl{font-size:.72rem;color:var(--sub);margin-top:2px;}
+
+/* Tabs */
+.tabs{display:flex;gap:4px;margin-bottom:12px;}
+.tab-btn{padding:6px 14px;border-radius:6px;border:1px solid var(--border);background:none;color:var(--sub);font-size:.78rem;font-family:inherit;cursor:pointer;}
+.tab-btn.on{color:var(--accent);border-color:var(--accent);background:rgba(240,136,62,.08);}
+.tab-content{display:none;}
+.tab-content.visible{display:block;}
+
+/* Simulation */
+.sim-bar{height:8px;background:var(--border);border-radius:4px;margin:6px 0;overflow:hidden;}
+.sim-fill{height:100%;border-radius:4px;transition:width .4s ease;width:0;}
+
+/* Footer */
+.ftr{text-align:center;margin-top:32px;font-size:.85rem;color:var(--sub);}
+.ftr b{color:var(--accent);}
+
+@media(max-width:600px){.hdr h1{font-size:1.6rem;}.crd{padding:16px;}.arch{gap:6px;}.arch-box{min-width:80px;padding:8px 10px;font-size:.7rem;}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="hdr">
+    <div class="tag">complete guide</div>
+    <h1>RAG Pipeline:<br><em>Zero to Production</em></h1>
+    <div class="sub">Build, test & deploy a Retrieval-Augmented Generation system · <b>Simplified by Mahendra Gajera</b></div>
+  </div>
+  <div class="progress" id="prog"></div>
+  <div class="nav" id="nav"></div>
+  <div class="crd" id="crd"></div>
+  <div class="ftr">✦ <b>Simplified by Mahendra Gajera</b> ✦</div>
+</div>
+
+<script>
+var STEPS=[
+  {id:"overview",n:0,t:"Overview",s:"What is RAG?",icon:"🧠",color:"var(--accent)"},
+  {id:"arch",n:1,t:"Architecture",s:"System Design",icon:"🏗️",color:"var(--blue)"},
+  {id:"ingest",n:2,t:"Data Ingestion",s:"Load & Chunk",icon:"📥",color:"var(--green)"},
+  {id:"embed",n:3,t:"Embeddings",s:"Vectorize Text",icon:"🔢",color:"var(--purple)"},
+  {id:"store",n:4,t:"Vector Store",s:"Store & Index",icon:"🗄️",color:"var(--cyan)"},
+  {id:"retrieve",n:5,t:"Retrieval",s:"Find Relevant Docs",icon:"🔍",color:"var(--orange)"},
+  {id:"generate",n:6,t:"Generation",s:"LLM + Context",icon:"✨",color:"var(--pink)"},
+  {id:"eval",n:7,t:"Evaluation",s:"Test Quality",icon:"📊",color:"var(--green)"},
+  {id:"optimize",n:8,t:"Optimization",s:"Make It Better",icon:"⚡",color:"var(--orange)"},
+  {id:"deploy",n:9,t:"Production",s:"Deploy & Scale",icon:"🚀",color:"var(--red)"},
+];
+
+var cur=0,timers=[];
+var nav=document.getElementById("nav");
+var prog=document.getElementById("prog");
+var crd=document.getElementById("crd");
+
+function clearT(){for(var i=0;i<timers.length;i++){clearInterval(timers[i]);clearTimeout(timers[i]);}timers=[];}
+
+// Build nav + progress
+for(var i=0;i<STEPS.length;i++){
+  var seg=document.createElement("div");seg.className="seg";seg.id="seg_"+i;prog.appendChild(seg);
+  (function(i){
+    var b=document.createElement("button");b.textContent=STEPS[i].icon+" "+STEPS[i].t;b.id="nb_"+i;
+    b.onclick=function(){go(i);};nav.appendChild(b);
+  })(i);
+}
+
+function go(idx){
+  clearT();cur=idx;
+  for(var j=0;j<STEPS.length;j++){
+    var seg=document.getElementById("seg_"+j);
+    seg.className="seg"+(j<idx?" done":"")+(j===idx?" active":"");
+    var btn=document.getElementById("nb_"+j);
+    btn.className=j===idx?"on":"";
+  }
+  crd.innerHTML="";
+  DEMOS[STEPS[idx].id]();
+}
+
+function h(tag,sty,html){var e=document.createElement(tag);if(sty)for(var k in sty)e.style[k]=sty[k];if(html!==undefined)e.innerHTML=html;return e;}
+
+function badge(step){
+  var s=STEPS[step];
+  return '<div class="crd-badge" style="color:'+s.color+';border-color:'+s.color+'">'+s.icon+' Step '+s.n+'/9</div>';
+}
+
+function navBtns(idx){
+  var d=h("div",{display:"flex",justifyContent:"space-between",marginTop:"20px"});
+  if(idx>0){var b=document.createElement("button");b.className="tab-btn";b.textContent="← "+STEPS[idx-1].t;b.onclick=function(){go(idx-1);};d.appendChild(b);}
+  else d.appendChild(h("div"));
+  if(idx<9){var b=document.createElement("button");b.className="tab-btn on";b.textContent=STEPS[idx+1].t+" →";b.onclick=function(){go(idx+1);};d.appendChild(b);}
+  return d;
+}
+
+// ═══════════════════════════════════════
+var DEMOS={};
+
+// 0. OVERVIEW
+DEMOS.overview=function(){
+  crd.innerHTML=badge(0)
+  +'<div class="crd-title">What is RAG? Why do you need it?</div>'
+  +'<div class="crd-desc"><b>Retrieval-Augmented Generation (RAG)</b> lets an LLM answer questions using your private data — without retraining the model. It retrieves relevant documents first, then generates an answer grounded in those documents.</div>';
+
+  // Problem / Solution
+  crd.innerHTML+='<div style="display:flex;gap:12px;flex-wrap:wrap;margin:14px 0">'
+    +'<div style="flex:1;min-width:200px;padding:16px;border-radius:10px;background:rgba(248,81,73,.08);border:1px solid rgba(248,81,73,.3)">'
+    +'<div style="font-weight:700;color:var(--red);margin-bottom:8px">❌ Without RAG</div>'
+    +'<div style="font-size:.82rem;color:var(--sub)">• LLM hallucinates facts<br>• No access to your data<br>• Knowledge frozen at training<br>• Can\'t cite sources<br>• Generic answers</div></div>'
+    +'<div style="flex:1;min-width:200px;padding:16px;border-radius:10px;background:rgba(63,185,80,.08);border:1px solid rgba(63,185,80,.3)">'
+    +'<div style="font-weight:700;color:var(--green);margin-bottom:8px">✅ With RAG</div>'
+    +'<div style="font-size:.82rem;color:var(--sub)">• Grounded in your docs<br>• Always up-to-date<br>• Cites actual sources<br>• No model retraining<br>• Domain-specific answers</div></div></div>';
+
+  // Flow
+  crd.innerHTML+='<div style="margin-top:16px;font-size:.85rem;color:var(--sub);font-family:Georgia,serif"><b style="color:var(--text)">The 30-second version:</b> User asks a question → System searches your documents → Finds the most relevant chunks → Sends them to the LLM with the question → LLM generates an answer using those chunks as context.</div>';
+
+  var arch=h("div",{className:"arch"});
+  arch.className="arch";
+  arch.innerHTML='<div class="arch-box" style="border-color:var(--blue);color:var(--blue)"><span class="icon">👤</span>User Query</div>'
+    +'<span class="arch-arrow">→</span>'
+    +'<div class="arch-box" style="border-color:var(--purple);color:var(--purple)"><span class="icon">🔢</span>Embed</div>'
+    +'<span class="arch-arrow">→</span>'
+    +'<div class="arch-box" style="border-color:var(--cyan);color:var(--cyan)"><span class="icon">🔍</span>Retrieve</div>'
+    +'<span class="arch-arrow">→</span>'
+    +'<div class="arch-box" style="border-color:var(--pink);color:var(--pink)"><span class="icon">✨</span>Generate</div>'
+    +'<span class="arch-arrow">→</span>'
+    +'<div class="arch-box" style="border-color:var(--green);color:var(--green)"><span class="icon">💬</span>Answer</div>';
+  crd.appendChild(arch);
+  crd.appendChild(navBtns(0));
+};
+
+// 1. ARCHITECTURE
+DEMOS.arch=function(){
+  crd.innerHTML=badge(1)
+  +'<div class="crd-title">System Architecture</div>'
+  +'<div class="crd-desc">A production RAG system has two pipelines: <b>Indexing</b> (offline — process your docs) and <b>Query</b> (online — answer questions).</div>';
+
+  // Indexing pipeline
+  crd.innerHTML+='<div style="font-size:.82rem;color:var(--green);font-weight:700;margin:12px 0 6px">📥 INDEXING PIPELINE (offline)</div>';
+  var a1=h("div");a1.className="arch";
+  a1.innerHTML='<div class="arch-box" style="border-color:var(--green);color:var(--green)"><span class="icon">📄</span>Raw Docs<br><span style="font-size:.65rem;color:var(--sub)">PDF, MD, HTML</span></div>'
+    +'<span class="arch-arrow">→</span>'
+    +'<div class="arch-box" style="border-color:var(--orange);color:var(--orange)"><span class="icon">✂️</span>Chunker<br><span style="font-size:.65rem;color:var(--sub)">Split text</span></div>'
+    +'<span class="arch-arrow">→</span>'
+    +'<div class="arch-box" style="border-color:var(--purple);color:var(--purple)"><span class="icon">🔢</span>Embedder<br><span style="font-size:.65rem;color:var(--sub)">text→vectors</span></div>'
+    +'<span class="arch-arrow">→</span>'
+    +'<div class="arch-box" style="border-color:var(--cyan);color:var(--cyan)"><span class="icon">🗄️</span>Vector DB<br><span style="font-size:.65rem;color:var(--sub)">Pinecone/Qdrant</span></div>';
+  crd.appendChild(a1);
+
+  // Query pipeline
+  crd.innerHTML+='<div style="font-size:.82rem;color:var(--blue);font-weight:700;margin:16px 0 6px">🔍 QUERY PIPELINE (online)</div>';
+  var a2=h("div");a2.className="arch";
+  a2.innerHTML='<div class="arch-box" style="border-color:var(--blue);color:var(--blue)"><span class="icon">❓</span>Question</div>'
+    +'<span class="arch-arrow">→</span>'
+    +'<div class="arch-box" style="border-color:var(--purple);color:var(--purple)"><span class="icon">🔢</span>Embed Query</div>'
+    +'<span class="arch-arrow">→</span>'
+    +'<div class="arch-box" style="border-color:var(--cyan);color:var(--cyan)"><span class="icon">🗄️</span>Similarity<br>Search</div>'
+    +'<span class="arch-arrow">→</span>'
+    +'<div class="arch-box" style="border-color:var(--orange);color:var(--orange)"><span class="icon">📋</span>Rerank &<br>Filter</div>'
+    +'<span class="arch-arrow">→</span>'
+    +'<div class="arch-box" style="border-color:var(--pink);color:var(--pink)"><span class="icon">✨</span>LLM +<br>Context</div>';
+  crd.appendChild(a2);
+
+  // Tech stack
+  crd.innerHTML+='<div style="margin-top:16px;font-size:.82rem;font-weight:700;color:var(--text)">🛠️ Recommended Tech Stack</div>'
+    +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0">'
+    +'<span style="padding:4px 10px;border-radius:12px;background:rgba(188,140,255,.12);color:var(--purple);font-size:.75rem;border:1px solid rgba(188,140,255,.3)">LangChain / LlamaIndex</span>'
+    +'<span style="padding:4px 10px;border-radius:12px;background:rgba(57,212,212,.12);color:var(--cyan);font-size:.75rem;border:1px solid rgba(57,212,212,.3)">Pinecone / Qdrant / Weaviate</span>'
+    +'<span style="padding:4px 10px;border-radius:12px;background:rgba(88,166,255,.12);color:var(--blue);font-size:.75rem;border:1px solid rgba(88,166,255,.3)">OpenAI / Anthropic / Cohere</span>'
+    +'<span style="padding:4px 10px;border-radius:12px;background:rgba(240,136,62,.12);color:var(--accent);font-size:.75rem;border:1px solid rgba(240,136,62,.3)">FastAPI / Docker / AWS</span></div>';
+  crd.appendChild(navBtns(1));
+};
+
+// 2. DATA INGESTION
+DEMOS.ingest=function(){
+  crd.innerHTML=badge(2)
+  +'<div class="crd-title">Data Ingestion & Chunking</div>'
+  +'<div class="crd-desc">Load your documents and split them into <b>chunks</b> — small pieces the LLM can digest. Chunk size matters!</div>';
+
+  crd.innerHTML+='<div class="code has-file" data-file="📄 ingest.py">'
+    +'<span class="kw">from</span> langchain.document_loaders <span class="kw">import</span> <span class="fn">PyPDFLoader</span>, <span class="fn">DirectoryLoader</span><br>'
+    +'<span class="kw">from</span> langchain.text_splitter <span class="kw">import</span> <span class="fn">RecursiveCharacterTextSplitter</span><br><br>'
+    +'<span class="cm"># 1. Load documents from a folder</span><br>'
+    +'loader = <span class="fn">DirectoryLoader</span>(<span class="st">"./docs"</span>, glob=<span class="st">"**/*.pdf"</span>)<br>'
+    +'documents = loader.<span class="fn">load</span>()<br>'
+    +'<span class="fn">print</span>(<span class="st">f"Loaded <span class="nb">{len(documents)}</span> documents"</span>)<br><br>'
+    +'<span class="cm"># 2. Split into chunks</span><br>'
+    +'splitter = <span class="fn">RecursiveCharacterTextSplitter</span>(<br>'
+    +'&nbsp;&nbsp;chunk_size=<span class="nb">512</span>,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm"># characters per chunk</span><br>'
+    +'&nbsp;&nbsp;chunk_overlap=<span class="nb">50</span>,&nbsp;&nbsp;&nbsp;<span class="cm"># overlap between chunks</span><br>'
+    +'&nbsp;&nbsp;separators=[<span class="st">"\\n\\n"</span>, <span class="st">"\\n"</span>, <span class="st">"."</span>, <span class="st">" "</span>]<br>'
+    +')<br>'
+    +'chunks = splitter.<span class="fn">split_documents</span>(documents)<br>'
+    +'<span class="fn">print</span>(<span class="st">f"Created <span class="nb">{len(chunks)}</span> chunks"</span>)<br>'
+    +'</div>';
+
+  // Chunk size visual
+  crd.innerHTML+='<div style="font-size:.82rem;font-weight:700;color:var(--text);margin:14px 0 8px">📏 Chunk Size Tradeoff</div>';
+  var row=h("div",{display:"flex",gap:"12px",flexWrap:"wrap"});
+  row.innerHTML='<div style="flex:1;min-width:180px;padding:12px;border-radius:8px;background:rgba(210,153,34,.08);border:1px solid rgba(210,153,34,.3);font-size:.8rem">'
+    +'<div style="font-weight:700;color:var(--orange)">Small chunks (256)</div>'
+    +'<div style="color:var(--sub);margin-top:4px">✅ More precise retrieval<br>❌ May lose context<br>❌ More API calls</div></div>'
+    +'<div style="flex:1;min-width:180px;padding:12px;border-radius:8px;background:rgba(63,185,80,.08);border:1px solid rgba(63,185,80,.3);font-size:.8rem">'
+    +'<div style="font-weight:700;color:var(--green)">Medium chunks (512) ⭐</div>'
+    +'<div style="color:var(--sub);margin-top:4px">✅ Good balance<br>✅ Enough context<br>✅ Reasonable cost</div></div>'
+    +'<div style="flex:1;min-width:180px;padding:12px;border-radius:8px;background:rgba(188,140,255,.08);border:1px solid rgba(188,140,255,.3);font-size:.8rem">'
+    +'<div style="font-weight:700;color:var(--purple)">Large chunks (1024)</div>'
+    +'<div style="color:var(--sub);margin-top:4px">✅ Rich context<br>❌ Noisy retrieval<br>❌ Fills context window</div></div>';
+  crd.appendChild(row);
+  crd.appendChild(navBtns(2));
+};
+
+// 3. EMBEDDINGS
+DEMOS.embed=function(){
+  crd.innerHTML=badge(3)
+  +'<div class="crd-title">Generate Embeddings</div>'
+  +'<div class="crd-desc">Convert each chunk into a <b>vector</b> (list of numbers). Similar texts get similar vectors. This is how semantic search works.</div>';
+
+  crd.innerHTML+='<div class="code has-file" data-file="📄 embed.py">'
+    +'<span class="kw">from</span> langchain.embeddings <span class="kw">import</span> <span class="fn">OpenAIEmbeddings</span><br><br>'
+    +'<span class="cm"># Initialize embedding model</span><br>'
+    +'embeddings = <span class="fn">OpenAIEmbeddings</span>(<br>'
+    +'&nbsp;&nbsp;model=<span class="st">"text-embedding-3-small"</span>,<br>'
+    +'&nbsp;&nbsp;dimensions=<span class="nb">1536</span><br>'
+    +')<br><br>'
+    +'<span class="cm"># Embed a single text</span><br>'
+    +'vector = embeddings.<span class="fn">embed_query</span>(<span class="st">"What is RAG?"</span>)<br>'
+    +'<span class="fn">print</span>(<span class="st">f"Vector dimension: <span class="nb">{len(vector)}</span>"</span>)<br>'
+    +'<span class="cm"># → Vector dimension: 1536</span><br><br>'
+    +'<span class="cm"># Embed all chunks in batch</span><br>'
+    +'texts = [chunk.page_content <span class="kw">for</span> chunk <span class="kw">in</span> chunks]<br>'
+    +'vectors = embeddings.<span class="fn">embed_documents</span>(texts)<br>'
+    +'</div>';
+
+  // Model comparison
+  crd.innerHTML+='<div style="font-size:.82rem;font-weight:700;color:var(--text);margin:14px 0 8px">📊 Embedding Models Compared</div>'
+    +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:.78rem">'
+    +'<tr style="border-bottom:1px solid var(--border)"><th style="text-align:left;padding:8px;color:var(--sub)">Model</th><th style="padding:8px;color:var(--sub)">Dimensions</th><th style="padding:8px;color:var(--sub)">Cost</th><th style="padding:8px;color:var(--sub)">Quality</th></tr>'
+    +'<tr style="border-bottom:1px solid var(--border)"><td style="padding:8px;color:var(--blue)">text-embedding-3-small</td><td style="padding:8px;text-align:center">1536</td><td style="padding:8px;text-align:center;color:var(--green)">$0.02/1M</td><td style="padding:8px;text-align:center">⭐⭐⭐⭐</td></tr>'
+    +'<tr style="border-bottom:1px solid var(--border)"><td style="padding:8px;color:var(--purple)">text-embedding-3-large</td><td style="padding:8px;text-align:center">3072</td><td style="padding:8px;text-align:center;color:var(--orange)">$0.13/1M</td><td style="padding:8px;text-align:center">⭐⭐⭐⭐⭐</td></tr>'
+    +'<tr style="border-bottom:1px solid var(--border)"><td style="padding:8px;color:var(--cyan)">Cohere embed-v3</td><td style="padding:8px;text-align:center">1024</td><td style="padding:8px;text-align:center;color:var(--green)">$0.10/1M</td><td style="padding:8px;text-align:center">⭐⭐⭐⭐⭐</td></tr>'
+    +'<tr><td style="padding:8px;color:var(--green)">all-MiniLM-L6 (free)</td><td style="padding:8px;text-align:center">384</td><td style="padding:8px;text-align:center;color:var(--green)">Free</td><td style="padding:8px;text-align:center">⭐⭐⭐</td></tr>'
+    +'</table></div>';
+  crd.appendChild(navBtns(3));
+};
+
+// 4. VECTOR STORE
+DEMOS.store=function(){
+  crd.innerHTML=badge(4)
+  +'<div class="crd-title">Store Vectors in a Database</div>'
+  +'<div class="crd-desc">Store your vectors in a <b>vector database</b> optimized for similarity search. This is where your "knowledge" lives.</div>';
+
+  crd.innerHTML+='<div class="code has-file" data-file="📄 store.py">'
+    +'<span class="kw">from</span> langchain.vectorstores <span class="kw">import</span> <span class="fn">Qdrant</span><br>'
+    +'<span class="kw">from</span> qdrant_client <span class="kw">import</span> <span class="fn">QdrantClient</span><br><br>'
+    +'<span class="cm"># Connect to Qdrant (local or cloud)</span><br>'
+    +'client = <span class="fn">QdrantClient</span>(url=<span class="st">"http://localhost:6333"</span>)<br><br>'
+    +'<span class="cm"># Create vector store & upload chunks</span><br>'
+    +'vectorstore = <span class="fn">Qdrant.from_documents</span>(<br>'
+    +'&nbsp;&nbsp;documents=chunks,<br>'
+    +'&nbsp;&nbsp;embedding=embeddings,<br>'
+    +'&nbsp;&nbsp;url=<span class="st">"http://localhost:6333"</span>,<br>'
+    +'&nbsp;&nbsp;collection_name=<span class="st">"my_docs"</span>,<br>'
+    +')<br>'
+    +'<span class="fn">print</span>(<span class="st">"✅ Vectors stored successfully!"</span>)<br>'
+    +'</div>';
+
+  // DB comparison
+  crd.innerHTML+='<div style="font-size:.82rem;font-weight:700;color:var(--text);margin:14px 0 8px">🗄️ Vector DB Options</div>'
+    +'<div style="display:flex;gap:8px;flex-wrap:wrap">'
+    +'<div style="flex:1;min-width:140px;padding:12px;border-radius:8px;background:rgba(57,212,212,.08);border:1px solid rgba(57,212,212,.3);font-size:.78rem;text-align:center">'
+    +'<div style="font-weight:700;color:var(--cyan);font-size:.9rem">Qdrant</div><div style="color:var(--sub);margin-top:4px">Open source<br>Self-host or cloud<br>Great filtering</div></div>'
+    +'<div style="flex:1;min-width:140px;padding:12px;border-radius:8px;background:rgba(88,166,255,.08);border:1px solid rgba(88,166,255,.3);font-size:.78rem;text-align:center">'
+    +'<div style="font-weight:700;color:var(--blue);font-size:.9rem">Pinecone</div><div style="color:var(--sub);margin-top:4px">Fully managed<br>Zero ops<br>Serverless tier</div></div>'
+    +'<div style="flex:1;min-width:140px;padding:12px;border-radius:8px;background:rgba(188,140,255,.08);border:1px solid rgba(188,140,255,.3);font-size:.78rem;text-align:center">'
+    +'<div style="font-weight:700;color:var(--purple);font-size:.9rem">ChromaDB</div><div style="color:var(--sub);margin-top:4px">Local / embedded<br>Quick prototyping<br>SQLite backend</div></div>'
+    +'<div style="flex:1;min-width:140px;padding:12px;border-radius:8px;background:rgba(63,185,80,.08);border:1px solid rgba(63,185,80,.3);font-size:.78rem;text-align:center">'
+    +'<div style="font-weight:700;color:var(--green);font-size:.9rem">pgvector</div><div style="color:var(--sub);margin-top:4px">PostgreSQL ext<br>Use existing DB<br>SQL + vectors</div></div></div>';
+  crd.appendChild(navBtns(4));
+};
+
+// 5. RETRIEVAL
+DEMOS.retrieve=function(){
+  crd.innerHTML=badge(5)
+  +'<div class="crd-title">Retrieval: Find Relevant Documents</div>'
+  +'<div class="crd-desc">When a user asks a question, <b>embed the query</b> and find the most similar chunks using vector similarity search.</div>';
+
+  crd.innerHTML+='<div class="code has-file" data-file="📄 retrieve.py">'
+    +'<span class="cm"># Create a retriever</span><br>'
+    +'retriever = vectorstore.<span class="fn">as_retriever</span>(<br>'
+    +'&nbsp;&nbsp;search_type=<span class="st">"similarity"</span>,<br>'
+    +'&nbsp;&nbsp;search_kwargs={<span class="st">"k"</span>: <span class="nb">4</span>}&nbsp;&nbsp;<span class="cm"># top 4 chunks</span><br>'
+    +')<br><br>'
+    +'<span class="cm"># Search!</span><br>'
+    +'query = <span class="st">"How does authentication work?"</span><br>'
+    +'results = retriever.<span class="fn">invoke</span>(query)<br><br>'
+    +'<span class="kw">for</span> i, doc <span class="kw">in</span> <span class="fn">enumerate</span>(results):<br>'
+    +'&nbsp;&nbsp;<span class="fn">print</span>(<span class="st">f"Chunk {i+1} (score: {doc.metadata.get(\'score\', \'N/A\')}):"</span>)<br>'
+    +'&nbsp;&nbsp;<span class="fn">print</span>(doc.page_content[:<span class="nb">100</span>], <span class="st">"..."</span>)<br>'
+    +'</div>';
+
+  // Simulate retrieval
+  crd.innerHTML+='<div style="font-size:.82rem;font-weight:700;color:var(--text);margin:14px 0 8px">🔍 Simulated Retrieval</div>';
+  var simDiv=h("div",{});
+  var query=h("div",{padding:"10px 14px",borderRadius:"8px",background:"rgba(88,166,255,.08)",border:"1px solid rgba(88,166,255,.3)",marginBottom:"10px",fontSize:".82rem"});
+  query.innerHTML='<span style="color:var(--blue);font-weight:700">Query:</span> "How does user authentication work?"';
+  simDiv.appendChild(query);
+
+  var results=[
+    {score:.94,text:"Users authenticate via OAuth 2.0. The system validates JWT tokens on each request and maintains session state in Redis...",src:"auth-guide.pdf, p.12"},
+    {score:.87,text:"Two-factor authentication is enabled by default. Users can configure TOTP or SMS verification in their security settings...",src:"security-docs.md, §3"},
+    {score:.81,text:"The login flow starts with email/password validation, then issues a signed JWT with 1-hour expiry and a refresh token...",src:"api-reference.pdf, p.45"},
+    {score:.62,text:"User permissions are managed through role-based access control (RBAC). Each role has a set of predefined capabilities...",src:"admin-guide.pdf, p.8"},
+  ];
+  for(var i=0;i<results.length;i++){
+    var r=results[i];
+    var rd=h("div",{padding:"10px 14px",borderRadius:"8px",background:"var(--bg)",border:"1px solid var(--border)",marginBottom:"6px",fontSize:".8rem"});
+    var col=r.score>.9?"var(--green)":r.score>.8?"var(--orange)":"var(--sub)";
+    rd.innerHTML='<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:'+col+';font-weight:700">Score: '+r.score.toFixed(2)+'</span><span style="color:var(--sub);font-size:.7rem">'+r.src+'</span></div>'
+      +'<div style="color:var(--sub)">'+r.text+'</div>';
+    simDiv.appendChild(rd);
+  }
+  crd.appendChild(simDiv);
+  crd.appendChild(navBtns(5));
+};
+
+// 6. GENERATION
+DEMOS.generate=function(){
+  crd.innerHTML=badge(6)
+  +'<div class="crd-title">Generation: LLM + Context = Answer</div>'
+  +'<div class="crd-desc">Send the retrieved chunks as <b>context</b> to the LLM along with the user\'s question. The prompt template is crucial.</div>';
+
+  crd.innerHTML+='<div class="code has-file" data-file="📄 generate.py">'
+    +'<span class="kw">from</span> langchain.chat_models <span class="kw">import</span> <span class="fn">ChatOpenAI</span><br>'
+    +'<span class="kw">from</span> langchain.prompts <span class="kw">import</span> <span class="fn">ChatPromptTemplate</span><br>'
+    +'<span class="kw">from</span> langchain.schema.runnable <span class="kw">import</span> <span class="fn">RunnablePassthrough</span><br><br>'
+    +'<span class="cm"># Prompt template</span><br>'
+    +'template = <span class="st">"""Answer based ONLY on this context:<br>'
+    +'{context}<br><br>'
+    +'Question: {question}<br>'
+    +'Answer concisely. If unsure, say "I don\'t know"."""</span><br><br>'
+    +'prompt = <span class="fn">ChatPromptTemplate.from_template</span>(template)<br>'
+    +'llm = <span class="fn">ChatOpenAI</span>(model=<span class="st">"gpt-4o-mini"</span>, temperature=<span class="nb">0</span>)<br><br>'
+    +'<span class="cm"># Build the RAG chain</span><br>'
+    +'rag_chain = (<br>'
+    +'&nbsp;&nbsp;{<span class="st">"context"</span>: retriever, <span class="st">"question"</span>: <span class="fn">RunnablePassthrough</span>()}<br>'
+    +'&nbsp;&nbsp;| prompt<br>'
+    +'&nbsp;&nbsp;| llm<br>'
+    +')<br><br>'
+    +'<span class="cm"># Ask!</span><br>'
+    +'answer = rag_chain.<span class="fn">invoke</span>(<span class="st">"How does authentication work?"</span>)<br>'
+    +'<span class="fn">print</span>(answer.content)<br>'
+    +'</div>';
+
+  // Simulated response
+  crd.innerHTML+='<div style="padding:14px;border-radius:8px;background:rgba(63,185,80,.06);border:1px solid rgba(63,185,80,.3);margin:12px 0;font-size:.82rem">'
+    +'<div style="font-weight:700;color:var(--green);margin-bottom:6px">✨ Generated Answer:</div>'
+    +'<div style="color:var(--text);line-height:1.7;font-family:Georgia,serif">Authentication uses OAuth 2.0 with JWT tokens. When a user logs in with email/password, the system issues a signed JWT (1-hour expiry) and a refresh token. Two-factor authentication (TOTP or SMS) is enabled by default. Sessions are maintained in Redis for fast validation.</div>'
+    +'<div style="margin-top:8px;font-size:.75rem;color:var(--sub)">📎 Sources: auth-guide.pdf p.12, security-docs.md §3, api-reference.pdf p.45</div></div>';
+  crd.appendChild(navBtns(6));
+};
+
+// 7. EVALUATION
+DEMOS.eval=function(){
+  crd.innerHTML=badge(7)
+  +'<div class="crd-title">Evaluate Your RAG System</div>'
+  +'<div class="crd-desc">Don\'t guess if your RAG works — <b>measure it</b>. Use these metrics to track quality.</div>';
+
+  crd.innerHTML+='<div class="code has-file" data-file="📄 evaluate.py">'
+    +'<span class="kw">from</span> ragas <span class="kw">import</span> <span class="fn">evaluate</span><br>'
+    +'<span class="kw">from</span> ragas.metrics <span class="kw">import</span> (<br>'
+    +'&nbsp;&nbsp;<span class="fn">faithfulness</span>,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm"># Is answer grounded in context?</span><br>'
+    +'&nbsp;&nbsp;<span class="fn">answer_relevancy</span>,&nbsp;&nbsp;<span class="cm"># Is answer relevant to question?</span><br>'
+    +'&nbsp;&nbsp;<span class="fn">context_precision</span>,&nbsp;<span class="cm"># Are retrieved docs relevant?</span><br>'
+    +'&nbsp;&nbsp;<span class="fn">context_recall</span>,&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm"># Did we find all relevant docs?</span><br>'
+    +')<br><br>'
+    +'result = <span class="fn">evaluate</span>(<br>'
+    +'&nbsp;&nbsp;dataset=eval_dataset,<br>'
+    +'&nbsp;&nbsp;metrics=[faithfulness, answer_relevancy,<br>'
+    +'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;context_precision, context_recall]<br>'
+    +')<br>'
+    +'<span class="fn">print</span>(result)<br>'
+    +'</div>';
+
+  // Metrics dashboard
+  crd.innerHTML+='<div class="metrics">'
+    +'<div class="metric"><div class="val" style="color:var(--green)">0.92</div><div class="lbl">Faithfulness</div></div>'
+    +'<div class="metric"><div class="val" style="color:var(--blue)">0.88</div><div class="lbl">Answer Relevancy</div></div>'
+    +'<div class="metric"><div class="val" style="color:var(--purple)">0.85</div><div class="lbl">Context Precision</div></div>'
+    +'<div class="metric"><div class="val" style="color:var(--orange)">0.79</div><div class="lbl">Context Recall</div></div></div>';
+
+  crd.innerHTML+='<div style="font-size:.82rem;color:var(--sub);margin-top:10px;font-family:Georgia,serif"><b style="color:var(--text)">Pro tip:</b> If faithfulness is low, your LLM is hallucinating. If context recall is low, your retriever is missing relevant docs. Fix retrieval before tweaking the LLM prompt.</div>';
+  crd.appendChild(navBtns(7));
+};
+
+// 8. OPTIMIZATION
+DEMOS.optimize=function(){
+  crd.innerHTML=badge(8)
+  +'<div class="crd-title">Optimize for Production Quality</div>'
+  +'<div class="crd-desc">These techniques take your RAG from "demo" to "production-grade".</div>';
+
+  var opts=[
+    {icon:"🔀",title:"Hybrid Search",desc:"Combine vector (semantic) + BM25 (keyword) search. Catches both meaning AND exact terms.",color:"var(--blue)",code:"<span class='kw'>from</span> langchain.retrievers <span class='kw'>import</span> <span class='fn'>EnsembleRetriever</span><br>retriever = <span class='fn'>EnsembleRetriever</span>(retrievers=[vector_ret, bm25_ret], weights=[<span class='nb'>0.6</span>, <span class='nb'>0.4</span>])"},
+    {icon:"📊",title:"Reranking",desc:"Use a cross-encoder to rerank retrieved results. Dramatically improves precision.",color:"var(--purple)",code:"<span class='kw'>from</span> langchain.retrievers <span class='kw'>import</span> <span class='fn'>ContextualCompressionRetriever</span><br><span class='kw'>from</span> cohere <span class='kw'>import</span> <span class='fn'>CohereRerank</span><br>compressor = <span class='fn'>CohereRerank</span>(top_n=<span class='nb'>3</span>)"},
+    {icon:"📝",title:"Query Expansion",desc:"Rephrase user queries into multiple variations to improve recall.",color:"var(--green)",code:"<span class='cm'># Generate query variations with LLM</span><br>queries = llm(<span class='st'>\"Generate 3 different phrasings of: {query}\"</span>)"},
+    {icon:"✂️",title:"Smart Chunking",desc:"Use semantic chunking — split on meaning boundaries, not just character count.",color:"var(--orange)",code:"<span class='kw'>from</span> langchain.text_splitter <span class='kw'>import</span> <span class='fn'>SemanticChunker</span><br>splitter = <span class='fn'>SemanticChunker</span>(embeddings, breakpoint_threshold=<span class='nb'>0.3</span>)"},
+  ];
+
+  for(var i=0;i<opts.length;i++){
+    var o=opts[i];
+    crd.innerHTML+='<div style="padding:14px;border-radius:8px;border:1px solid var(--border);margin-bottom:10px;background:var(--bg)">'
+      +'<div style="font-weight:700;color:'+o.color+';margin-bottom:4px">'+o.icon+' '+o.title+'</div>'
+      +'<div style="font-size:.82rem;color:var(--sub);margin-bottom:8px;font-family:Georgia,serif">'+o.desc+'</div>'
+      +'<div style="background:var(--card);padding:8px 12px;border-radius:6px;font-size:.78rem;border:1px solid var(--border)">'+o.code+'</div></div>';
+  }
+  crd.appendChild(navBtns(8));
+};
+
+// 9. PRODUCTION DEPLOY
+DEMOS.deploy=function(){
+  crd.innerHTML=badge(9)
+  +'<div class="crd-title">Deploy to Production 🚀</div>'
+  +'<div class="crd-desc">Wrap your RAG in a <b>FastAPI</b> server, containerize with <b>Docker</b>, and deploy to cloud.</div>';
+
+  crd.innerHTML+='<div class="code has-file" data-file="📄 api.py — FastAPI Server">'
+    +'<span class="kw">from</span> fastapi <span class="kw">import</span> <span class="fn">FastAPI</span><br>'
+    +'<span class="kw">from</span> pydantic <span class="kw">import</span> <span class="fn">BaseModel</span><br><br>'
+    +'app = <span class="fn">FastAPI</span>(title=<span class="st">"RAG API"</span>)<br><br>'
+    +'<span class="kw">class</span> <span class="ty">Query</span>(<span class="fn">BaseModel</span>):<br>'
+    +'&nbsp;&nbsp;question: <span class="ty">str</span><br>'
+    +'&nbsp;&nbsp;top_k: <span class="ty">int</span> = <span class="nb">4</span><br><br>'
+    +'<span class="kw">@</span>app.<span class="fn">post</span>(<span class="st">"/ask"</span>)<br>'
+    +'<span class="kw">async def</span> <span class="fn">ask</span>(q: <span class="ty">Query</span>):<br>'
+    +'&nbsp;&nbsp;answer = rag_chain.<span class="fn">invoke</span>(q.question)<br>'
+    +'&nbsp;&nbsp;<span class="kw">return</span> {<span class="st">"answer"</span>: answer.content,<br>'
+    +'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="st">"sources"</span>: get_sources(q.question)}<br>'
+    +'</div>';
+
+  crd.innerHTML+='<div class="code has-file" data-file="🐳 Dockerfile">'
+    +'<span class="kw">FROM</span> python:<span class="nb">3.11</span>-slim<br>'
+    +'<span class="kw">WORKDIR</span> /app<br>'
+    +'<span class="kw">COPY</span> requirements.txt .<br>'
+    +'<span class="kw">RUN</span> pip install -r requirements.txt<br>'
+    +'<span class="kw">COPY</span> . .<br>'
+    +'<span class="kw">CMD</span> [<span class="st">"uvicorn"</span>, <span class="st">"api:app"</span>, <span class="st">"--host"</span>, <span class="st">"0.0.0.0"</span>]<br>'
+    +'</div>';
+
+  // Deploy terminal
+  crd.innerHTML+='<div class="term">'
+    +'<span class="prompt">$</span> <span class="cmd">docker build -t rag-api .</span><br>'
+    +'<span class="out">Building image... ✅ Done</span><br>'
+    +'<span class="prompt">$</span> <span class="cmd">docker push rag-api:latest</span><br>'
+    +'<span class="out">Pushing to registry... ✅ Done</span><br>'
+    +'<span class="prompt">$</span> <span class="cmd">kubectl apply -f deployment.yaml</span><br>'
+    +'<span class="ok">deployment.apps/rag-api created</span><br>'
+    +'<span class="ok">service/rag-api-svc created</span><br>'
+    +'<span class="prompt">$</span> <span class="cmd">curl https://api.example.com/ask -d \'{"question":"How does auth work?"}\'</span><br>'
+    +'<span class="ok">{"answer": "Authentication uses OAuth 2.0 with JWT...", "sources": [...]}</span><br>'
+    +'</div>';
+
+  // Production checklist
+  crd.innerHTML+='<div style="font-size:.82rem;font-weight:700;color:var(--text);margin:14px 0 8px">✅ Production Checklist</div>';
+  var checks=[
+    {icon:"🔒",text:"API authentication (API keys / OAuth)",c:"var(--green)"},
+    {icon:"⚡",text:"Response caching (Redis) for common queries",c:"var(--green)"},
+    {icon:"📊",text:"Logging & monitoring (traces, latency, costs)",c:"var(--blue)"},
+    {icon:"🔄",text:"Auto-reindex pipeline when docs update",c:"var(--orange)"},
+    {icon:"🛡️",text:"Rate limiting & input validation",c:"var(--red)"},
+    {icon:"🧪",text:"CI/CD with automated eval tests (RAGAS)",c:"var(--purple)"},
+    {icon:"📈",text:"Horizontal scaling (K8s / ECS / Cloud Run)",c:"var(--cyan)"},
+    {icon:"💰",text:"Token usage tracking & cost alerts",c:"var(--orange)"},
+  ];
+  for(var i=0;i<checks.length;i++){
+    crd.innerHTML+='<div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);font-size:.82rem">'
+      +'<span style="color:'+checks[i].c+'">'+checks[i].icon+'</span>'
+      +'<span style="color:var(--sub)">'+checks[i].text+'</span></div>';
+  }
+
+  crd.innerHTML+='<div style="margin-top:18px;padding:14px;border-radius:10px;background:rgba(240,136,62,.08);border:1px solid rgba(240,136,62,.3);text-align:center;font-family:Georgia,serif">'
+    +'<div style="font-size:1rem;font-weight:700;color:var(--accent)">🎉 You now have a production RAG pipeline!</div>'
+    +'<div style="font-size:.82rem;color:var(--sub);margin-top:4px">From documents → vectors → retrieval → generation → deployed API</div></div>';
+
+  // Back button only
+  var d=h("div",{display:"flex",justifyContent:"space-between",marginTop:"20px"});
+  var b=document.createElement("button");b.className="tab-btn";b.textContent="← "+STEPS[8].t;b.onclick=function(){go(8);};d.appendChild(b);
+  d.appendChild(h("div",{},""));
+  crd.appendChild(d);
+};
+
+// ─── START ───
+go(0);
+</script>
+</body>
+</html>

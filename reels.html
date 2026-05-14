@@ -559,10 +559,11 @@
       <span>←</span> <span>Portfolio</span>
     </a>
     <div class="project-tabs">
-      <button class="project-tab active" data-project="troubleshoot">P / 01</button>
-      <button class="project-tab" data-project="assistant">P / 02</button>
-      <button class="project-tab" data-project="copilot">P / 03</button>
-      <button class="project-tab" data-project="generate">P / 04</button>
+      <button class="project-tab active" data-project="mcp_server">P / 01</button>
+      <button class="project-tab" data-project="troubleshoot">P / 02</button>
+      <button class="project-tab" data-project="assistant">P / 03</button>
+      <button class="project-tab" data-project="copilot">P / 04</button>
+      <button class="project-tab" data-project="generate">P / 05</button>
     </div>
     <span class="reel-brand">Reels · by Mahendra Gajera</span>
   </header>
@@ -591,8 +592,57 @@
 <script>
   // ===================== PROJECT DATA =====================
   const projects = {
-    troubleshoot: {
+    mcp_server: {
       num: "P / 01",
+      title: "MCP Server — <em>Natural Language</em> Job Operations",
+      sub: "Model Context Protocol Bridge for Conversational Automation",
+      meta: "Built by <strong>Mahendra Gajera</strong> · Redwood RunMyJobs 2026",
+      problem: {
+        quote: "Operators context-switch between terminal and UI. Job submission, status checks, cancellation — all require jumping between tools.",
+        context: "Enterprise automation teams lose productivity navigating back and forth. Operations at scale demand speed. The friction adds up."
+      },
+      approach: {
+        title: "My <em>approach</em> — stateless proxy bridge to the LLM",
+        points: [
+          { strong: "Stateless architecture", body: "No credential persistence. Client API keys pass directly to RunMyJobs backend — simplified security." },
+          { strong: "Header-based routing", body: "Single regional deployment routes multi-tenant requests via X-RMJ-Instance-ID header." },
+          { strong: "MCP tool set", body: "Four core operations exposed: submit_job, get_job, cancel_job, get_process_server." },
+          { strong: "Natural language interface", body: "Operators work in terminal or LLM client — zero context-switching." }
+        ]
+      },
+      arch: {
+        title: "Deployment <em>architecture</em>",
+        cards: [
+          { icon: "MCP", strong: "Spring AI MCP", body: "Framework bridging MCP protocol to RunMyJobs REST APIs." },
+          { icon: "EKS", strong: "AWS EKS + Karpenter", body: "Co-located in same VPC + region. Horizontal pod autoscaling." },
+          { icon: "ALB", strong: "ALB + WAF", body: "Ingress layer protecting the MCP server from external threats." },
+          { icon: "→", strong: "Passthrough Auth", body: "Client API key relayed directly — zero secrets stored in MCP layer." }
+        ]
+      },
+      role: {
+        title: "What I <em>actually did</em>",
+        points: [
+          { strong: "Architecture design", body: "Defined the stateless proxy pattern and multi-tenant routing strategy." },
+          { strong: "Security model", body: "Implemented passthrough auth — no credential storage, direct API key relay to backend." },
+          { strong: "Tool implementation", body: "Led the integration of the four MVP operations into the Spring AI MCP framework." },
+          { strong: "Deployment strategy", body: "Architected co-location in same AWS region/VPC to eliminate egress costs and latency." }
+        ]
+      },
+      impact: [
+        { num: "70%", lbl: "Reduction in data transfer costs" },
+        { num: "Multi-tenant", lbl: "Single regional deployment" },
+        { num: "90%", lbl: "Faster job operations" },
+        { num: "Stateless", lbl: "Zero credential persistence" }
+      ],
+      stack: [
+        { text: "MCP", featured: true }, { text: "Spring AI", featured: true },
+        { text: "OpenAI / LLM" }, { text: "Python" }, { text: "Java" },
+        { text: "AWS EKS" }, { text: "Karpenter" }, { text: "ALB" }, { text: "WAF" }
+      ]
+    },
+
+    troubleshoot: {
+      num: "P / 02",
       title: "Troubleshoot with <em>RangerAI</em>",
       sub: "Intelligent Job Diagnostics for Enterprise Automation",
       meta: "Built by <strong>Mahendra Gajera</strong> · Redwood RunMyJobs 2026",
@@ -640,7 +690,7 @@
     },
 
     assistant: {
-      num: "P / 02",
+      num: "P / 03",
       title: "RangerAI Product <em>Assistant</em>",
       sub: "A Conversational Documentation Engine",
       meta: "Built by <strong>Mahendra Gajera</strong> · Redwood RunMyJobs 2026",
@@ -688,7 +738,7 @@
     },
 
     copilot: {
-      num: "P / 03",
+      num: "P / 04",
       title: "RangerAI Automation <em>Co-pilot</em>",
       sub: "AI-Powered Scripting with a RAGAS Quality Gate",
       meta: "Built by <strong>Mahendra Gajera</strong> · Redwood RunMyJobs 2026",
@@ -736,7 +786,7 @@
     },
 
     generate: {
-      num: "P / 04",
+      num: "P / 05",
       title: "Generate with <em>RangerAI</em>",
       sub: "A Self-Documenting Automation Engine",
       meta: "Built by <strong>Mahendra Gajera</strong> · Redwood RunMyJobs 2026",
@@ -1028,8 +1078,8 @@
   });
 
   // Init from URL hash
-  const initial = (location.hash || '#troubleshoot').slice(1);
-  state.project = projects[initial] ? initial : 'troubleshoot';
+  const initial = (location.hash || '#mcp_server').slice(1);
+  state.project = projects[initial] ? initial : 'mcp_server';
   renderProject(state.project);
   state.rafId = requestAnimationFrame(tick);
 </script>

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>#3 Multi-Agent Orchestration — Simplified by Mahendra Gajera</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Courier New',monospace;background:#06070a;color:#e4e8f1;min-height:100vh;padding:24px 16px;}.app{max-width:860px;margin:0 auto;}.hdr{text-align:center;margin-bottom:28px;}.hdr .tag{display:inline-block;padding:3px 14px;border:1px solid #9d3dff;border-radius:20px;font-size:.68rem;color:#9d3dff;letter-spacing:2px;margin-bottom:8px;}.hdr h1{font-family:Georgia,serif;font-size:1.9rem;color:#9d3dff;}.hdr .sub{font-size:.82rem;color:#6e7590;margin-top:4px;font-family:Georgia,serif;}.hdr .sub b{color:#9d3dff;}.card{background:#0e1018;border:1px solid #1e2333;border-radius:14px;padding:22px;margin-bottom:18px;}.card h2{font-family:Georgia,serif;font-size:1.1rem;margin-bottom:10px;}.card p{font-size:.84rem;color:#6e7590;line-height:1.7;font-family:Georgia,serif;margin-bottom:12px;}.card p b{color:#e4e8f1;}.btn{padding:10px 24px;border-radius:8px;border:none;font-weight:700;cursor:pointer;font-size:.88rem;font-family:inherit;transition:all .2s;}.btn:hover{opacity:.85;}
+.agent-lane{display:flex;gap:12px;flex-wrap:wrap;margin:16px 0;}
+.lane{flex:1;min-width:180px;border-radius:12px;border:2px solid #1e2333;background:#0a0b10;padding:12px;min-height:220px;}
+.lane-hdr{display:flex;align-items:center;gap:6px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #1e2333;}
+.lane-hdr .icon{font-size:1.3rem;}
+.lane-hdr .name{font-weight:700;font-size:.85rem;}
+.lane-hdr .status{margin-left:auto;font-size:.65rem;padding:2px 8px;border-radius:10px;}
+.task{padding:10px;border-radius:8px;margin-bottom:6px;font-size:.78rem;border:1px solid;cursor:default;transition:all .3s;}
+.task.pending{opacity:.5;}
+.task.working{animation:pulse 1s infinite alternate;}
+.task.done{opacity:.9;}
+@keyframes pulse{from{box-shadow:0 0 0 rgba(255,255,255,0);}to{box-shadow:0 0 12px rgba(255,255,255,.1);}}
+.timeline{display:flex;flex-direction:column;gap:4px;margin:12px 0;max-height:200px;overflow-y:auto;}
+.tl-item{display:flex;align-items:center;gap:8px;font-size:.76rem;padding:4px 8px;border-radius:6px;background:#06070a;animation:fadeIn .3s;}
+@keyframes fadeIn{from{opacity:0;transform:translateX(-10px);}to{opacity:1;transform:translateX(0);}}
+.metrics{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0;}.metric{flex:1;min-width:90px;padding:10px;border-radius:10px;background:#06070a;border:1px solid #1e2333;text-align:center;}.metric .v{font-size:1.3rem;font-weight:800;}.metric .l{font-size:.68rem;color:#6e7590;margin-top:2px;}
+.ftr{text-align:center;margin-top:24px;font-size:.82rem;color:#6e7590;}.ftr b{color:#9d3dff;}
+</style></head><body>
+<div class="app">
+  <div class="hdr">
+    <div class="tag">concept #3 · 2026</div>
+    <h1>🎭 Multi-Agent Orchestration</h1>
+    <div class="sub">Watch a team of specialist AI agents work together · <b>Simplified by Mahendra Gajera</b></div>
+  </div>
+  <div class="card">
+    <h2>💡 What Is It?</h2>
+    <p>Instead of one massive AI doing everything poorly, use <b>teams of small specialist agents</b> coordinated by an orchestrator — like a company with departments. A researcher finds info, a coder builds, an analyst validates, a writer presents.</p>
+  </div>
+  <div class="card">
+    <h2>🎮 Live Demo: Build a Landing Page</h2>
+    <p>Watch 4 agents collaborate to research, design, code, and review a landing page.</p>
+    <div style="text-align:center;margin-bottom:12px;">
+      <button class="btn" style="background:#9d3dff;color:#06070a" onclick="runOrch()">▶ Start Orchestration</button>
+      <button class="btn" style="background:#1e2333;color:#6e7590" onclick="resetOrch()">↺ Reset</button>
+    </div>
+    <div class="agent-lane" id="lanes"></div>
+    <div class="metrics">
+      <div class="metric"><div class="v" id="m_tasks" style="color:#9d3dff">0/8</div><div class="l">Tasks Done</div></div>
+      <div class="metric"><div class="v" id="m_time" style="color:#ffd23d">0s</div><div class="l">Time</div></div>
+      <div class="metric"><div class="v" id="m_status" style="color:#6e7590;font-size:.85rem">Ready</div><div class="l">Status</div></div>
+    </div>
+    <div class="card" style="padding:12px;background:#000;border-color:#1e2333;">
+      <div style="font-size:.75rem;color:#6e7590;margin-bottom:6px;font-weight:700;">📋 Activity Log</div>
+      <div class="timeline" id="timeline"></div>
+    </div>
+  </div>
+  <div class="ftr">⚡ <b>Simplified by Mahendra Gajera</b> ⚡</div>
+</div>
+<script>
+var agents=[
+  {id:"orch",name:"Orchestrator",icon:"🎼",color:"#ffd23d",tasks:[]},
+  {id:"research",name:"Researcher",icon:"🔍",color:"#00f0ff",tasks:["Find competitor designs","Gather brand assets"]},
+  {id:"coder",name:"Coder",icon:"💻",color:"#3dff8a",tasks:["Build HTML structure","Add animations","Make responsive"]},
+  {id:"reviewer",name:"Reviewer",icon:"🔍",color:"#ff3daa",tasks:["Check accessibility","Performance audit","Final approval"]},
+];
+var allTasks=8,doneTasks=0,startTime=0,running=false,timers=[],timerInterval;
+
+function clearT(){timers.forEach(function(t){clearTimeout(t);});if(timerInterval)clearInterval(timerInterval);timers=[];running=false;}
+
+function resetOrch(){
+  clearT();doneTasks=0;
+  document.getElementById("m_tasks").textContent="0/8";
+  document.getElementById("m_time").textContent="0s";
+  document.getElementById("m_status").textContent="Ready";
+  document.getElementById("m_status").style.color="#6e7590";
+  document.getElementById("timeline").innerHTML="";
+  renderLanes("idle");
+}
+
+function renderLanes(state,activeAgent,activeTask){
+  var container=document.getElementById("lanes");
+  container.innerHTML="";
+  agents.forEach(function(ag){
+    var lane=document.createElement("div");
+    lane.className="lane";
+    if(activeAgent===ag.id)lane.style.borderColor=ag.color+"80";
+    var hdr='<div class="lane-hdr"><span class="icon">'+ag.icon+'</span><span class="name" style="color:'+ag.color+'">'+ag.name+'</span>';
+    if(activeAgent===ag.id)hdr+='<span class="status" style="background:'+ag.color+'20;color:'+ag.color+';border:1px solid '+ag.color+'40">Working</span>';
+    else hdr+='<span class="status" style="background:#1e233380;color:#6e7590">Idle</span>';
+    hdr+='</div>';
+    lane.innerHTML=hdr;
+    ag.tasks.forEach(function(task,i){
+      var taskEl=document.createElement("div");
+      taskEl.className="task";
+      var isDone=ag._done&&ag._done[i];
+      var isWorking=activeAgent===ag.id&&activeTask===i;
+      taskEl.style.borderColor=ag.color+"40";
+      taskEl.style.background=ag.color+"08";
+      taskEl.style.color=ag.color;
+      if(isDone){taskEl.classList.add("done");taskEl.innerHTML="✅ "+task;}
+      else if(isWorking){taskEl.classList.add("working");taskEl.innerHTML="⏳ "+task;}
+      else{taskEl.classList.add("pending");taskEl.innerHTML="○ "+task;}
+      lane.appendChild(taskEl);
+    });
+    container.appendChild(lane);
+  });
+}
+
+function addTL(text,color){
+  var tl=document.getElementById("timeline");
+  var d=document.createElement("div");
+  d.className="tl-item";
+  d.innerHTML='<span style="color:'+color+'">●</span> <span style="color:#6e7590">'+text+'</span>';
+  tl.appendChild(d);
+  tl.scrollTop=tl.scrollHeight;
+}
+
+function runOrch(){
+  if(running)return;
+  resetOrch();running=true;
+  agents.forEach(function(a){a._done={};});
+  startTime=Date.now();
+  timerInterval=setInterval(function(){
+    var s=Math.floor((Date.now()-startTime)/1000);
+    document.getElementById("m_time").textContent=s+"s";
+  },500);
+  document.getElementById("m_status").textContent="Running...";
+  document.getElementById("m_status").style.color="#9d3dff";
+
+  var schedule=[
+    {t:300,agent:"orch",task:-1,msg:"🎼 Orchestrator: Analyzing task 'Build a landing page'..."},
+    {t:1000,agent:"orch",task:-1,msg:"🎼 Orchestrator: Delegating to Researcher first..."},
+    {t:1500,agent:"research",task:0,msg:"🔍 Researcher: Finding competitor designs..."},
+    {t:3000,agent:"research",task:0,msg:"🔍 Researcher: Found 5 competitor examples ✓",done:true},
+    {t:3500,agent:"research",task:1,msg:"🔍 Researcher: Gathering brand assets..."},
+    {t:5000,agent:"research",task:1,msg:"🔍 Researcher: Brand kit ready ✓",done:true},
+    {t:5500,agent:"orch",task:-1,msg:"🎼 Orchestrator: Research done. Routing to Coder..."},
+    {t:6000,agent:"coder",task:0,msg:"💻 Coder: Building HTML structure..."},
+    {t:7500,agent:"coder",task:0,msg:"💻 Coder: HTML scaffold complete ✓",done:true},
+    {t:8000,agent:"coder",task:1,msg:"💻 Coder: Adding scroll animations..."},
+    {t:9500,agent:"coder",task:1,msg:"💻 Coder: Animations added ✓",done:true},
+    {t:10000,agent:"coder",task:2,msg:"💻 Coder: Making responsive..."},
+    {t:11500,agent:"coder",task:2,msg:"💻 Coder: Responsive design complete ✓",done:true},
+    {t:12000,agent:"orch",task:-1,msg:"🎼 Orchestrator: Code done. Sending to Reviewer..."},
+    {t:12500,agent:"reviewer",task:0,msg:"🔍 Reviewer: Checking accessibility (ARIA, contrast)..."},
+    {t:14000,agent:"reviewer",task:0,msg:"🔍 Reviewer: Accessibility score 96/100 ✓",done:true},
+    {t:14500,agent:"reviewer",task:1,msg:"🔍 Reviewer: Running performance audit..."},
+    {t:16000,agent:"reviewer",task:1,msg:"🔍 Reviewer: Lighthouse score 94 ✓",done:true},
+    {t:16500,agent:"reviewer",task:2,msg:"🔍 Reviewer: Final approval..."},
+    {t:17500,agent:"reviewer",task:2,msg:"🔍 Reviewer: APPROVED ✅",done:true},
+    {t:18000,agent:"orch",task:-1,msg:"🎉 Orchestrator: Landing page complete! 4 agents, 8 tasks, one seamless workflow."},
+  ];
+
+  schedule.forEach(function(s){
+    timers.push(setTimeout(function(){
+      if(!running)return;
+      var ag=agents.find(function(a){return a.id===s.agent;});
+      if(s.done){ag._done[s.task]=true;doneTasks++;document.getElementById("m_tasks").textContent=doneTasks+"/"+allTasks;}
+      addTL(s.msg,ag.color);
+      renderLanes("run",s.agent,s.done?-1:s.task);
+      if(doneTasks>=allTasks){
+        document.getElementById("m_status").textContent="Complete ✓";
+        document.getElementById("m_status").style.color="#3dff8a";
+        clearInterval(timerInterval);running=false;
+      }
+    },s.t));
+  });
+}
+renderLanes("idle");
+</script>
+</body></html>

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#2 Agent-to-Agent Protocol — Simplified by Mahendra Gajera</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Courier New',monospace;background:#06070a;color:#e4e8f1;min-height:100vh;padding:24px 16px;}
+.app{max-width:860px;margin:0 auto;}
+.hdr{text-align:center;margin-bottom:28px;}
+.hdr .tag{display:inline-block;padding:3px 14px;border:1px solid #ff3daa;border-radius:20px;font-size:.68rem;color:#ff3daa;letter-spacing:2px;margin-bottom:8px;}
+.hdr h1{font-family:Georgia,serif;font-size:1.9rem;color:#ff3daa;}
+.hdr .sub{font-size:.82rem;color:#6e7590;margin-top:4px;font-family:Georgia,serif;}.hdr .sub b{color:#ff3daa;}
+.card{background:#0e1018;border:1px solid #1e2333;border-radius:14px;padding:22px;margin-bottom:18px;}
+.card h2{font-family:Georgia,serif;font-size:1.1rem;margin-bottom:10px;}
+.card p{font-size:.84rem;color:#6e7590;line-height:1.7;font-family:Georgia,serif;margin-bottom:12px;}
+.card p b{color:#e4e8f1;}
+.btn{padding:10px 24px;border-radius:8px;border:none;font-weight:700;cursor:pointer;font-size:.88rem;font-family:inherit;transition:all .2s;}
+.btn:hover{opacity:.85;}
+
+/* Agent cards */
+.agent-grid{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin:16px 0;}
+.agent-card{padding:16px;border-radius:12px;border:2px solid;min-width:140px;text-align:center;transition:all .4s;background:#0a0b10;}
+.agent-card .icon{font-size:2rem;margin-bottom:6px;display:block;}
+.agent-card .name{font-weight:700;font-size:.9rem;}
+.agent-card .role{font-size:.72rem;color:#6e7590;margin-top:2px;}
+.agent-card.active{transform:scale(1.05);box-shadow:0 0 20px rgba(255,61,170,.2);}
+
+/* Message stream */
+.msg-stream{background:#000;border:1px solid #1e2333;border-radius:8px;padding:12px;max-height:300px;overflow-y:auto;font-size:.78rem;line-height:1.8;margin:12px 0;}
+.msg{padding:4px 8px;border-radius:6px;margin:3px 0;animation:fadeIn .3s;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.msg-discover{background:rgba(0,240,255,.08);border-left:3px solid #00f0ff;color:#00f0ff;}
+.msg-negotiate{background:rgba(255,61,170,.08);border-left:3px solid #ff3daa;color:#ff3daa;}
+.msg-execute{background:rgba(61,255,138,.08);border-left:3px solid #3dff8a;color:#3dff8a;}
+.msg-result{background:rgba(255,210,61,.08);border-left:3px solid #ffd23d;color:#ffd23d;}
+.msg-mcp{background:rgba(61,142,255,.08);border-left:3px solid #3d8eff;color:#3d8eff;}
+
+.ftr{text-align:center;margin-top:24px;font-size:.82rem;color:#6e7590;}.ftr b{color:#ff3daa;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="hdr">
+    <div class="tag">concept #2 · 2026</div>
+    <h1>🤝 Agent-to-Agent Protocol</h1>
+    <div class="sub">Watch AI agents discover, negotiate & collaborate in real-time · <b>Simplified by Mahendra Gajera</b></div>
+  </div>
+
+  <div class="card">
+    <h2>💡 What Is A2A?</h2>
+    <p>If <b>MCP</b> is how agents connect to tools (like USB-C), then <b>A2A</b> is how agents connect to <b>other agents</b> (like the internet). Different AI agents from different companies can discover each other, advertise their capabilities, negotiate tasks, and collaborate — all through one standard protocol.</p>
+  </div>
+
+  <div class="card">
+    <h2>🎮 Live Simulation: Multi-Agent Task</h2>
+    <p>Watch 4 agents from different platforms collaborate on a task: <b>"Research competitor pricing and create a report."</b></p>
+
+    <div class="agent-grid" id="agents">
+      <div class="agent-card" id="ag_orch" style="border-color:#ffd23d;">
+        <span class="icon">🎼</span>
+        <div class="name" style="color:#ffd23d">Orchestrator</div>
+        <div class="role">Claude · Plans & routes</div>
+      </div>
+      <div class="agent-card" id="ag_research" style="border-color:#00f0ff;">
+        <span class="icon">🔍</span>
+        <div class="name" style="color:#00f0ff">Researcher</div>
+        <div class="role">Gemini · Web search</div>
+      </div>
+      <div class="agent-card" id="ag_analyst" style="border-color:#ff3daa;">
+        <span class="icon">📊</span>
+        <div class="name" style="color:#ff3daa">Analyst</div>
+        <div class="role">GPT-4o · Data analysis</div>
+      </div>
+      <div class="agent-card" id="ag_writer" style="border-color:#3dff8a;">
+        <span class="icon">✍️</span>
+        <div class="name" style="color:#3dff8a">Writer</div>
+        <div class="role">Claude · Report writing</div>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin:12px 0;">
+      <button class="btn" style="background:#ff3daa;color:#06070a" onclick="runSimulation()">▶ Run A2A Simulation</button>
+      <button class="btn" style="background:#1e2333;color:#6e7590" onclick="resetSim()">↺ Reset</button>
+    </div>
+
+    <div class="msg-stream" id="stream"></div>
+  </div>
+
+  <div class="card">
+    <h2>🔗 MCP vs A2A — Side by Side</h2>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;">
+      <div style="flex:1;min-width:200px;padding:14px;border-radius:10px;background:#0a0b10;border:1px solid rgba(61,142,255,.3);">
+        <div style="font-weight:700;color:#3d8eff;margin-bottom:8px">🔌 MCP (Anthropic)</div>
+        <div style="font-size:.8rem;color:#6e7590;line-height:1.7">
+          <b style="color:#e4e8f1">Agent ↔ Tool</b><br>
+          • Connect to databases<br>
+          • Call APIs<br>
+          • Access file systems<br>
+          • Read/write data<br>
+          <span style="color:#3d8eff">= USB-C for AI tools</span>
+        </div>
+      </div>
+      <div style="flex:1;min-width:200px;padding:14px;border-radius:10px;background:#0a0b10;border:1px solid rgba(255,61,170,.3);">
+        <div style="font-weight:700;color:#ff3daa;margin-bottom:8px">🤝 A2A (Google)</div>
+        <div style="font-size:.8rem;color:#6e7590;line-height:1.7">
+          <b style="color:#e4e8f1">Agent ↔ Agent</b><br>
+          • Discover capabilities<br>
+          • Negotiate tasks<br>
+          • Delegate sub-tasks<br>
+          • Share results<br>
+          <span style="color:#ff3daa">= Internet for AI agents</span>
+        </div>
+      </div>
+      <div style="flex:1;min-width:200px;padding:14px;border-radius:10px;background:#0a0b10;border:1px solid rgba(255,210,61,.3);">
+        <div style="font-weight:700;color:#ffd23d;margin-bottom:8px">🤝+🔌 Together</div>
+        <div style="font-size:.8rem;color:#6e7590;line-height:1.7">
+          <b style="color:#e4e8f1">The Agent Economy</b><br>
+          • Agents find each other (A2A)<br>
+          • Agents use tools (MCP)<br>
+          • Unified "agent card"<br>
+          • Linux Foundation governed<br>
+          <span style="color:#ffd23d">= Full autonomous workflows</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ftr">⚡ <b>Simplified by Mahendra Gajera</b> ⚡</div>
+</div>
+
+<script>
+var timers=[],running=false;
+function clearT(){timers.forEach(function(t){clearTimeout(t);});timers=[];running=false;}
+
+function resetSim(){
+  clearT();
+  document.getElementById("stream").innerHTML="";
+  ["ag_orch","ag_research","ag_analyst","ag_writer"].forEach(function(id){
+    document.getElementById(id).classList.remove("active");
+  });
+}
+
+function addMsg(text,cls){
+  var s=document.getElementById("stream");
+  var d=document.createElement("div");
+  d.className="msg "+cls;
+  d.innerHTML=text;
+  s.appendChild(d);
+  s.scrollTop=s.scrollHeight;
+}
+
+function activate(id){
+  ["ag_orch","ag_research","ag_analyst","ag_writer"].forEach(function(a){
+    document.getElementById(a).classList.remove("active");
+  });
+  if(id)document.getElementById(id).classList.add("active");
+}
+
+function runSimulation(){
+  if(running)return;
+  resetSim();running=true;
+
+  var steps=[
+    {t:300,fn:function(){activate("ag_orch");addMsg("🎼 <b>Orchestrator</b>: Received task — 'Research competitor pricing and create a report'","msg-discover");}},
+    {t:800,fn:function(){addMsg("🎼 <b>Orchestrator</b>: Broadcasting A2A discovery request...","msg-discover");}},
+    {t:1400,fn:function(){addMsg("📡 <b>A2A Protocol</b>: Discovering available agents in registry...","msg-discover");}},
+    {t:2000,fn:function(){activate("ag_research");addMsg("🔍 <b>Researcher</b> (Gemini): I'm available! Capabilities: [web_search, data_scraping, fact_checking]","msg-negotiate");}},
+    {t:2600,fn:function(){activate("ag_analyst");addMsg("📊 <b>Analyst</b> (GPT-4o): I'm available! Capabilities: [data_analysis, charting, comparison]","msg-negotiate");}},
+    {t:3200,fn:function(){activate("ag_writer");addMsg("✍️ <b>Writer</b> (Claude): I'm available! Capabilities: [report_writing, formatting, summarization]","msg-negotiate");}},
+    {t:3800,fn:function(){activate("ag_orch");addMsg("🎼 <b>Orchestrator</b>: Negotiating task delegation via A2A...","msg-negotiate");}},
+    {t:4400,fn:function(){addMsg("📋 <b>A2A Task Cards</b>: Researcher → scrape pricing | Analyst → compare data | Writer → create report","msg-negotiate");}},
+    {t:5200,fn:function(){activate("ag_research");addMsg("🔍 <b>Researcher</b>: Using MCP → connecting to web_search tool...","msg-mcp");}},
+    {t:5800,fn:function(){addMsg("🔍 <b>Researcher</b>: Found pricing data for 5 competitors ✓","msg-execute");}},
+    {t:6400,fn:function(){addMsg("🔍 <b>Researcher</b>: Sending results to Analyst via A2A...","msg-execute");}},
+    {t:7000,fn:function(){activate("ag_analyst");addMsg("📊 <b>Analyst</b>: Received data. Using MCP → connecting to analysis tools...","msg-mcp");}},
+    {t:7600,fn:function(){addMsg("📊 <b>Analyst</b>: Competitor A: $49/mo | B: $79/mo | C: $29/mo | D: $99/mo | E: $59/mo","msg-execute");}},
+    {t:8200,fn:function(){addMsg("📊 <b>Analyst</b>: Analysis complete. We're 15% below market average. Sending to Writer...","msg-execute");}},
+    {t:8800,fn:function(){activate("ag_writer");addMsg("✍️ <b>Writer</b>: Received analysis. Generating report via MCP → doc_creator...","msg-mcp");}},
+    {t:9400,fn:function(){addMsg("✍️ <b>Writer</b>: Report generated: 'Competitive Pricing Analysis Q2 2026' (3 pages)","msg-execute");}},
+    {t:10000,fn:function(){activate("ag_orch");addMsg("🎼 <b>Orchestrator</b>: All tasks complete! Assembling final deliverable...","msg-result");}},
+    {t:10600,fn:function(){addMsg("✅ <b>COMPLETE</b>: Report ready. 4 agents, 3 platforms, 1 protocol. Total time: 45 seconds.","msg-result");activate(null);running=false;}},
+  ];
+
+  steps.forEach(function(s){
+    timers.push(setTimeout(s.fn,s.t));
+  });
+}
+</script>
+</body>
+</html>
