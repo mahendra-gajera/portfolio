@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>#9 AI Deployment Patterns — Simplified by Mahendra Gajera</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Courier New',monospace;background:#06070a;color:#e4e8f1;min-height:100vh;padding:24px 16px;}
+.app{max-width:960px;margin:0 auto;}
+.hdr{text-align:center;margin-bottom:24px;}
+.hdr .tag{display:inline-block;padding:3px 14px;border:1px solid #ff8c42;border-radius:20px;font-size:.68rem;color:#ff8c42;letter-spacing:2px;margin-bottom:8px;}
+.hdr h1{font-family:Georgia,serif;font-size:1.9rem;color:#ff8c42;}
+.hdr .sub{font-size:.82rem;color:#6e7590;margin-top:4px;font-family:Georgia,serif;}.hdr .sub b{color:#ff8c42;}
+
+.card{background:#0e1018;border:1px solid #1e2333;border-radius:14px;padding:22px;margin-bottom:18px;}
+.card h2{font-family:Georgia,serif;font-size:1.15rem;margin-bottom:10px;}
+.card p{font-size:.84rem;color:#9d9da3;line-height:1.7;font-family:Georgia,serif;margin-bottom:10px;}
+.card p b{color:#e4e8f1;}
+
+.btn{padding:9px 18px;border-radius:8px;border:none;font-weight:700;cursor:pointer;font-size:.82rem;font-family:inherit;transition:all .2s;}
+.btn:hover{opacity:.85;}
+.btn.sec{background:#1e2333;color:#9d9da3;}
+.btn.primary{background:#ff8c42;color:#06070a;}
+
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px;}
+.tab{padding:9px 16px;border-radius:8px;border:1px solid #1e2333;background:#0e1018;color:#9d9da3;cursor:pointer;font-family:inherit;font-size:.78rem;font-weight:700;letter-spacing:.5px;transition:all .2s;}
+.tab:hover{border-color:#ff8c4240;color:#e4e8f1;}
+.tab.active{background:#ff8c42;color:#06070a;border-color:#ff8c42;}
+
+.panel{display:none;animation:fadeIn .3s;}
+.panel.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+.lvl{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.62rem;letter-spacing:1px;margin-left:8px;vertical-align:middle;}
+.lvl.beg{background:rgba(61,255,138,.15);color:#3dff8a;border:1px solid #3dff8a40;}
+.lvl.mid{background:rgba(255,210,61,.15);color:#ffd23d;border:1px solid #ffd23d40;}
+.lvl.adv{background:rgba(255,61,170,.15);color:#ff3daa;border:1px solid #ff3daa40;}
+
+.concept{background:rgba(255,140,66,.05);border-left:3px solid #ff8c42;padding:12px 16px;border-radius:0 6px 6px 0;margin:12px 0;font-size:.82rem;color:#c8c8d0;line-height:1.7;font-family:Georgia,serif;}
+.concept b{color:#ff8c42;}
+
+.warn{background:rgba(255,61,170,.05);border-left:3px solid #ff3daa;padding:12px 16px;border-radius:0 6px 6px 0;margin:12px 0;font-size:.82rem;color:#c8c8d0;line-height:1.7;font-family:Georgia,serif;}
+.warn b{color:#ff3daa;}
+
+.good{background:rgba(61,255,138,.05);border-left:3px solid #3dff8a;padding:12px 16px;border-radius:0 6px 6px 0;margin:12px 0;font-size:.82rem;color:#c8c8d0;line-height:1.7;font-family:Georgia,serif;}
+.good b{color:#3dff8a;}
+
+/* Deployment cards */
+.deploys{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin:14px 0;}
+.deploy{padding:16px;border-radius:12px;border:2px solid;background:#0a0b10;transition:all .25s;cursor:default;}
+.deploy:hover{transform:translateY(-2px);}
+.deploy h3{font-family:Georgia,serif;font-size:1rem;margin-bottom:4px;}
+.deploy .vendor{font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;color:#6e7590;margin-bottom:10px;}
+.deploy .desc{font-size:.74rem;color:#9d9da3;line-height:1.6;margin-bottom:12px;}
+.deploy .stats{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px;}
+.deploy .stat{padding:6px 8px;background:#06070a;border-radius:6px;border:1px solid #1e2333;}
+.deploy .stat .l{font-size:.55rem;color:#6e7590;letter-spacing:1px;}
+.deploy .stat .v{font-size:.78rem;font-weight:700;margin-top:2px;}
+.deploy .best{font-size:.7rem;color:#3dff8a;margin-top:8px;padding-top:8px;border-top:1px dashed #1e2333;}
+.deploy .best b{color:#3dff8a;}
+.deploy .bad{font-size:.7rem;color:#ff3daa;margin-top:4px;}
+.deploy .bad b{color:#ff3daa;}
+.deploy.lambda{border-color:#ff8c42;}.deploy.lambda h3{color:#ff8c42;}
+.deploy.ecs{border-color:#4d8eff;}.deploy.ecs h3{color:#4d8eff;}
+.deploy.k8s{border-color:#9d3dff;}.deploy.k8s h3{color:#9d3dff;}
+.deploy.sagemaker{border-color:#ffd23d;}.deploy.sagemaker h3{color:#ffd23d;}
+.deploy.bedrock{border-color:#3dff8a;}.deploy.bedrock h3{color:#3dff8a;}
+.deploy.azureml{border-color:#00f0ff;}.deploy.azureml h3{color:#00f0ff;}
+.deploy.vertex{border-color:#ff3daa;}.deploy.vertex h3{color:#ff3daa;}
+.deploy.modal{border-color:#a880ff;}.deploy.modal h3{color:#a880ff;}
+.deploy.runpod{border-color:#a8a8b8;}.deploy.runpod h3{color:#a8a8b8;}
+
+.stage{background:#000;border:1px solid #1e2333;border-radius:8px;padding:16px;margin:14px 0;}
+.stage-title{font-size:.72rem;color:#6e7590;font-weight:700;margin-bottom:10px;letter-spacing:1px;}
+
+/* Architecture diagram */
+.arch-svg{width:100%;height:340px;}
+.arch-box{transition:all .35s;}
+.arch-rect{fill:#0e1018;stroke:#ff8c42;stroke-width:2;rx:8;}
+.arch-rect.cold{fill:#1e2333;stroke:#6e7590;}
+.arch-rect.active{fill:#ff8c42;}
+.arch-rect.gpu{fill:#0e1018;stroke:#9d3dff;stroke-width:2;}
+.arch-rect.gpu.active{fill:#9d3dff;}
+.arch-rect.cache{fill:#0e1018;stroke:#3dff8a;}
+.arch-rect.cache.active{fill:#3dff8a;}
+.arch-rect.user{fill:#0e1018;stroke:#00f0ff;}
+.arch-label{fill:#e4e8f1;text-anchor:middle;font-family:'Courier New',monospace;font-size:.7rem;font-weight:700;pointer-events:none;}
+.arch-rect.active+.arch-label,.arch-rect.gpu.active+.arch-label,.arch-rect.cache.active+.arch-label{fill:#06070a;}
+.arch-sublabel{fill:#6e7590;text-anchor:middle;font-family:'Courier New',monospace;font-size:.55rem;pointer-events:none;}
+.arch-edge{stroke:#1e2333;stroke-width:1.5;fill:none;transition:stroke .3s;}
+.arch-edge.active{stroke:#ff8c42;stroke-width:2.5;}
+.arch-elabel{fill:#6e7590;font-family:'Courier New',monospace;font-size:.6rem;text-anchor:middle;}
+
+/* Cost compare */
+.compare-bars{display:flex;flex-direction:column;gap:10px;margin:14px 0;}
+.cb-row{display:grid;grid-template-columns:140px 1fr 70px;gap:10px;align-items:center;}
+.cb-name{font-size:.74rem;font-weight:700;}
+.cb-track{height:18px;background:#06070a;border-radius:9px;overflow:hidden;border:1px solid #1e2333;}
+.cb-fill{height:100%;border-radius:9px;transition:width .6s;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;font-size:.6rem;color:#06070a;font-weight:700;}
+.cb-val{font-size:.7rem;color:#9d9da3;text-align:right;}
+
+.controls{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;align-items:center;margin:12px 0;}
+.controls input{background:#0a0b10;border:1px solid #1e2333;color:#e4e8f1;padding:8px 12px;border-radius:6px;font-family:inherit;font-size:.8rem;}
+.controls label{font-size:.74rem;color:#9d9da3;display:flex;align-items:center;gap:6px;}
+
+.usecase{padding:14px;background:#0a0b10;border:1px solid #1e2333;border-radius:10px;margin:10px 0;}
+.usecase .uc-h{font-size:.85rem;font-weight:700;margin-bottom:8px;font-family:Georgia,serif;}
+.usecase .uc-pick{display:inline-block;padding:3px 10px;border-radius:14px;font-size:.7rem;font-weight:700;margin-right:6px;margin-bottom:4px;}
+.usecase .pick-lambda{background:rgba(255,140,66,.2);color:#ff8c42;border:1px solid #ff8c4240;}
+.usecase .pick-ecs{background:rgba(77,142,255,.15);color:#4d8eff;border:1px solid #4d8eff40;}
+.usecase .pick-k8s{background:rgba(157,61,255,.2);color:#9d3dff;border:1px solid #9d3dff40;}
+.usecase .pick-bedrock{background:rgba(61,255,138,.15);color:#3dff8a;border:1px solid #3dff8a40;}
+.usecase .pick-modal{background:rgba(168,128,255,.15);color:#a880ff;border:1px solid #a880ff40;}
+.usecase .pick-sagemaker{background:rgba(255,210,61,.15);color:#ffd23d;border:1px solid #ffd23d40;}
+.usecase .reasoning{font-size:.74rem;color:#9d9da3;line-height:1.6;margin-top:6px;font-family:Georgia,serif;}
+
+.code{background:#000;border:1px solid #1e2333;border-radius:8px;padding:14px 18px;font-size:.74rem;color:#c8c8d0;margin:12px 0;line-height:1.7;overflow-x:auto;white-space:pre;font-family:'Courier New',monospace;}
+.code .kw{color:#ff3daa;}
+.code .fn{color:#ffd23d;}
+.code .str{color:#3dff8a;}
+.code .cmt{color:#6e7590;font-style:italic;}
+.code .num{color:#9d3dff;}
+.code .cls{color:#00f0ff;}
+
+.code-title{font-size:.7rem;color:#6e7590;font-weight:700;letter-spacing:1px;margin-top:14px;margin-bottom:4px;font-family:'Courier New',monospace;}
+.code-title b{color:#e4e8f1;}
+
+/* Decision tree */
+.tree-svg{width:100%;height:480px;}
+
+/* Animated request flow */
+.flow-controls{display:flex;justify-content:center;gap:8px;margin-bottom:8px;}
+
+/* Quiz */
+.quiz-q{margin:12px 0;padding:14px;background:#0a0b10;border:1px solid #1e2333;border-radius:10px;}
+.quiz-q .label{font-size:.78rem;color:#e4e8f1;font-weight:700;margin-bottom:10px;font-family:Georgia,serif;}
+.opts{display:flex;gap:6px;flex-wrap:wrap;}
+.opt{padding:8px 14px;border:1px solid #1e2333;border-radius:8px;background:#06070a;color:#9d9da3;cursor:pointer;font-family:inherit;font-size:.74rem;transition:all .2s;}
+.opt:hover{border-color:#ff8c4240;color:#e4e8f1;}
+.opt.selected{background:#ff8c42;color:#06070a;border-color:#ff8c42;}
+
+.recommend{background:linear-gradient(135deg,#0e1018 0%,#0a0b10 100%);border:2px solid #ff8c42;border-radius:12px;padding:18px;margin:16px 0;animation:fadeIn .4s;}
+.recommend .header{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.recommend .header .icon{font-size:1.5rem;}
+.recommend .header .title{font-family:Georgia,serif;font-size:1rem;color:#ff8c42;}
+.recommend .pick{font-size:1.15rem;font-weight:800;color:#e4e8f1;margin:8px 0;font-family:Georgia,serif;}
+.recommend .why{font-size:.78rem;color:#9d9da3;line-height:1.6;font-family:Georgia,serif;}
+.recommend .alt{font-size:.72rem;color:#6e7590;margin-top:10px;padding-top:10px;border-top:1px dashed #1e2333;}
+
+.ftr{text-align:center;margin-top:24px;font-size:.82rem;color:#6e7590;}.ftr b{color:#ff8c42;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="hdr">
+    <div class="tag">concept #9 · 2026</div>
+    <h1>☁️ AI Deployment Patterns</h1>
+    <div class="sub">Lambda · ECS · Kubernetes · Bedrock · Serverless GPU — when to use what · <b>Simplified by Mahendra Gajera</b></div>
+  </div>
+
+  <div class="card">
+    <h2>💡 The Real Question</h2>
+    <p>You've built your AI app. Now <b>where do you run it?</b> Lambda's fast but has limits. ECS scales but needs babysitting. Kubernetes is bulletproof but expensive to operate. SageMaker handles GPUs but locks you in.</p>
+    <p>This guide is the framework I actually use to decide. No vendor pitches — just tradeoffs from real deployments at <b>Microsoft, LSEG, JPMC, DBS Bank</b>.</p>
+    <div class="concept">⚡ <b>Rule of thumb:</b> Pick the simplest deployment that handles your load. You can always upgrade. Starting with Kubernetes for a side project is how you end up debugging YAML instead of shipping features.</div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="show(this,'p-overview')">🗺 Options</div>
+    <div class="tab" onclick="show(this,'p-decide')">🎯 Decide For Me</div>
+    <div class="tab" onclick="show(this,'p-arch')">🏗 Reference Architecture</div>
+    <div class="tab" onclick="show(this,'p-cost')">💰 Cost Compare</div>
+    <div class="tab" onclick="show(this,'p-usecases')">📋 Use Cases</div>
+    <div class="tab" onclick="show(this,'p-rules')">📐 Production Rules</div>
+  </div>
+
+  <!-- ============= OVERVIEW ============= -->
+  <div class="panel active" id="p-overview">
+    <div class="card">
+      <h2>🗺 Your Deployment Options <span class="lvl beg">START HERE</span></h2>
+      <p>Three broad categories — <b>serverless</b> (no infra to manage, scales to zero), <b>containers</b> (you manage less, control more), and <b>managed AI platforms</b> (vendor handles the AI-specific parts).</p>
+
+      <h3 style="font-family:Georgia,serif;font-size:.95rem;margin-top:16px;color:#ff8c42">⚡ Serverless — No infra, scales to zero</h3>
+      <div class="deploys">
+        <div class="deploy lambda">
+          <h3>AWS Lambda</h3>
+          <div class="vendor">Amazon Web Services</div>
+          <div class="desc">Trigger-based functions. Perfect for AI API wrappers, async processing, event-driven workflows. Cold starts hurt — ~1-3 sec for Python.</div>
+          <div class="stats">
+            <div class="stat"><div class="l">COLD START</div><div class="v" style="color:#ff3daa">1-3s</div></div>
+            <div class="stat"><div class="l">COST IDLE</div><div class="v" style="color:#3dff8a">$0</div></div>
+            <div class="stat"><div class="l">MAX RUN</div><div class="v">15 min</div></div>
+            <div class="stat"><div class="l">GPU</div><div class="v" style="color:#ff3daa">No</div></div>
+          </div>
+          <div class="best"><b>Best for:</b> Calling LLM APIs (OpenAI, Anthropic), webhook handlers, batch jobs, async RAG.</div>
+          <div class="bad"><b>Bad for:</b> Real-time GPU inference, long-running agents, big model loading.</div>
+        </div>
+
+        <div class="deploy modal">
+          <h3>Modal / Banana / Beam</h3>
+          <div class="vendor">Serverless GPU Platforms</div>
+          <div class="desc">Lambda-style ergonomics but with GPU support. Scale to zero, pay-per-second GPU, fast cold starts via snapshotting. The future of self-hosted model inference.</div>
+          <div class="stats">
+            <div class="stat"><div class="l">COLD START</div><div class="v" style="color:#ffd23d">2-10s</div></div>
+            <div class="stat"><div class="l">COST IDLE</div><div class="v" style="color:#3dff8a">$0</div></div>
+            <div class="stat"><div class="l">MAX RUN</div><div class="v" style="color:#3dff8a">Hours</div></div>
+            <div class="stat"><div class="l">GPU</div><div class="v" style="color:#3dff8a">Yes</div></div>
+          </div>
+          <div class="best"><b>Best for:</b> Self-hosted LLMs with bursty traffic, fine-tuned model serving, ML inference without DevOps overhead.</div>
+          <div class="bad"><b>Bad for:</b> Steady-state high-traffic production (cost adds up). Strict latency SLAs.</div>
+        </div>
+      </div>
+
+      <h3 style="font-family:Georgia,serif;font-size:.95rem;margin-top:20px;color:#4d8eff">📦 Containers — More control, more responsibility</h3>
+      <div class="deploys">
+        <div class="deploy ecs">
+          <h3>AWS ECS / Fargate</h3>
+          <div class="vendor">Amazon Web Services</div>
+          <div class="desc">Run Docker containers without managing servers (Fargate) or with full control (EC2 mode). The "Kubernetes-lite" — simpler operations, AWS-native.</div>
+          <div class="stats">
+            <div class="stat"><div class="l">COLD START</div><div class="v" style="color:#3dff8a">None</div></div>
+            <div class="stat"><div class="l">COST IDLE</div><div class="v" style="color:#ffd23d">$$</div></div>
+            <div class="stat"><div class="l">SCALE</div><div class="v">Auto</div></div>
+            <div class="stat"><div class="l">GPU</div><div class="v" style="color:#3dff8a">EC2 mode</div></div>
+          </div>
+          <div class="best"><b>Best for:</b> Production APIs with steady traffic, FastAPI services wrapping LLMs, RAG backends.</div>
+          <div class="bad"><b>Bad for:</b> Bursty traffic with long idle periods. Multi-cloud requirements.</div>
+        </div>
+
+        <div class="deploy k8s">
+          <h3>Kubernetes (EKS / AKS / GKE)</h3>
+          <div class="vendor">Cloud-Agnostic</div>
+          <div class="desc">The industry standard for production at scale. Massive ecosystem, vendor-neutral. Steep operational cost — needs platform engineering investment.</div>
+          <div class="stats">
+            <div class="stat"><div class="l">COLD START</div><div class="v" style="color:#3dff8a">None</div></div>
+            <div class="stat"><div class="l">COST IDLE</div><div class="v" style="color:#ff3daa">$$$</div></div>
+            <div class="stat"><div class="l">SCALE</div><div class="v" style="color:#3dff8a">Best</div></div>
+            <div class="stat"><div class="l">GPU</div><div class="v" style="color:#3dff8a">Yes</div></div>
+          </div>
+          <div class="best"><b>Best for:</b> Multi-cloud, complex microservices, GPU clusters, regulated industries needing portability.</div>
+          <div class="bad"><b>Bad for:</b> Small teams, side projects, simple apps. YAML hell is real.</div>
+        </div>
+      </div>
+
+      <h3 style="font-family:Georgia,serif;font-size:.95rem;margin-top:20px;color:#3dff8a">🤖 Managed AI Platforms — Vendor handles AI specifics</h3>
+      <div class="deploys">
+        <div class="deploy bedrock">
+          <h3>AWS Bedrock</h3>
+          <div class="vendor">Amazon Web Services</div>
+          <div class="desc">Fully managed access to Claude, Llama, Mistral, Cohere. No model ops, pay per token. Like the OpenAI API but on AWS with your data residency.</div>
+          <div class="stats">
+            <div class="stat"><div class="l">SETUP</div><div class="v" style="color:#3dff8a">Minutes</div></div>
+            <div class="stat"><div class="l">SCALING</div><div class="v" style="color:#3dff8a">Vendor</div></div>
+            <div class="stat"><div class="l">MODELS</div><div class="v">Claude, Llama+</div></div>
+            <div class="stat"><div class="l">CUSTOM</div><div class="v" style="color:#ffd23d">Limited</div></div>
+          </div>
+          <div class="best"><b>Best for:</b> AWS shops needing Claude or open-weight models. Compliance (PrivateLink, no data retention).</div>
+          <div class="bad"><b>Bad for:</b> Heavy custom model work, non-AWS environments.</div>
+        </div>
+
+        <div class="deploy azureml">
+          <h3>Azure OpenAI / ML</h3>
+          <div class="vendor">Microsoft Azure</div>
+          <div class="desc">GPT-4/5 with Azure compliance (HIPAA, SOC, etc), data residency, content filtering. Azure ML for custom model training/deployment. What I use at Microsoft.</div>
+          <div class="stats">
+            <div class="stat"><div class="l">SETUP</div><div class="v" style="color:#3dff8a">Minutes</div></div>
+            <div class="stat"><div class="l">COMPLIANCE</div><div class="v" style="color:#3dff8a">Strong</div></div>
+            <div class="stat"><div class="l">MODELS</div><div class="v">GPT, Claude*</div></div>
+            <div class="stat"><div class="l">CUSTOM</div><div class="v" style="color:#3dff8a">Yes</div></div>
+          </div>
+          <div class="best"><b>Best for:</b> Enterprise workflows, regulated industries, Microsoft-aligned stacks. Production GPT access.</div>
+          <div class="bad"><b>Bad for:</b> Multi-cloud strategies. Azure quota waits can be brutal in 2026.</div>
+        </div>
+
+        <div class="deploy sagemaker">
+          <h3>AWS SageMaker</h3>
+          <div class="vendor">Amazon Web Services</div>
+          <div class="desc">Full ML lifecycle — training, fine-tuning, deployment. Endpoints can host any model. Powerful but expensive and AWS-locked.</div>
+          <div class="stats">
+            <div class="stat"><div class="l">SETUP</div><div class="v" style="color:#ffd23d">Hours</div></div>
+            <div class="stat"><div class="l">COST IDLE</div><div class="v" style="color:#ff3daa">$$$$</div></div>
+            <div class="stat"><div class="l">CUSTOM</div><div class="v" style="color:#3dff8a">Full</div></div>
+            <div class="stat"><div class="l">GPU</div><div class="v" style="color:#3dff8a">Yes</div></div>
+          </div>
+          <div class="best"><b>Best for:</b> Custom model training, fine-tuned model serving, enterprises with serious ML engineering teams.</div>
+          <div class="bad"><b>Bad for:</b> Small teams. The cheapest endpoint runs ~$50/month even idle.</div>
+        </div>
+
+        <div class="deploy vertex">
+          <h3>Google Vertex AI</h3>
+          <div class="vendor">Google Cloud</div>
+          <div class="desc">Google's ML platform. Gemini access, model garden, vector search. Strong on multimodal and long-context use cases.</div>
+          <div class="stats">
+            <div class="stat"><div class="l">SETUP</div><div class="v" style="color:#3dff8a">Minutes</div></div>
+            <div class="stat"><div class="l">MULTIMODAL</div><div class="v" style="color:#3dff8a">Best</div></div>
+            <div class="stat"><div class="l">MODELS</div><div class="v">Gemini, OS</div></div>
+            <div class="stat"><div class="l">CUSTOM</div><div class="v" style="color:#3dff8a">Yes</div></div>
+          </div>
+          <div class="best"><b>Best for:</b> GCP shops, video/image AI, long-context workloads (Gemini 2M context).</div>
+          <div class="bad"><b>Bad for:</b> Non-GCP environments, teams wanting Claude or GPT.</div>
+        </div>
+      </div>
+
+      <h3 style="font-family:Georgia,serif;font-size:.95rem;margin-top:20px;color:#a8a8b8">🔌 Other Options Worth Knowing</h3>
+      <div class="deploys">
+        <div class="deploy runpod">
+          <h3>RunPod / Lambda Labs / Vast.ai</h3>
+          <div class="vendor">GPU Cloud Specialists</div>
+          <div class="desc">Bare GPU rentals. 50-80% cheaper than hyperscalers for the same hardware. Perfect for training, fine-tuning, batch inference.</div>
+          <div class="stats">
+            <div class="stat"><div class="l">PRICE</div><div class="v" style="color:#3dff8a">Cheapest</div></div>
+            <div class="stat"><div class="l">RELIABILITY</div><div class="v" style="color:#ffd23d">OK</div></div>
+            <div class="stat"><div class="l">SETUP</div><div class="v" style="color:#ffd23d">DIY</div></div>
+            <div class="stat"><div class="l">COMPLIANCE</div><div class="v" style="color:#ff3daa">Weak</div></div>
+          </div>
+          <div class="best"><b>Best for:</b> Training runs, research, fine-tuning, hobby projects, batch jobs where reliability isn't critical.</div>
+          <div class="bad"><b>Bad for:</b> Production SLAs, regulated workloads, anything mission-critical.</div>
+        </div>
+      </div>
+
+      <div class="warn">⚠️ <b>Things people get wrong:</b> Picking Kubernetes for an MVP. Running LLM inference on Lambda (cold starts + 15-min limit kills you). Self-hosting on bare GPU when an API would cost less. Building "future-proof" multi-cloud when you have one engineer.</div>
+    </div>
+  </div>
+
+  <!-- ============= DECIDE FOR ME ============= -->
+  <div class="panel" id="p-decide">
+    <div class="card">
+      <h2>🎯 Pick A Deployment For Your Use Case <span class="lvl beg">INTERACTIVE</span></h2>
+      <p>Answer 5 questions. I'll recommend a deployment with reasoning.</p>
+
+      <div class="quiz-q">
+        <div class="label">1. Are you calling an LLM API or running a model yourself?</div>
+        <div class="opts" data-q="model">
+          <div class="opt" data-v="api">API only (OpenAI, Claude, etc)</div>
+          <div class="opt" data-v="oss">Self-host open-source model</div>
+          <div class="opt" data-v="finetuned">Custom fine-tuned model</div>
+          <div class="opt" data-v="mixed">Both API + self-host</div>
+        </div>
+      </div>
+
+      <div class="quiz-q">
+        <div class="label">2. What's the traffic pattern?</div>
+        <div class="opts" data-q="traffic">
+          <div class="opt" data-v="bursty">Bursty (idle then spikes)</div>
+          <div class="opt" data-v="steady">Steady (24/7 load)</div>
+          <div class="opt" data-v="low">Low (&lt;1000 req/day)</div>
+          <div class="opt" data-v="batch">Batch (jobs, not real-time)</div>
+        </div>
+      </div>
+
+      <div class="quiz-q">
+        <div class="label">3. Latency requirement?</div>
+        <div class="opts" data-q="latency">
+          <div class="opt" data-v="strict">&lt;500ms (interactive)</div>
+          <div class="opt" data-v="medium">1-5s (acceptable)</div>
+          <div class="opt" data-v="loose">5s+ is fine (async)</div>
+        </div>
+      </div>
+
+      <div class="quiz-q">
+        <div class="label">4. Team size &amp; ops capacity?</div>
+        <div class="opts" data-q="team">
+          <div class="opt" data-v="solo">Solo / small (1-3)</div>
+          <div class="opt" data-v="mid">Mid (4-15)</div>
+          <div class="opt" data-v="big">Big with platform team</div>
+        </div>
+      </div>
+
+      <div class="quiz-q">
+        <div class="label">5. Cloud preference?</div>
+        <div class="opts" data-q="cloud">
+          <div class="opt" data-v="aws">AWS shop</div>
+          <div class="opt" data-v="azure">Azure shop</div>
+          <div class="opt" data-v="gcp">GCP shop</div>
+          <div class="opt" data-v="agnostic">Multi-cloud / agnostic</div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button class="btn primary" onclick="recommendDeploy()">🎯 Recommend</button>
+        <button class="btn sec" onclick="resetQuiz()">↺ Reset</button>
+      </div>
+
+      <div id="rec-result"></div>
+    </div>
+  </div>
+
+  <!-- ============= ARCHITECTURE ============= -->
+  <div class="panel" id="p-arch">
+    <div class="card">
+      <h2>🏗 Reference Architecture: Production AI App <span class="lvl mid">PRACTICAL</span></h2>
+      <p>What a real production AI deployment looks like. This is roughly what I'd build for a typical RAG/agent app — boring, battle-tested, the kind of architecture that survives real traffic.</p>
+
+      <div class="flow-controls">
+        <button class="btn primary" onclick="animateFlow()">▶ Animate Request</button>
+        <button class="btn sec" onclick="resetFlow()">↺ Reset</button>
+      </div>
+
+      <div class="stage">
+        <div class="stage-title">→ Production AI request flow</div>
+        <svg class="arch-svg" viewBox="0 0 700 340" id="arch-svg"></svg>
+      </div>
+
+      <div class="concept">⚡ <b>Why this design?</b> API Gateway gives you rate limiting and auth without code. Lambda is cheap and scales infinitely for thin orchestration. The vector store and LLM are managed services — you don't run the hard parts. The Redis cache is the secret weapon: 30-70% of LLM calls in production can be served from cache.</div>
+
+      <div class="code-title">// <b>Production deployment with AWS CDK (TypeScript)</b></div>
+      <div class="code"><span class="kw">import</span> * <span class="kw">as</span> cdk <span class="kw">from</span> <span class="str">'aws-cdk-lib'</span>;
+<span class="kw">import</span> * <span class="kw">as</span> lambda <span class="kw">from</span> <span class="str">'aws-cdk-lib/aws-lambda'</span>;
+<span class="kw">import</span> * <span class="kw">as</span> apigw <span class="kw">from</span> <span class="str">'aws-cdk-lib/aws-apigateway'</span>;
+
+<span class="kw">export class</span> <span class="cls">AiAppStack</span> <span class="kw">extends</span> cdk.<span class="cls">Stack</span> {
+  <span class="fn">constructor</span>(scope, id, props) {
+    <span class="kw">super</span>(scope, id, props);
+
+    <span class="cmt">// 1. The orchestration Lambda — calls Bedrock, manages RAG</span>
+    <span class="kw">const</span> ragFn = <span class="kw">new</span> lambda.<span class="cls">Function</span>(<span class="kw">this</span>, <span class="str">'RagHandler'</span>, {
+      runtime: lambda.<span class="cls">Runtime</span>.<span class="cls">PYTHON_3_12</span>,
+      handler: <span class="str">'index.handler'</span>,
+      code: lambda.<span class="cls">Code</span>.<span class="fn">fromAsset</span>(<span class="str">'lambda/rag'</span>),
+      memorySize: <span class="num">1024</span>,
+      timeout: cdk.<span class="cls">Duration</span>.<span class="fn">seconds</span>(<span class="num">30</span>),
+      environment: {
+        BEDROCK_MODEL_ID: <span class="str">'anthropic.claude-sonnet-4-6'</span>,
+        VECTOR_STORE_URL: vectorStore.url,
+        CACHE_URL: redisCluster.endpoint,
+      },
+    });
+
+    <span class="cmt">// 2. API Gateway — rate limiting, auth, throttling</span>
+    <span class="kw">const</span> api = <span class="kw">new</span> apigw.<span class="cls">RestApi</span>(<span class="kw">this</span>, <span class="str">'AiApi'</span>, {
+      throttle: { rateLimit: <span class="num">100</span>, burstLimit: <span class="num">200</span> },
+    });
+    api.root.<span class="fn">addMethod</span>(<span class="str">'POST'</span>, <span class="kw">new</span> apigw.<span class="cls">LambdaIntegration</span>(ragFn));
+
+    <span class="cmt">// 3. Grant Bedrock access</span>
+    ragFn.<span class="fn">addToRolePolicy</span>(<span class="kw">new</span> iam.<span class="cls">PolicyStatement</span>({
+      actions: [<span class="str">'bedrock:InvokeModel'</span>],
+      resources: [<span class="str">'arn:aws:bedrock:*::foundation-model/anthropic.*'</span>],
+    }));
+  }
+}</div>
+
+      <div class="code-title">// <b>The Lambda handler itself</b></div>
+      <div class="code"><span class="kw">import</span> os, json, boto3, redis
+<span class="kw">from</span> langchain_aws <span class="kw">import</span> <span class="cls">ChatBedrock</span>
+
+bedrock = boto3.<span class="fn">client</span>(<span class="str">'bedrock-runtime'</span>)
+cache = redis.<span class="cls">Redis</span>.<span class="fn">from_url</span>(os.environ[<span class="str">'CACHE_URL'</span>])
+llm = <span class="cls">ChatBedrock</span>(model_id=os.environ[<span class="str">'BEDROCK_MODEL_ID'</span>])
+
+<span class="kw">def</span> <span class="fn">handler</span>(event, context):
+    query = json.<span class="fn">loads</span>(event[<span class="str">'body'</span>])[<span class="str">'query'</span>]
+
+    <span class="cmt"># 1. Check cache first — saves 30-70% of LLM costs</span>
+    cached = cache.<span class="fn">get</span>(<span class="fn">cache_key</span>(query))
+    <span class="kw">if</span> cached:
+        <span class="kw">return</span> {<span class="str">'statusCode'</span>: <span class="num">200</span>, <span class="str">'body'</span>: cached}
+
+    <span class="cmt"># 2. RAG: retrieve from vector store</span>
+    docs = vector_store.<span class="fn">similarity_search</span>(query, k=<span class="num">5</span>)
+
+    <span class="cmt"># 3. Augment + generate</span>
+    response = llm.<span class="fn">invoke</span>(<span class="fn">build_prompt</span>(query, docs))
+
+    <span class="cmt"># 4. Cache for next time (5 min TTL)</span>
+    cache.<span class="fn">setex</span>(<span class="fn">cache_key</span>(query), <span class="num">300</span>, response.content)
+
+    <span class="kw">return</span> {<span class="str">'statusCode'</span>: <span class="num">200</span>, <span class="str">'body'</span>: response.content}</div>
+
+      <div class="good">✅ <b>Why this scales:</b> Lambda auto-scales to thousands of concurrent invocations. Bedrock handles model scaling. Redis is the only thing you sized — and it's cheap. Your scaling problem becomes someone else's scaling problem.</div>
+    </div>
+  </div>
+
+  <!-- ============= COST COMPARE ============= -->
+  <div class="panel" id="p-cost">
+    <div class="card">
+      <h2>💰 Monthly Cost Comparison <span class="lvl mid">REALITY CHECK</span></h2>
+      <p>Same RAG workload deployed different ways. Numbers are <i>approximate 2026 pricing</i> — actual costs depend on your AWS/Azure/GCP discounts, region, and usage patterns.</p>
+
+      <div class="controls">
+        <label>Requests/day: <input type="number" id="req-day" value="50000" min="100" max="100000000" style="width:120px"></label>
+        <label>Avg request time: <input type="number" id="req-time" value="2" min="0.1" max="60" step="0.1" style="width:80px"></label>s
+        <button class="btn primary" onclick="calcDeployCost()">💰 Calculate</button>
+      </div>
+
+      <div class="stage">
+        <div class="stage-title">→ Estimated monthly cost (compute only, not including LLM API)</div>
+        <div class="compare-bars" id="cost-bars"></div>
+      </div>
+
+      <div class="concept">⚡ <b>The big insight:</b> For most AI apps, your LLM API costs (Bedrock, OpenAI) dwarf your compute costs. Optimizing compute when LLM tokens are 90% of your bill is fixing the wrong problem. Cache aggressively. Use cheaper models where you can. Then worry about compute.</div>
+
+      <div class="warn">⚠️ <b>Hidden costs nobody mentions:</b><br>
+      • <b>NAT Gateway</b> — Lambdas in VPCs need this. ~$32/mo + per-GB egress.<br>
+      • <b>Data transfer</b> — Cross-AZ traffic = $0.01/GB. Adds up at scale.<br>
+      • <b>CloudWatch logs</b> — Verbose logging from Lambdas can cost more than the Lambdas.<br>
+      • <b>Idle endpoints</b> — SageMaker endpoints, ALBs, NAT Gateways all bill 24/7.<br>
+      • <b>Reserved capacity</b> — Provisioned concurrency on Lambda kills the "scale to zero" benefit.</div>
+    </div>
+  </div>
+
+  <!-- ============= USE CASES ============= -->
+  <div class="panel" id="p-usecases">
+    <div class="card">
+      <h2>📋 Real-World Use Cases <span class="lvl mid">PATTERNS</span></h2>
+      <p>Common AI deployment scenarios with picks and reasoning.</p>
+
+      <div class="usecase">
+        <div class="uc-h">💬 Internal chatbot (calls OpenAI API)</div>
+        <span class="uc-pick pick-lambda">AWS Lambda + API Gateway</span>
+        <div class="reasoning">Low complexity, bursty traffic (employees use it during work hours, idle otherwise). Lambda's scale-to-zero is perfect. Cold starts of 1-2 sec are acceptable for chat. ~$30/mo at typical scale.</div>
+      </div>
+
+      <div class="usecase">
+        <div class="uc-h">🌐 Customer-facing RAG app (100K+ req/day)</div>
+        <span class="uc-pick pick-ecs">ECS Fargate</span><span class="uc-pick pick-bedrock">+ Bedrock</span>
+        <div class="reasoning">Steady production load — Lambda costs more than containers at this volume. Fargate keeps containers warm (no cold starts), auto-scales horizontally, integrates with ALB for routing. Use Bedrock for the LLM so you skip model ops.</div>
+      </div>
+
+      <div class="usecase">
+        <div class="uc-h">🧠 Self-hosted Llama 3.3 70B inference</div>
+        <span class="uc-pick pick-modal">Modal / Beam</span><span class="uc-pick pick-k8s">or K8s + vLLM</span>
+        <div class="reasoning">Need GPUs but want to skip DevOps? Modal. Have a platform team and need cost control at scale? K8s with vLLM for high-throughput serving. Avoid SageMaker unless you need its fine-tuning features.</div>
+      </div>
+
+      <div class="usecase">
+        <div class="uc-h">📊 Batch document processing (millions of docs)</div>
+        <span class="uc-pick pick-lambda">Lambda + SQS</span><span class="uc-pick pick-bedrock">+ Bedrock Batch</span>
+        <div class="reasoning">Async, parallel, fault-tolerant. Lambdas pull from SQS queue, hit Bedrock Batch API for 50% discount. No need for always-on compute. Scales to millions overnight then bills $0 the rest of the time.</div>
+      </div>
+
+      <div class="usecase">
+        <div class="uc-h">🤖 Multi-agent workflow with long-running steps</div>
+        <span class="uc-pick pick-ecs">ECS</span><span class="uc-pick pick-k8s">or K8s</span>
+        <div class="reasoning">Agents can run 30+ seconds. Lambda's 15-min limit is fine, but stateful coordination across agents is awkward. Containers let you keep state in-process. Use Step Functions or Temporal for orchestration.</div>
+      </div>
+
+      <div class="usecase">
+        <div class="uc-h">🏥 Regulated industry (HIPAA, financial)</div>
+        <span class="uc-pick pick-k8s">EKS + Bedrock</span><span class="uc-pick pick-bedrock">PrivateLink</span>
+        <div class="reasoning">EKS gives you network isolation (PrivateLink, VPC endpoints, no internet). Bedrock has BAA and HIPAA eligibility. Lambda complicates audit trails for some compliance frameworks. This is what I deployed at LSEG for trading workflows.</div>
+      </div>
+
+      <div class="usecase">
+        <div class="uc-h">🎯 Real-time AI in mobile/web app (&lt;500ms)</div>
+        <span class="uc-pick pick-ecs">ECS Fargate + ALB</span>
+        <div class="reasoning">Lambda cold starts of 1-3 seconds kill strict latency SLAs. Keep containers warm. Use Bedrock or OpenAI streaming for token-by-token response — perceived latency drops dramatically. Add CloudFront for global edge.</div>
+      </div>
+
+      <div class="usecase">
+        <div class="uc-h">🔬 ML training / fine-tuning runs</div>
+        <span class="uc-pick pick-sagemaker">SageMaker Training</span><span class="uc-pick" style="background:rgba(168,168,184,.2);color:#a8a8b8;border:1px solid #a8a8b840">or RunPod</span>
+        <div class="reasoning">SageMaker for managed experience with experiment tracking and hyperparameter tuning. RunPod for 60% cheaper GPU when you don't need the bells and whistles. Avoid running training on your production infra.</div>
+      </div>
+
+      <div class="usecase">
+        <div class="uc-h">🚀 Side project / MVP</div>
+        <span class="uc-pick pick-lambda">Lambda + Vercel</span><span class="uc-pick pick-modal">or Modal for GPU</span>
+        <div class="reasoning">Don't over-engineer. Lambda for backend ($0 idle), Vercel for frontend, OpenAI/Claude API for the AI part. Total infra cost: probably $5-20/mo until you hit real scale. Worry about K8s after you have users.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============= RULES ============= -->
+  <div class="panel" id="p-rules">
+    <div class="card">
+      <h2>📐 Production Rules I Follow <span class="lvl adv">REAL TALK</span></h2>
+      <p>Hard-won lessons from deploying AI at Microsoft, LSEG, JPMC, DBS Bank. Patterns that survived real incidents.</p>
+
+      <h3 style="font-family:Georgia,serif;font-size:.95rem;margin-top:14px">📏 Rule 1 — Cache before you scale</h3>
+      <div class="concept">In production RAG, <b>30-70% of queries are repeats</b>. Add Redis with a 5-min TTL on (query → response). This saves more money than any infra optimization. Cost: ~$15/mo for a small Redis. Savings: thousands.</div>
+      <div class="code"><span class="kw">def</span> <span class="fn">cached_llm_call</span>(query):
+    key = hashlib.<span class="fn">sha256</span>(query.<span class="fn">encode</span>()).<span class="fn">hexdigest</span>()
+    <span class="kw">if</span> cached := redis.<span class="fn">get</span>(key):
+        <span class="kw">return</span> cached  <span class="cmt"># 30-70% of calls end here</span>
+    response = llm.<span class="fn">invoke</span>(query)
+    redis.<span class="fn">setex</span>(key, <span class="num">300</span>, response)  <span class="cmt"># 5 min TTL</span>
+    <span class="kw">return</span> response</div>
+
+      <h3 style="font-family:Georgia,serif;font-size:.95rem;margin-top:14px">📏 Rule 2 — Streaming &gt; waiting</h3>
+      <div class="concept">A 5-second response feels broken. The same 5-second response <b>streamed token-by-token</b> feels instant. Use SSE (Server-Sent Events) or WebSockets. ALB supports streaming; API Gateway has Lambda response streaming since 2023.</div>
+
+      <h3 style="font-family:Georgia,serif;font-size:.95rem;margin-top:14px">📏 Rule 3 — Async by default</h3>
+      <div class="concept">If a request can take &gt;10 seconds, don't block the user. Return a job ID immediately, do work in the background (SQS + Lambda or Step Functions), poll or push completion. This is how every serious AI app handles long-running work.</div>
+
+      <h3 style="font-family:Georgia,serif;font-size:.95rem;margin-top:14px">📏 Rule 4 — Cold starts are a UX bug</h3>
+      <div class="concept">Lambda Python cold starts are 1-3 sec. For interactive apps that's noticeable. Three fixes: (1) provisioned concurrency, (2) keep functions warm with EventBridge ping, (3) use ECS Fargate where it matters. Profile before optimizing.</div>
+
+      <h3 style="font-family:Georgia,serif;font-size:.95rem;margin-top:14px">📏 Rule 5 — Pick your bottleneck</h3>
+      <div class="concept">Your latency is dominated by <b>one thing</b>: usually the LLM call itself. Optimizing your container start time when the LLM takes 3 seconds is wasted effort. Profile, find the bottleneck, fix that.</div>
+
+      <h3 style="font-family:Georgia,serif;font-size:.95rem;margin-top:14px">📏 Rule 6 — Observability isn't optional</h3>
+      <div class="concept">From day one: log every prompt, every response, every tool call, every error. Track p50/p95/p99 latency, token usage, cost per request. Use OpenTelemetry, Datadog, Grafana — whatever your team uses. <b>You can't fix what you don't measure.</b></div>
+      <div class="code"><span class="kw">from</span> opentelemetry <span class="kw">import</span> trace
+tracer = trace.<span class="fn">get_tracer</span>(__name__)
+
+<span class="kw">with</span> tracer.<span class="fn">start_as_current_span</span>(<span class="str">"llm_call"</span>) <span class="kw">as</span> span:
+    span.<span class="fn">set_attribute</span>(<span class="str">"model"</span>, <span class="str">"claude-sonnet"</span>)
+    span.<span class="fn">set_attribute</span>(<span class="str">"prompt_tokens"</span>, count_tokens(prompt))
+    response = llm.<span class="fn">invoke</span>(prompt)
+    span.<span class="fn">set_attribute</span>(<span class="str">"output_tokens"</span>, response.usage.output_tokens)
+    span.<span class="fn">set_attribute</span>(<span class="str">"cost_usd"</span>, <span class="fn">estimate_cost</span>(response))</div>
+
+      <h3 style="font-family:Georgia,serif;font-size:.95rem;margin-top:14px">📏 Rule 7 — Plan for failure modes</h3>
+      <div class="concept">LLMs go down. APIs rate-limit. Models get deprecated. Build for it. Wrap every LLM call in retries with exponential backoff. Have a fallback model (Bedrock if Anthropic API fails, vice versa). Graceful degradation &gt; 500 errors.</div>
+
+      <h3 style="font-family:Georgia,serif;font-size:.95rem;margin-top:14px">📏 Rule 8 — IaC from day one</h3>
+      <div class="concept">Terraform, CDK, Pulumi — pick one. Click-Ops deployments are landmines. Yes, this is more upfront work. Yes, it pays off the third time you need to recreate the stack at 3 AM after someone deleted something.</div>
+
+      <h3 style="font-family:Georgia,serif;font-size:.95rem;margin-top:14px">📏 Rule 9 — Start managed, go custom when it hurts</h3>
+      <div class="concept">Start with Bedrock or OpenAI API. Move to self-hosted only when (a) costs blow up, (b) latency is unfixable, or (c) compliance demands it. Most teams self-host too early and regret it. The OpenAI bill that justifies a 10-engineer ML platform team is enormous.</div>
+
+      <div class="warn">⚠️ <b>The thing that will hurt the most:</b> You'll be tempted to over-engineer for scale you don't have yet. Resist. Build the boring thing. Ship. Measure. Scale when reality forces you to. Production wisdom is mostly knowing what NOT to build.</div>
+
+      <div class="good">✅ <b>The framework one more time:</b><br>
+      • <b>API-only + low traffic</b> → Lambda<br>
+      • <b>API-only + high traffic</b> → ECS Fargate<br>
+      • <b>Self-host + bursty</b> → Modal/Beam<br>
+      • <b>Self-host + steady</b> → Kubernetes + vLLM<br>
+      • <b>Regulated</b> → EKS + Bedrock/Azure OpenAI<br>
+      • <b>Training</b> → SageMaker or RunPod<br>
+      • <b>MVP</b> → Lambda + Vercel + OpenAI</div>
+    </div>
+  </div>
+
+  <div class="ftr">⚡ <b>Simplified by Mahendra Gajera</b> ⚡</div>
+</div>
+
+<script>
+function show(el,id){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(id).classList.add('active');
+  if(id==='p-arch')drawArch();
+  if(id==='p-cost')calcDeployCost();
+}
+
+/* ============== QUIZ ============== */
+const answers={};
+document.addEventListener('click',function(e){
+  if(e.target.classList.contains('opt')){
+    const q=e.target.parentElement.dataset.q;
+    const v=e.target.dataset.v;
+    answers[q]=v;
+    e.target.parentElement.querySelectorAll('.opt').forEach(o=>o.classList.remove('selected'));
+    e.target.classList.add('selected');
+  }
+});
+
+function resetQuiz(){
+  Object.keys(answers).forEach(k=>delete answers[k]);
+  document.querySelectorAll('.opt').forEach(o=>o.classList.remove('selected'));
+  document.getElementById('rec-result').innerHTML='';
+}
+
+function recommendDeploy(){
+  const need=['model','traffic','latency','team','cloud'];
+  const missing=need.filter(k=>!answers[k]);
+  if(missing.length){
+    document.getElementById('rec-result').innerHTML=`<div class="warn">⚠️ Please answer all 5 questions. Missing: ${missing.join(', ')}</div>`;
+    return;
+  }
+
+  let pick='AWS Lambda + API Gateway',icon='⚡',why='',alt='';
+  const a=answers;
+
+  // Self-hosted models — needs GPU
+  if(a.model==='oss'||a.model==='finetuned'){
+    if(a.traffic==='bursty'||a.traffic==='low'){
+      pick='Modal / Beam (Serverless GPU)';icon='🟣';
+      why='You\'re self-hosting a model but traffic is bursty — keeping a GPU warm 24/7 is wasteful. Modal/Beam scale GPU containers to zero, charge per-second, and have reasonable cold starts. Lambda-style ergonomics for ML.';
+      alt='Alternative: RunPod for hobby/research scale at lowest cost. Avoid SageMaker endpoints — they bill 24/7.';
+    } else if(a.team==='solo'||a.team==='mid'){
+      pick='Modal + vLLM';icon='🟣';
+      why='Steady traffic but small team — Modal handles scaling without DevOps overhead. vLLM gives you high-throughput inference. Way easier than running your own K8s cluster.';
+      alt='Alternative: ECS with GPU instances if you\'re already deep in AWS. SageMaker only if you need its training/tuning features.';
+    } else {
+      pick='Kubernetes (EKS/AKS/GKE) + vLLM';icon='🟦';
+      why='Steady production load, big team, self-hosted model — this is the K8s sweet spot. vLLM for serving (best throughput), KEDA for scaling, GPU node pools. You\'re running it at the scale where the operational cost makes sense.';
+      alt='Alternative: SageMaker if you need managed model registry, but it costs 2-3x more.';
+    }
+  }
+  // API only or mixed - latency strict
+  else if(a.latency==='strict'){
+    if(a.cloud==='aws'){
+      pick='ECS Fargate + ALB + Bedrock';icon='📦';
+      why='Sub-500ms requires warm containers. Lambda\'s 1-3s cold starts kill the SLA. Fargate keeps containers warm, ALB does smart routing, Bedrock handles the LLM. Use streaming responses to make perceived latency even better.';
+      alt='Alternative: Lambda with provisioned concurrency if cost is critical (you pay for warm containers anyway).';
+    } else if(a.cloud==='azure'){
+      pick='Azure Container Apps + Azure OpenAI';icon='🟦';
+      why='Container Apps is Azure\'s ECS Fargate equivalent. Keeps containers warm, scales horizontally, integrates with Azure OpenAI for low-latency GPT-4 access. What I deploy at Microsoft.';
+      alt='Alternative: AKS if you need more control or want to self-host on Azure.';
+    } else {
+      pick='Cloud Run + Vertex AI';icon='🩷';
+      why='Cloud Run is GCP\'s serverless container platform with much faster cold starts than Lambda. Pairs well with Vertex AI for Gemini access.';
+      alt='Alternative: GKE if you need fine-grained control over compute.';
+    }
+  }
+  // Batch workloads
+  else if(a.traffic==='batch'){
+    pick='Lambda + SQS + Bedrock Batch API';icon='📦';
+    why='Batch processing screams serverless. Lambda pulls from SQS queue, fans out massively in parallel, hits Bedrock Batch (50% discount). Scales to millions overnight, bills $0 between batches. Perfect cost profile.';
+    alt='Alternative: ECS task scheduled via EventBridge if individual tasks need >15min runtime.';
+  }
+  // Low traffic / solo team
+  else if(a.traffic==='low'||a.team==='solo'){
+    pick='AWS Lambda + API Gateway + Bedrock';icon='⚡';
+    why='Low volume or small team — Lambda is unbeatable. Scales to zero, $0 when idle, no servers to manage. Bedrock for the LLM means you skip all model ops. Total cost likely under $50/mo.';
+    alt='Alternative: Cloudflare Workers if you need global edge deployment.';
+  }
+  // Bursty traffic
+  else if(a.traffic==='bursty'){
+    if(a.cloud==='aws'){
+      pick='AWS Lambda + Bedrock';icon='⚡';
+      why='Bursty traffic with API-based LLM is the textbook Lambda use case. Scales 0→1000s instantly. You pay only for actual usage. Bedrock removes any model-side scaling concern.';
+      alt='Alternative: ECS Fargate with low minimum capacity if cold starts matter.';
+    } else if(a.cloud==='azure'){
+      pick='Azure Functions + Azure OpenAI';icon='🟦';
+      why='Azure Functions is the Lambda equivalent. Pairs natively with Azure OpenAI for GPT access. Bursty load is exactly what this combo handles best.';
+      alt='Alternative: Container Apps if you need longer execution times.';
+    } else {
+      pick='Cloud Functions + Vertex AI (Gemini)';icon='🩷';
+      why='GCP\'s serverless function platform plus Vertex AI for Gemini. Bursty workloads scale automatically.';
+      alt='Alternative: Cloud Run if you need WebSocket support or longer-lived processes.';
+    }
+  }
+  // Steady high traffic
+  else if(a.traffic==='steady'){
+    if(a.team==='big'){
+      pick='Kubernetes + Bedrock/Azure OpenAI';icon='🟪';
+      why='Steady production traffic with platform team — K8s gives you portability, fine-grained scaling, full control. Pair with managed LLM (Bedrock or Azure OpenAI) so you\'re not managing both infra AND models.';
+      alt='Alternative: ECS Fargate if you don\'t need K8s\'s flexibility — much simpler ops.';
+    } else {
+      pick='ECS Fargate + Bedrock';icon='📦';
+      why='Steady traffic but mid-sized team — Fargate gives you containerized scaling without K8s operational overhead. Warm containers, auto-scaling, AWS-native. This is what I deploy for ~70% of production AI apps.';
+      alt='Alternative: Lambda if costs work out cheaper at your traffic level (they often do up to 10K req/day).';
+    }
+  } else {
+    pick='ECS Fargate + Bedrock';icon='📦';
+    why='Sensible default for production AI: warm containers, no cold starts, managed scaling, managed LLM access.';
+    alt='Alternative: Lambda if traffic is low/bursty, K8s if you need multi-cloud or fine control.';
+  }
+
+  document.getElementById('rec-result').innerHTML=`
+    <div class="recommend">
+      <div class="header">
+        <span class="icon">${icon}</span>
+        <span class="title">My recommendation for your setup:</span>
+      </div>
+      <div class="pick">${pick}</div>
+      <div class="why">${why}</div>
+      <div class="alt">💡 ${alt}</div>
+    </div>
+  `;
+}
+
+/* ============== ARCHITECTURE DIAGRAM ============== */
+const archNodes=[
+  {id:'user',x:60,y:50,w:80,h:40,label:'👤 User',type:'user'},
+  {id:'cdn',x:200,y:50,w:90,h:40,label:'CloudFront',sub:'(CDN/edge)'},
+  {id:'api',x:340,y:50,w:90,h:40,label:'API Gateway',sub:'(auth, rate)'},
+  {id:'lambda',x:490,y:50,w:90,h:40,label:'λ Lambda',sub:'(orchestrator)'},
+  {id:'cache',x:620,y:130,w:70,h:40,label:'Redis',sub:'(cache)',type:'cache'},
+  {id:'vector',x:490,y:200,w:90,h:40,label:'OpenSearch',sub:'(vector DB)'},
+  {id:'bedrock',x:490,y:280,w:90,h:40,label:'Bedrock',sub:'(LLM)',type:'gpu'},
+  {id:'logs',x:340,y:280,w:90,h:40,label:'CloudWatch',sub:'(logs/metrics)'},
+];
+const archEdges=[
+  {from:'user',to:'cdn'},
+  {from:'cdn',to:'api'},
+  {from:'api',to:'lambda'},
+  {from:'lambda',to:'cache',label:'check'},
+  {from:'lambda',to:'vector',label:'retrieve'},
+  {from:'lambda',to:'bedrock',label:'generate'},
+  {from:'lambda',to:'logs',label:'trace'},
+];
+
+function drawArch(state={}){
+  const svg=document.getElementById('arch-svg');
+  if(!svg)return;
+  svg.innerHTML='';
+
+  const defs=document.createElementNS('http://www.w3.org/2000/svg','defs');
+  defs.innerHTML='<marker id="aarr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#1e2333"/></marker><marker id="aarr-active" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#ff8c42"/></marker>';
+  svg.appendChild(defs);
+
+  archEdges.forEach(e=>{
+    const a=archNodes.find(n=>n.id===e.from);
+    const b=archNodes.find(n=>n.id===e.to);
+    const isActive=(state.activeEdges||[]).includes(`${e.from}-${e.to}`);
+    // Find connection points
+    let x1=a.x+a.w/2, y1=a.y+a.h/2, x2=b.x+b.w/2, y2=b.y+b.h/2;
+    if(b.y>a.y+a.h){y1=a.y+a.h;y2=b.y;}
+    else if(b.y+b.h<a.y){y1=a.y;y2=b.y+b.h;}
+    else if(b.x>a.x+a.w){x1=a.x+a.w;x2=b.x;}
+    else if(b.x+b.w<a.x){x1=a.x;x2=b.x+b.w;}
+
+    const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1',x1);line.setAttribute('y1',y1);
+    line.setAttribute('x2',x2);line.setAttribute('y2',y2);
+    line.setAttribute('class','arch-edge'+(isActive?' active':''));
+    line.setAttribute('marker-end',isActive?'url(#aarr-active)':'url(#aarr)');
+    svg.appendChild(line);
+
+    if(e.label){
+      const lbl=document.createElementNS('http://www.w3.org/2000/svg','text');
+      lbl.setAttribute('x',(x1+x2)/2);lbl.setAttribute('y',(y1+y2)/2-4);
+      lbl.setAttribute('class','arch-elabel');
+      lbl.textContent=e.label;
+      svg.appendChild(lbl);
+    }
+  });
+
+  archNodes.forEach(n=>{
+    const g=document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.setAttribute('class','arch-box');
+    const isActive=(state.activeNodes||[]).includes(n.id);
+    let cls='arch-rect';
+    if(n.type==='gpu')cls+=' gpu';
+    if(n.type==='cache')cls+=' cache';
+    if(n.type==='user')cls+=' user';
+    if(isActive)cls+=' active';
+    const rect=document.createElementNS('http://www.w3.org/2000/svg','rect');
+    rect.setAttribute('x',n.x);rect.setAttribute('y',n.y);
+    rect.setAttribute('width',n.w);rect.setAttribute('height',n.h);
+    rect.setAttribute('rx',8);
+    rect.setAttribute('class',cls);
+    svg.appendChild(rect);
+    const lbl=document.createElementNS('http://www.w3.org/2000/svg','text');
+    lbl.setAttribute('x',n.x+n.w/2);lbl.setAttribute('y',n.y+(n.sub?16:n.h/2+5));
+    lbl.setAttribute('class','arch-label');
+    if(isActive)lbl.style.fill='#06070a';
+    lbl.textContent=n.label;
+    svg.appendChild(lbl);
+    if(n.sub){
+      const sub=document.createElementNS('http://www.w3.org/2000/svg','text');
+      sub.setAttribute('x',n.x+n.w/2);sub.setAttribute('y',n.y+30);
+      sub.setAttribute('class','arch-sublabel');
+      if(isActive)sub.style.fill='#0a0b10';
+      sub.textContent=n.sub;
+      svg.appendChild(sub);
+    }
+  });
+}
+
+let flowTimer=null;
+function resetFlow(){if(flowTimer)clearTimeout(flowTimer);flowTimer=null;drawArch();}
+
+function animateFlow(){
+  resetFlow();
+  const sequence=[
+    {nodes:['user'],edges:[]},
+    {nodes:['user','cdn'],edges:['user-cdn']},
+    {nodes:['user','cdn','api'],edges:['cdn-api']},
+    {nodes:['user','cdn','api','lambda'],edges:['api-lambda']},
+    {nodes:['lambda','cache'],edges:['lambda-cache']},
+    {nodes:['lambda','vector'],edges:['lambda-vector']},
+    {nodes:['lambda','bedrock'],edges:['lambda-bedrock']},
+    {nodes:['lambda','logs'],edges:['lambda-logs']},
+    {nodes:['user','cdn','api','lambda'],edges:['api-lambda']},
+    {nodes:['user'],edges:[]},
+  ];
+  sequence.forEach((s,i)=>{
+    flowTimer=setTimeout(()=>{
+      drawArch({activeNodes:s.nodes,activeEdges:s.edges});
+    },i*700);
+  });
+}
+
+/* ============== COST CALC ============== */
+const DEPLOY_COSTS={
+  'Lambda + API GW':       {fn:(r,t)=>0.20+(r*30*0.0000002)+(r*30*t*0.000016),color:'#ff8c42'},
+  'ECS Fargate (2 task)':  {fn:(r,t)=>72,color:'#4d8eff'},
+  'ECS Fargate (auto)':    {fn:(r,t)=>Math.max(36,r*30*t*0.000012),color:'#4d8eff'},
+  'EKS (3 nodes, m5.large)':{fn:(r,t)=>220,color:'#9d3dff'},
+  'EKS GPU (g4dn.xlarge)': {fn:(r,t)=>380,color:'#9d3dff'},
+  'Modal (CPU)':           {fn:(r,t)=>r*30*t*0.000018,color:'#a880ff'},
+  'Modal (GPU T4)':        {fn:(r,t)=>r*30*t*0.000156,color:'#a880ff'},
+  'SageMaker (ml.m5.large)':{fn:(r,t)=>108,color:'#ffd23d'},
+  'SageMaker GPU':         {fn:(r,t)=>820,color:'#ffd23d'},
+};
+
+function calcDeployCost(){
+  const r=parseInt(document.getElementById('req-day').value)||0;
+  const t=parseFloat(document.getElementById('req-time').value)||1;
+  const monthly={};
+  Object.keys(DEPLOY_COSTS).forEach(name=>{
+    const d=DEPLOY_COSTS[name];
+    monthly[name]={cost:d.fn(r,t),color:d.color};
+  });
+  const sorted=Object.entries(monthly).sort((a,b)=>a[1].cost-b[1].cost);
+  const maxCost=sorted[sorted.length-1][1].cost;
+  const html=sorted.map(([name,d])=>{
+    const w=Math.max((d.cost/maxCost)*100,2);
+    const formatted=d.cost<10?'$'+d.cost.toFixed(2):d.cost<1000?'$'+d.cost.toFixed(0):'$'+(d.cost/1000).toFixed(1)+'K';
+    return `<div class="cb-row">
+      <div class="cb-name" style="color:${d.color}">${name}</div>
+      <div class="cb-track"><div class="cb-fill" style="width:${w}%;background:${d.color}">${w>22?formatted:''}</div></div>
+      <div class="cb-val">${w<=22?formatted:'/mo'}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('cost-bars').innerHTML=html;
+}
+
+calcDeployCost();
+drawArch();
+</script>
+</body>
+</html>

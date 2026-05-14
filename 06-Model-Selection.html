@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>#6 Which AI Model to Pick — Simplified by Mahendra Gajera</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Courier New',monospace;background:#06070a;color:#e4e8f1;min-height:100vh;padding:24px 16px;}
+.app{max-width:960px;margin:0 auto;}
+.hdr{text-align:center;margin-bottom:24px;}
+.hdr .tag{display:inline-block;padding:3px 14px;border:1px solid #ffd23d;border-radius:20px;font-size:.68rem;color:#ffd23d;letter-spacing:2px;margin-bottom:8px;}
+.hdr h1{font-family:Georgia,serif;font-size:1.9rem;color:#ffd23d;}
+.hdr .sub{font-size:.82rem;color:#6e7590;margin-top:4px;font-family:Georgia,serif;}.hdr .sub b{color:#ffd23d;}
+
+.card{background:#0e1018;border:1px solid #1e2333;border-radius:14px;padding:22px;margin-bottom:18px;}
+.card h2{font-family:Georgia,serif;font-size:1.15rem;margin-bottom:10px;}
+.card p{font-size:.84rem;color:#9d9da3;line-height:1.7;font-family:Georgia,serif;margin-bottom:10px;}
+.card p b{color:#e4e8f1;}
+
+.btn{padding:9px 18px;border-radius:8px;border:none;font-weight:700;cursor:pointer;font-size:.82rem;font-family:inherit;transition:all .2s;}
+.btn:hover{opacity:.85;}
+.btn.sec{background:#1e2333;color:#9d9da3;}
+.btn.primary{background:#ffd23d;color:#06070a;}
+
+/* Tab nav */
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px;}
+.tab{padding:9px 16px;border-radius:8px;border:1px solid #1e2333;background:#0e1018;color:#9d9da3;cursor:pointer;font-family:inherit;font-size:.78rem;font-weight:700;letter-spacing:.5px;transition:all .2s;}
+.tab:hover{border-color:#ffd23d40;color:#e4e8f1;}
+.tab.active{background:#ffd23d;color:#06070a;border-color:#ffd23d;}
+
+.panel{display:none;animation:fadeIn .3s;}
+.panel.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+.lvl{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.62rem;letter-spacing:1px;margin-left:8px;vertical-align:middle;}
+.lvl.beg{background:rgba(61,255,138,.15);color:#3dff8a;border:1px solid #3dff8a40;}
+.lvl.mid{background:rgba(255,210,61,.15);color:#ffd23d;border:1px solid #ffd23d40;}
+.lvl.adv{background:rgba(255,61,170,.15);color:#ff3daa;border:1px solid #ff3daa40;}
+
+.concept{background:rgba(255,210,61,.05);border-left:3px solid #ffd23d;padding:12px 16px;border-radius:0 6px 6px 0;margin:12px 0;font-size:.82rem;color:#c8c8d0;line-height:1.7;font-family:Georgia,serif;}
+.concept b{color:#ffd23d;}
+
+.warn{background:rgba(255,61,170,.05);border-left:3px solid #ff3daa;padding:12px 16px;border-radius:0 6px 6px 0;margin:12px 0;font-size:.82rem;color:#c8c8d0;line-height:1.7;font-family:Georgia,serif;}
+.warn b{color:#ff3daa;}
+
+/* Model cards */
+.models{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin:14px 0;}
+.model{padding:16px;border-radius:12px;border:2px solid;background:#0a0b10;transition:all .25s;}
+.model:hover{transform:translateY(-2px);}
+.model h3{font-family:Georgia,serif;font-size:1rem;margin-bottom:4px;}
+.model .vendor{font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;color:#6e7590;margin-bottom:10px;}
+.model .desc{font-size:.74rem;color:#9d9da3;line-height:1.6;margin-bottom:12px;}
+.model .stats{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px;}
+.model .stat{padding:6px 8px;background:#06070a;border-radius:6px;border:1px solid #1e2333;}
+.model .stat .l{font-size:.55rem;color:#6e7590;letter-spacing:1px;}
+.model .stat .v{font-size:.78rem;font-weight:700;margin-top:2px;}
+.model .best{font-size:.7rem;color:#3dff8a;margin-top:8px;padding-top:8px;border-top:1px dashed #1e2333;}
+.model .best b{color:#3dff8a;}
+.model.opus{border-color:#9d3dff;}
+.model.opus h3{color:#9d3dff;}
+.model.sonnet{border-color:#00f0ff;}
+.model.sonnet h3{color:#00f0ff;}
+.model.haiku{border-color:#3dff8a;}
+.model.haiku h3{color:#3dff8a;}
+.model.gpt5{border-color:#ffd23d;}
+.model.gpt5 h3{color:#ffd23d;}
+.model.gpt4{border-color:#ff8c42;}
+.model.gpt4 h3{color:#ff8c42;}
+.model.mini{border-color:#ff3daa;}
+.model.mini h3{color:#ff3daa;}
+.model.gemini{border-color:#4d8eff;}
+.model.gemini h3{color:#4d8eff;}
+.model.llama{border-color:#a8a8b8;}
+.model.llama h3{color:#a8a8b8;}
+
+/* Stage */
+.stage{background:#000;border:1px solid #1e2333;border-radius:8px;padding:16px;margin:14px 0;}
+.stage-title{font-size:.72rem;color:#6e7590;font-weight:700;margin-bottom:10px;letter-spacing:1px;}
+
+/* Picker quiz */
+.quiz-q{margin:12px 0;padding:14px;background:#0a0b10;border:1px solid #1e2333;border-radius:10px;}
+.quiz-q .label{font-size:.78rem;color:#e4e8f1;font-weight:700;margin-bottom:10px;font-family:Georgia,serif;}
+.opts{display:flex;gap:6px;flex-wrap:wrap;}
+.opt{padding:8px 14px;border:1px solid #1e2333;border-radius:8px;background:#06070a;color:#9d9da3;cursor:pointer;font-family:inherit;font-size:.74rem;transition:all .2s;}
+.opt:hover{border-color:#ffd23d40;color:#e4e8f1;}
+.opt.selected{background:#ffd23d;color:#06070a;border-color:#ffd23d;}
+
+.recommend{background:linear-gradient(135deg,#0e1018 0%,#0a0b10 100%);border:2px solid #ffd23d;border-radius:12px;padding:18px;margin:16px 0;animation:fadeIn .4s;}
+.recommend .header{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.recommend .header .icon{font-size:1.5rem;}
+.recommend .header .title{font-family:Georgia,serif;font-size:1rem;color:#ffd23d;}
+.recommend .pick{font-size:1.2rem;font-weight:800;color:#e4e8f1;margin:8px 0;font-family:Georgia,serif;}
+.recommend .why{font-size:.78rem;color:#9d9da3;line-height:1.6;font-family:Georgia,serif;}
+.recommend .alt{font-size:.72rem;color:#6e7590;margin-top:10px;padding-top:10px;border-top:1px dashed #1e2333;}
+
+/* Cost calc */
+.cost-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:14px 0;}
+.cost-row{padding:12px;background:#0a0b10;border:1px solid #1e2333;border-radius:10px;display:flex;justify-content:space-between;align-items:center;}
+.cost-row .name{font-size:.78rem;font-weight:700;}
+.cost-row .price{font-size:.85rem;color:#3dff8a;font-weight:700;font-family:'Courier New',monospace;}
+
+.controls{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;align-items:center;margin:12px 0;}
+.controls input{background:#0a0b10;border:1px solid #1e2333;color:#e4e8f1;padding:8px 12px;border-radius:6px;font-family:inherit;font-size:.8rem;}
+.controls label{font-size:.74rem;color:#9d9da3;display:flex;align-items:center;gap:6px;}
+
+/* Use case grid */
+.usecase{padding:14px;background:#0a0b10;border:1px solid #1e2333;border-radius:10px;margin:10px 0;}
+.usecase .uc-h{font-size:.85rem;font-weight:700;margin-bottom:8px;font-family:Georgia,serif;}
+.usecase .uc-pick{display:inline-block;padding:3px 10px;border-radius:14px;font-size:.7rem;font-weight:700;margin-right:6px;margin-bottom:4px;}
+.usecase .pick-opus{background:rgba(157,61,255,.2);color:#9d3dff;border:1px solid #9d3dff40;}
+.usecase .pick-sonnet{background:rgba(0,240,255,.15);color:#00f0ff;border:1px solid #00f0ff40;}
+.usecase .pick-haiku{background:rgba(61,255,138,.15);color:#3dff8a;border:1px solid #3dff8a40;}
+.usecase .pick-gpt5{background:rgba(255,210,61,.15);color:#ffd23d;border:1px solid #ffd23d40;}
+.usecase .pick-mini{background:rgba(255,61,170,.15);color:#ff3daa;border:1px solid #ff3daa40;}
+.usecase .pick-gemini{background:rgba(77,142,255,.15);color:#4d8eff;border:1px solid #4d8eff40;}
+.usecase .reasoning{font-size:.74rem;color:#9d9da3;line-height:1.6;margin-top:6px;font-family:Georgia,serif;}
+
+/* Code */
+.code{background:#000;border:1px solid #1e2333;border-radius:8px;padding:14px 18px;font-size:.76rem;color:#c8c8d0;margin:12px 0;line-height:1.7;overflow-x:auto;white-space:pre;font-family:'Courier New',monospace;}
+.code .kw{color:#ff3daa;}
+.code .fn{color:#ffd23d;}
+.code .str{color:#3dff8a;}
+.code .cmt{color:#6e7590;font-style:italic;}
+.code .num{color:#9d3dff;}
+.code .cls{color:#00f0ff;}
+
+/* Bar comparison */
+.compare-bars{display:flex;flex-direction:column;gap:10px;margin:14px 0;}
+.cb-row{display:grid;grid-template-columns:130px 1fr 60px;gap:10px;align-items:center;}
+.cb-name{font-size:.74rem;font-weight:700;}
+.cb-track{height:18px;background:#06070a;border-radius:9px;overflow:hidden;border:1px solid #1e2333;}
+.cb-fill{height:100%;border-radius:9px;transition:width .6s;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;font-size:.6rem;color:#06070a;font-weight:700;}
+.cb-val{font-size:.7rem;color:#9d9da3;text-align:right;}
+
+.ftr{text-align:center;margin-top:24px;font-size:.82rem;color:#6e7590;}.ftr b{color:#ffd23d;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="hdr">
+    <div class="tag">concept #6 · 2026</div>
+    <h1>🎯 Which AI Model Should You Pick?</h1>
+    <div class="sub">GPT, Claude, Gemini, Llama — practical guide with cost, speed &amp; use-case fits · <b>Simplified by Mahendra Gajera</b></div>
+  </div>
+
+  <div class="card">
+    <h2>💡 The Honest Answer</h2>
+    <p>There is no "best" model. Only the <b>right model for this specific job, with these specific constraints</b>. A model that's overkill costs you 50x more for the same output. A model that's underpowered hallucinates and breaks your product.</p>
+    <p>This guide walks you through how I actually pick models in production — at Microsoft, for LSEG, and for client work. The framework: <b>capability × speed × cost × privacy × tooling</b>.</p>
+    <div class="concept">⚡ <b>Rule of thumb I live by:</b> Start with the cheapest model that <i>might</i> work. Measure with evals. Upgrade only when evals say you need to. Never pick by reputation alone.</div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <div class="tab active" onclick="show(this,'p-overview')">🗺 The Landscape</div>
+    <div class="tab" onclick="show(this,'p-quiz')">🎯 Pick For Me</div>
+    <div class="tab" onclick="show(this,'p-usecases')">📋 Use Cases</div>
+    <div class="tab" onclick="show(this,'p-cost')">💰 Cost Calc</div>
+    <div class="tab" onclick="show(this,'p-rules')">📐 Rules I Follow</div>
+  </div>
+
+  <!-- ============= OVERVIEW ============= -->
+  <div class="panel active" id="p-overview">
+    <div class="card">
+      <h2>🗺 The Model Landscape <span class="lvl beg">START HERE</span></h2>
+      <p>As of 2026, eight models cover ~95% of real-world AI work. They split into three tiers — <b>frontier</b> (most capable, most expensive), <b>workhorse</b> (best balance), and <b>cheap &amp; fast</b> (high volume, simple tasks).</p>
+
+      <h3 style="font-family:Georgia,serif;font-size:.95rem;margin-top:16px;color:#9d3dff">🟣 Frontier Tier — Maximum capability</h3>
+      <div class="models">
+        <div class="model opus">
+          <h3>Claude Opus 4.7</h3>
+          <div class="vendor">Anthropic</div>
+          <div class="desc">Highest reasoning capability, best at complex multi-step problems, agentic workflows, deep code work, and nuanced writing.</div>
+          <div class="stats">
+            <div class="stat"><div class="l">SPEED</div><div class="v" style="color:#ff3daa">Slow</div></div>
+            <div class="stat"><div class="l">COST</div><div class="v" style="color:#ff3daa">$$$$$</div></div>
+            <div class="stat"><div class="l">CONTEXT</div><div class="v">200K</div></div>
+            <div class="stat"><div class="l">TOOL USE</div><div class="v" style="color:#3dff8a">Best</div></div>
+          </div>
+          <div class="best"><b>Best for:</b> Complex agents, hard code refactors, deep research, anywhere quality matters more than cost.</div>
+        </div>
+
+        <div class="model gpt5">
+          <h3>GPT-5</h3>
+          <div class="vendor">OpenAI</div>
+          <div class="desc">OpenAI's flagship. Strong general reasoning, broad knowledge, mature ecosystem (Azure OpenAI, function calling, structured outputs).</div>
+          <div class="stats">
+            <div class="stat"><div class="l">SPEED</div><div class="v" style="color:#ffd23d">Medium</div></div>
+            <div class="stat"><div class="l">COST</div><div class="v" style="color:#ff3daa">$$$$</div></div>
+            <div class="stat"><div class="l">CONTEXT</div><div class="v">256K</div></div>
+            <div class="stat"><div class="l">TOOL USE</div><div class="v" style="color:#3dff8a">Strong</div></div>
+          </div>
+          <div class="best"><b>Best for:</b> Enterprise workflows on Azure, structured output extraction, anything that needs OpenAI's specific ecosystem.</div>
+        </div>
+
+        <div class="model gemini">
+          <h3>Gemini 2.5 Pro</h3>
+          <div class="vendor">Google</div>
+          <div class="desc">Massive context window (2M tokens) and strong multimodal. Best when you need to dump an entire codebase or PDF into one prompt.</div>
+          <div class="stats">
+            <div class="stat"><div class="l">SPEED</div><div class="v" style="color:#ffd23d">Medium</div></div>
+            <div class="stat"><div class="l">COST</div><div class="v" style="color:#ffd23d">$$$</div></div>
+            <div class="stat"><div class="l">CONTEXT</div><div class="v" style="color:#3dff8a">2M!</div></div>
+            <div class="stat"><div class="l">MULTIMODAL</div><div class="v" style="color:#3dff8a">Best</div></div>
+          </div>
+          <div class="best"><b>Best for:</b> Long documents, video understanding, codebase-scale context, Google Cloud shops.</div>
+        </div>
+      </div>
+
+      <h3 style="font-family:Georgia,serif;font-size:.95rem;margin-top:20px;color:#00f0ff">🟦 Workhorse Tier — The default choice</h3>
+      <div class="models">
+        <div class="model sonnet">
+          <h3>Claude Sonnet 4.6</h3>
+          <div class="vendor">Anthropic</div>
+          <div class="desc">The model I default to for production. ~80% of Opus quality at ~20% the cost. Excellent at coding, instruction following, and structured output.</div>
+          <div class="stats">
+            <div class="stat"><div class="l">SPEED</div><div class="v" style="color:#3dff8a">Fast</div></div>
+            <div class="stat"><div class="l">COST</div><div class="v" style="color:#ffd23d">$$</div></div>
+            <div class="stat"><div class="l">CONTEXT</div><div class="v">200K</div></div>
+            <div class="stat"><div class="l">TOOL USE</div><div class="v" style="color:#3dff8a">Excellent</div></div>
+          </div>
+          <div class="best"><b>Best for:</b> RAG, agents, coding, customer-facing chat, ~90% of production GenAI work.</div>
+        </div>
+
+        <div class="model gpt4">
+          <h3>GPT-4.1 / GPT-4o</h3>
+          <div class="vendor">OpenAI</div>
+          <div class="desc">OpenAI's workhorse. Native multimodal (image + audio), great function calling, broad knowledge, strong on Azure.</div>
+          <div class="stats">
+            <div class="stat"><div class="l">SPEED</div><div class="v" style="color:#3dff8a">Fast</div></div>
+            <div class="stat"><div class="l">COST</div><div class="v" style="color:#ffd23d">$$</div></div>
+            <div class="stat"><div class="l">CONTEXT</div><div class="v">128K</div></div>
+            <div class="stat"><div class="l">MULTIMODAL</div><div class="v" style="color:#3dff8a">Native</div></div>
+          </div>
+          <div class="best"><b>Best for:</b> Azure-hosted production, image+text apps, voice apps, anything that needs the OpenAI SDK.</div>
+        </div>
+      </div>
+
+      <h3 style="font-family:Georgia,serif;font-size:.95rem;margin-top:20px;color:#3dff8a">🟢 Cheap &amp; Fast Tier — High volume work</h3>
+      <div class="models">
+        <div class="model haiku">
+          <h3>Claude Haiku 4.5</h3>
+          <div class="vendor">Anthropic</div>
+          <div class="desc">Tiny, fast, cheap, but surprisingly capable. Beats older flagships on many benchmarks. Use when you need throughput.</div>
+          <div class="stats">
+            <div class="stat"><div class="l">SPEED</div><div class="v" style="color:#3dff8a">Very Fast</div></div>
+            <div class="stat"><div class="l">COST</div><div class="v" style="color:#3dff8a">$</div></div>
+            <div class="stat"><div class="l">CONTEXT</div><div class="v">200K</div></div>
+            <div class="stat"><div class="l">LATENCY</div><div class="v" style="color:#3dff8a">Sub-second</div></div>
+          </div>
+          <div class="best"><b>Best for:</b> Classification, simple extraction, autocomplete, real-time chat, high-volume pipelines.</div>
+        </div>
+
+        <div class="model mini">
+          <h3>GPT-4o-mini / GPT-5-mini</h3>
+          <div class="vendor">OpenAI</div>
+          <div class="desc">OpenAI's cheap tier. Good for simple tasks, batch processing, and anywhere you'd otherwise burn money on the big model.</div>
+          <div class="stats">
+            <div class="stat"><div class="l">SPEED</div><div class="v" style="color:#3dff8a">Fast</div></div>
+            <div class="stat"><div class="l">COST</div><div class="v" style="color:#3dff8a">$</div></div>
+            <div class="stat"><div class="l">CONTEXT</div><div class="v">128K</div></div>
+            <div class="stat"><div class="l">BATCH API</div><div class="v" style="color:#3dff8a">50% off</div></div>
+          </div>
+          <div class="best"><b>Best for:</b> Form filling, intent classification, summarization at scale, batch jobs.</div>
+        </div>
+
+        <div class="model llama">
+          <h3>Llama 3.3 / Open Weights</h3>
+          <div class="vendor">Meta / Self-host</div>
+          <div class="desc">Self-hosted open-weight models. No per-token cost — you pay for GPU. Privacy-first, no data leaves your network.</div>
+          <div class="stats">
+            <div class="stat"><div class="l">SPEED</div><div class="v" style="color:#ffd23d">Depends</div></div>
+            <div class="stat"><div class="l">COST</div><div class="v" style="color:#ffd23d">GPU $</div></div>
+            <div class="stat"><div class="l">PRIVACY</div><div class="v" style="color:#3dff8a">Maximum</div></div>
+            <div class="stat"><div class="l">CONTROL</div><div class="v" style="color:#3dff8a">Total</div></div>
+          </div>
+          <div class="best"><b>Best for:</b> Regulated industries, on-prem requirements, very high volume, fine-tuned domain models.</div>
+        </div>
+      </div>
+
+      <div class="warn">⚠️ <b>What I avoid:</b> Hyped models without production track record. New SOTA releases get the spotlight, but in a year half of them are deprecated. Stick with vendors that publish deprecation policies (OpenAI, Anthropic, Google).</div>
+    </div>
+  </div>
+
+  <!-- ============= QUIZ / PICKER ============= -->
+  <div class="panel" id="p-quiz">
+    <div class="card">
+      <h2>🎯 Pick A Model For Your Use Case <span class="lvl beg">INTERACTIVE</span></h2>
+      <p>Answer 5 quick questions. I'll recommend a model with reasoning, plus alternatives.</p>
+
+      <div class="quiz-q">
+        <div class="label">1. What's the task?</div>
+        <div class="opts" data-q="task">
+          <div class="opt" data-v="chat">Chatbot / Q&amp;A</div>
+          <div class="opt" data-v="rag">RAG (search over docs)</div>
+          <div class="opt" data-v="agent">Agent (multi-step, tools)</div>
+          <div class="opt" data-v="code">Code generation</div>
+          <div class="opt" data-v="extract">Data extraction</div>
+          <div class="opt" data-v="creative">Creative writing</div>
+        </div>
+      </div>
+
+      <div class="quiz-q">
+        <div class="label">2. How complex is the reasoning?</div>
+        <div class="opts" data-q="complexity">
+          <div class="opt" data-v="simple">Simple (single-step)</div>
+          <div class="opt" data-v="medium">Medium (a few steps)</div>
+          <div class="opt" data-v="complex">Complex (deep reasoning)</div>
+        </div>
+      </div>
+
+      <div class="quiz-q">
+        <div class="label">3. What's your budget pressure?</div>
+        <div class="opts" data-q="budget">
+          <div class="opt" data-v="strict">Strict — every penny counts</div>
+          <div class="opt" data-v="balanced">Balanced — quality matters</div>
+          <div class="opt" data-v="unlimited">Quality &gt; cost</div>
+        </div>
+      </div>
+
+      <div class="quiz-q">
+        <div class="label">4. How fast does it need to respond?</div>
+        <div class="opts" data-q="speed">
+          <div class="opt" data-v="realtime">Real-time (&lt;1 sec)</div>
+          <div class="opt" data-v="interactive">Interactive (1–5 sec)</div>
+          <div class="opt" data-v="batch">Batch (can be slow)</div>
+        </div>
+      </div>
+
+      <div class="quiz-q">
+        <div class="label">5. Any constraints?</div>
+        <div class="opts" data-q="constraint">
+          <div class="opt" data-v="none">None — cloud is fine</div>
+          <div class="opt" data-v="azure">Must be Azure (Microsoft shop)</div>
+          <div class="opt" data-v="privacy">Privacy / on-prem only</div>
+          <div class="opt" data-v="longctx">Need huge context (1M+ tokens)</div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button class="btn primary" onclick="recommend()">🎯 Recommend a Model</button>
+        <button class="btn sec" onclick="resetQuiz()">↺ Reset</button>
+      </div>
+
+      <div id="rec-result"></div>
+    </div>
+  </div>
+
+  <!-- ============= USE CASES ============= -->
+  <div class="panel" id="p-usecases">
+    <div class="card">
+      <h2>📋 Real-World Use Cases <span class="lvl mid">PRACTICAL</span></h2>
+      <p>Concrete production scenarios with model picks &amp; reasoning. These are the patterns I see most often.</p>
+
+      <div class="usecase">
+        <div class="uc-h">🤖 Customer support chatbot (high volume)</div>
+        <span class="uc-pick pick-haiku">Claude Haiku 4.5</span><span class="uc-pick pick-mini">GPT-4o-mini</span>
+        <div class="reasoning">10K+ conversations/day. Most queries are simple FAQ lookups. Latency matters (customers won't wait). <b>Pick the cheap tier.</b> Upgrade to Sonnet for hard cases via a router pattern.</div>
+      </div>
+
+      <div class="usecase">
+        <div class="uc-h">📚 RAG over company knowledge base</div>
+        <span class="uc-pick pick-sonnet">Claude Sonnet 4.6</span><span class="uc-pick pick-gpt5">GPT-4.1</span>
+        <div class="reasoning">Quality of answer matters. Retrieval handles the search; the model just needs to read context and write a grounded answer. <b>Workhorse tier is the sweet spot.</b> Don't waste Opus money here.</div>
+      </div>
+
+      <div class="usecase">
+        <div class="uc-h">🧠 Multi-step agent (research, code, etc.)</div>
+        <span class="uc-pick pick-opus">Claude Opus 4.7</span><span class="uc-pick pick-sonnet">Sonnet 4.6</span>
+        <div class="reasoning">Agents compound errors over multi-step loops. Each step needs to be right. <b>Use Opus for planning</b>, drop to Sonnet for sub-tasks. This is what I do for the SRE Agent at Microsoft.</div>
+      </div>
+
+      <div class="usecase">
+        <div class="uc-h">💻 Code generation in an IDE</div>
+        <span class="uc-pick pick-sonnet">Claude Sonnet 4.6</span><span class="uc-pick pick-opus">Opus for refactors</span>
+        <div class="reasoning">Sonnet is currently the strongest at code per dollar — Copilot, Cursor, and most coding assistants use it for a reason. Reach for Opus only for hard refactors or multi-file work.</div>
+      </div>
+
+      <div class="usecase">
+        <div class="uc-h">📊 Structured data extraction (invoices, forms)</div>
+        <span class="uc-pick pick-mini">GPT-4o-mini</span><span class="uc-pick pick-haiku">Claude Haiku</span>
+        <div class="reasoning">Output schema is fixed (JSON). You don't need creativity, just accuracy. <b>Cheap tier with structured output mode.</b> Validate with Pydantic. Add eval gates.</div>
+      </div>
+
+      <div class="usecase">
+        <div class="uc-h">📄 Summarize 500-page legal contracts</div>
+        <span class="uc-pick pick-gemini">Gemini 2.5 Pro</span><span class="uc-pick pick-sonnet">Sonnet (with chunking)</span>
+        <div class="reasoning">Gemini's 2M context lets you drop the whole doc in. Otherwise you need chunking + map-reduce summarization, which adds complexity.</div>
+      </div>
+
+      <div class="usecase">
+        <div class="uc-h">🏥 Patient data analysis (regulated)</div>
+        <span class="uc-pick pick-opus" style="background:rgba(168,168,184,.2);color:#a8a8b8;border-color:#a8a8b840">Llama 3.3 self-hosted</span>
+        <div class="reasoning">HIPAA, data residency, audit trails. Cloud LLMs are usually disqualified unless you have a BAA. <b>Self-host on your own GPUs.</b> Fine-tune on de-identified clinical data.</div>
+      </div>
+
+      <div class="usecase">
+        <div class="uc-h">✍️ Marketing copy / creative writing</div>
+        <span class="uc-pick pick-opus">Claude Opus</span><span class="uc-pick pick-sonnet">Sonnet for drafts</span>
+        <div class="reasoning">Claude is widely considered the strongest at nuanced prose, voice matching, and creative work. Opus for hero copy, Sonnet for bulk drafting.</div>
+      </div>
+
+      <div class="usecase">
+        <div class="uc-h">🎙 Voice / real-time conversation</div>
+        <span class="uc-pick pick-gpt5">GPT-4o Realtime</span><span class="uc-pick pick-gemini">Gemini Live</span>
+        <div class="reasoning">Native audio-in/audio-out, sub-300ms latency. Text-only models routed through TTS feel laggy and unnatural in voice apps.</div>
+      </div>
+
+      <div class="usecase">
+        <div class="uc-h">📋 Classification at scale (10M+ items/day)</div>
+        <span class="uc-pick pick-haiku">Claude Haiku</span><span class="uc-pick pick-mini">GPT-4o-mini Batch API</span>
+        <div class="reasoning">Batch APIs give you 50% off if you can wait 24hrs. Run classification overnight. If real-time, use Haiku.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============= COST CALC ============= -->
+  <div class="panel" id="p-cost">
+    <div class="card">
+      <h2>💰 Cost Calculator <span class="lvl mid">REALITY CHECK</span></h2>
+      <p>Type your expected usage. See what each model would cost per month. Numbers are <i>approximate 2026 pricing</i> — always check vendor docs for current rates.</p>
+
+      <div class="controls">
+        <label>Input tokens/request: <input type="number" id="in-tok" value="2000" min="100" max="500000" style="width:90px"></label>
+        <label>Output tokens/request: <input type="number" id="out-tok" value="500" min="50" max="50000" style="width:90px"></label>
+        <label>Requests/day: <input type="number" id="req-day" value="10000" min="100" max="10000000" style="width:90px"></label>
+        <button class="btn primary" onclick="calcCost()">💰 Calculate</button>
+      </div>
+
+      <div class="stage">
+        <div class="stage-title">→ Monthly cost across models</div>
+        <div class="compare-bars" id="cost-bars"></div>
+      </div>
+
+      <div class="concept">⚡ <b>The math that surprises people:</b> A doubling of model price often gives you a <i>tiny</i> quality lift for your specific use case. Always measure with evals before paying for a tier upgrade.</div>
+
+      <div class="warn">⚠️ <b>Hidden costs nobody mentions:</b><br>
+      • <b>Caching</b> — Anthropic/OpenAI both offer prompt caching at ~10% the cost. Use it for RAG.<br>
+      • <b>Batch APIs</b> — 50% off for non-urgent work. OpenAI Batch &amp; Anthropic Message Batches.<br>
+      • <b>Embeddings</b> — separate cost from LLM. Easy to forget.<br>
+      • <b>Tool use</b> — every tool call is another roundtrip = more tokens.<br>
+      • <b>Failed/retried calls</b> — bugs and rate limits cost money too.</div>
+    </div>
+  </div>
+
+  <!-- ============= RULES ============= -->
+  <div class="panel" id="p-rules">
+    <div class="card">
+      <h2>📐 Rules I Actually Follow <span class="lvl adv">PRODUCTION</span></h2>
+      <p>What I learned the hard way, building production AI for Microsoft, LSEG, and others. Not theory — patterns that survived real incidents.</p>
+
+      <h3 style="font-family:Georgia,serif;font-size:.95rem;margin-top:14px">📏 Rule 1 — Start cheap, upgrade with evidence</h3>
+      <div class="concept">Start with the cheap tier. Build evals. Run them. <b>Only upgrade when evals say the cheap model is failing</b>. I've watched teams burn $50K/month on Opus when Haiku would have hit their accuracy bar.</div>
+
+      <h3 style="font-family:Georgia,serif;font-size:.95rem;margin-top:14px">📏 Rule 2 — Use multiple models in one pipeline</h3>
+      <div class="concept">Not all parts of a workflow need the same model. <b>Router pattern:</b> cheap model classifies the request, then routes to the right specialist. Used this at Microsoft to cut 60% of agent costs.</div>
+      <div class="code"><span class="cmt"># Router pattern in production</span>
+<span class="kw">def</span> <span class="fn">route_request</span>(query):
+    intent = haiku.<span class="fn">classify</span>(query)  <span class="cmt"># cheap classifier</span>
+
+    <span class="kw">if</span> intent == <span class="str">"simple_faq"</span>:
+        <span class="kw">return</span> haiku.<span class="fn">answer</span>(query)
+    <span class="kw">elif</span> intent == <span class="str">"complex_reasoning"</span>:
+        <span class="kw">return</span> opus.<span class="fn">answer</span>(query)
+    <span class="kw">elif</span> intent == <span class="str">"code"</span>:
+        <span class="kw">return</span> sonnet.<span class="fn">answer</span>(query)
+    <span class="kw">else</span>:
+        <span class="kw">return</span> sonnet.<span class="fn">answer</span>(query)  <span class="cmt"># safe default</span></div>
+
+      <h3 style="font-family:Georgia,serif;font-size:.95rem;margin-top:14px">📏 Rule 3 — Test with your actual data</h3>
+      <div class="concept">Public benchmarks (MMLU, HumanEval) are <b>not</b> your use case. Build a golden dataset of 50–500 real queries from your product. Run all candidate models. Pick the cheapest that hits your quality bar.</div>
+
+      <h3 style="font-family:Georgia,serif;font-size:.95rem;margin-top:14px">📏 Rule 4 — Build for vendor independence</h3>
+      <div class="concept">Wrap LLM calls in an abstraction (LangChain, LiteLLM, or your own). Swapping GPT-4 for Claude should be a one-line config change, not a refactor. Models deprecate; your code shouldn't break.</div>
+      <div class="code"><span class="cmt"># Don't hardcode the vendor</span>
+<span class="kw">from</span> langchain_core.language_models <span class="kw">import</span> <span class="cls">BaseChatModel</span>
+
+<span class="kw">def</span> <span class="fn">get_llm</span>(model_name: <span class="cls">str</span>) -&gt; <span class="cls">BaseChatModel</span>:
+    <span class="kw">if</span> model_name.<span class="fn">startswith</span>(<span class="str">"gpt"</span>):
+        <span class="kw">return</span> <span class="cls">ChatOpenAI</span>(model=model_name)
+    <span class="kw">elif</span> model_name.<span class="fn">startswith</span>(<span class="str">"claude"</span>):
+        <span class="kw">return</span> <span class="cls">ChatAnthropic</span>(model=model_name)
+    <span class="kw">elif</span> model_name.<span class="fn">startswith</span>(<span class="str">"gemini"</span>):
+        <span class="kw">return</span> <span class="cls">ChatGoogleGenerativeAI</span>(model=model_name)
+
+<span class="cmt"># Now this works for any model:</span>
+llm = <span class="fn">get_llm</span>(os.environ[<span class="str">"MODEL_NAME"</span>])
+chain = prompt | llm | parser</div>
+
+      <h3 style="font-family:Georgia,serif;font-size:.95rem;margin-top:14px">📏 Rule 5 — Pick the model that matches your tooling</h3>
+      <div class="concept">If your stack is Azure → GPT-4 via Azure OpenAI is the path of least resistance. AWS shop → Claude via Bedrock. GCP → Gemini via Vertex. The "best model" matters less than the "best model your platform supports without 3 months of procurement".</div>
+
+      <h3 style="font-family:Georgia,serif;font-size:.95rem;margin-top:14px">📏 Rule 6 — Watch for the "good enough" trap</h3>
+      <div class="concept">Sometimes the cheap model is "almost as good." That gap might be 5% of test cases — but in production, 5% failure becomes thousands of bad responses per day. <b>Match model strength to user tolerance for errors</b>, not your eval averages.</div>
+
+      <h3 style="font-family:Georgia,serif;font-size:.95rem;margin-top:14px">📏 Rule 7 — Plan for model deprecation from day one</h3>
+      <div class="concept">Every model gets deprecated eventually. Lock your version (<code>gpt-4-1106-preview</code>, not <code>gpt-4</code>). Re-run evals when you upgrade. Budget engineering time for migrations every 6–12 months.</div>
+
+      <div class="warn">⚠️ <b>One last warning:</b> Don't pick a model because of a benchmark you read on Twitter. Don't pick a model because your CEO read about it. Pick because <i>your evals</i> say it works for <i>your task</i>. That's the entire game.</div>
+    </div>
+  </div>
+
+  <div class="ftr">⚡ <b>Simplified by Mahendra Gajera</b> ⚡</div>
+</div>
+
+<script>
+/* ============== TAB SWITCH ============== */
+function show(el,id){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(id).classList.add('active');
+  if(id==='p-cost')calcCost();
+}
+
+/* ============== QUIZ / PICKER ============== */
+const answers={};
+document.addEventListener('click',function(e){
+  if(e.target.classList.contains('opt')){
+    const q=e.target.parentElement.dataset.q;
+    const v=e.target.dataset.v;
+    answers[q]=v;
+    e.target.parentElement.querySelectorAll('.opt').forEach(o=>o.classList.remove('selected'));
+    e.target.classList.add('selected');
+  }
+});
+
+function resetQuiz(){
+  Object.keys(answers).forEach(k=>delete answers[k]);
+  document.querySelectorAll('.opt').forEach(o=>o.classList.remove('selected'));
+  document.getElementById('rec-result').innerHTML='';
+}
+
+function recommend(){
+  const need=['task','complexity','budget','speed','constraint'];
+  const missing=need.filter(k=>!answers[k]);
+  if(missing.length){
+    document.getElementById('rec-result').innerHTML=`<div class="warn">⚠️ Please answer all ${need.length} questions. Missing: ${missing.join(', ')}</div>`;
+    return;
+  }
+
+  // Decision logic
+  let pick='Claude Sonnet 4.6', icon='🟦', why='', alt='';
+  const a=answers;
+
+  // Constraint overrides come first
+  if(a.constraint==='privacy'){
+    pick='Llama 3.3 (self-hosted)';icon='🔒';
+    why='Privacy/on-prem is a hard constraint that disqualifies cloud LLMs unless you have BAAs/DPAs in place. Self-hosting Llama on your own GPUs gives you total control over data, audit trails, and can be fine-tuned on domain data.';
+    alt='Alternative: Use Azure OpenAI with a private endpoint + customer-managed keys if your compliance lawyers approve.';
+  }
+  else if(a.constraint==='longctx'){
+    pick='Gemini 2.5 Pro';icon='📚';
+    why='Gemini\'s 2M-token context window is unmatched. If your use case fundamentally requires loading a huge codebase, document, or video into one prompt, this beats chunking + map-reduce patterns from a complexity standpoint.';
+    alt='Alternative: Sonnet/Opus with chunking + retrieval if cost matters more than simplicity.';
+  }
+  else if(a.constraint==='azure'){
+    if(a.complexity==='complex'||a.task==='agent'){pick='GPT-5';icon='🟡';}
+    else if(a.budget==='strict'||a.speed==='realtime'){pick='GPT-4o-mini';icon='🩷';}
+    else{pick='GPT-4.1';icon='🟠';}
+    why='You\'re locked to Azure, so OpenAI models via Azure OpenAI are the path of least friction. '+(a.complexity==='complex'?'For complex reasoning, GPT-5 is currently the strongest.':a.budget==='strict'?'GPT-4o-mini is your cost-effective workhorse.':'GPT-4.1 hits the production sweet spot.');
+    alt='Note: Anthropic models are now available via Azure for some customers — worth checking if you can access Claude on Azure for better price/performance.';
+  }
+  // Speed-critical
+  else if(a.speed==='realtime'){
+    if(a.task==='extract'||a.task==='chat'&&a.complexity==='simple'){
+      pick='Claude Haiku 4.5';icon='🟢';
+      why='Sub-second latency requirement plus simple/medium task — Haiku is built for this. Surprisingly capable for its size, and the latency advantage matters more than a few quality points users won\'t notice.';
+      alt='Alternative: GPT-4o-mini if you\'re on OpenAI ecosystem.';
+    }else{
+      pick='GPT-4o (Realtime API)';icon='🟡';
+      why='Real-time speed with full GPT-4-level capability. The Realtime API is purpose-built for low-latency interactive use cases including voice.';
+      alt='Alternative: Claude Haiku if you can tolerate ~500ms latency for major cost savings.';
+    }
+  }
+  // Complex agents
+  else if(a.task==='agent'&&a.complexity==='complex'){
+    if(a.budget==='strict'){
+      pick='Claude Sonnet 4.6';icon='🟦';
+      why='Complex agents compound errors across multi-step loops, so model strength matters. Sonnet is the best balance — ~80% of Opus quality at ~20% the price. Use Sonnet by default, escalate specific hard steps to Opus.';
+      alt='Alternative: Pure Opus if budget eases up. The quality lift on agentic tool use is real.';
+    }else{
+      pick='Claude Opus 4.7';icon='🟣';
+      why='Opus 4.7 is the strongest at agentic workflows in 2026 — tool use, multi-step planning, recovery from failures. For high-stakes agents where errors are expensive, this is the right pick.';
+      alt='Alternative: GPT-5 if you need OpenAI\'s tooling. Hybrid pattern: Opus for planning, Sonnet for sub-tasks.';
+    }
+  }
+  // Code
+  else if(a.task==='code'){
+    if(a.complexity==='complex'&&a.budget!=='strict'){
+      pick='Claude Opus 4.7';icon='🟣';
+      why='Opus 4.7 currently leads on hard coding tasks — multi-file refactors, complex debugging, architecture work. Worth the premium for high-stakes code work.';
+      alt='Alternative: Sonnet for ~95% of routine coding work at 1/5 the cost.';
+    }else{
+      pick='Claude Sonnet 4.6';icon='🟦';
+      why='Sonnet is widely the default for production code generation in 2026 — what Cursor, Copilot, and most coding assistants use. Best capability-per-dollar for code.';
+      alt='Alternative: GPT-4.1 if you\'re on Azure or need OpenAI tooling.';
+    }
+  }
+  // Extraction
+  else if(a.task==='extract'){
+    pick='GPT-4o-mini';icon='🩷';
+    why='Structured extraction (JSON output, fixed schema) doesn\'t need a frontier model. Mini-tier with structured output mode + Pydantic validation handles this cheaply and reliably.';
+    alt='Alternative: Claude Haiku with tool use mode for the same pattern at similar cost.';
+  }
+  // Creative
+  else if(a.task==='creative'){
+    if(a.budget==='unlimited'){
+      pick='Claude Opus 4.7';icon='🟣';
+      why='Claude is widely considered the strongest at nuanced prose, voice matching, and creative work in 2026. For hero copy or anything where quality matters more than cost, Opus delivers.';
+      alt='Alternative: Sonnet for bulk drafting with a final Opus pass on the best draft.';
+    }else{
+      pick='Claude Sonnet 4.6';icon='🟦';
+      why='Sonnet writes well enough for ~95% of creative work — drafts, social copy, blog posts. Use Opus only for the highest-stakes copy where every word matters.';
+      alt='Alternative: Run multiple drafts through Sonnet, then ask Opus to pick or polish the best one.';
+    }
+  }
+  // RAG default
+  else if(a.task==='rag'){
+    pick='Claude Sonnet 4.6';icon='🟦';
+    why='RAG quality is dominated by retrieval, not by the model. The LLM\'s job is to read context and write a grounded answer — Sonnet handles this excellently at workhorse pricing. Don\'t waste Opus money here.';
+    alt='Alternative: GPT-4.1 if you\'re on Azure. Haiku/Mini if simple, high-volume FAQ with strong retrieval.';
+  }
+  // Default fallback by budget
+  else if(a.budget==='strict'){
+    pick='Claude Haiku 4.5';icon='🟢';
+    why='Tight budget with simple/medium tasks — the cheap tier is your friend. Surprisingly capable for the price. Build evals and only upgrade if quality fails.';
+    alt='Alternative: GPT-4o-mini with batch API for 50% off if you can tolerate 24hr latency.';
+  }
+  else{
+    pick='Claude Sonnet 4.6';icon='🟦';
+    why='General-purpose workhorse for production. Best balance of quality, speed, and cost for most production GenAI work. This is my default starting point — I only move off it with eval evidence.';
+    alt='Alternative: GPT-4.1 if your stack is Azure-aligned.';
+  }
+
+  document.getElementById('rec-result').innerHTML=`
+    <div class="recommend">
+      <div class="header">
+        <span class="icon">${icon}</span>
+        <span class="title">My recommendation for your setup:</span>
+      </div>
+      <div class="pick">${pick}</div>
+      <div class="why">${why}</div>
+      <div class="alt">💡 ${alt}</div>
+    </div>
+  `;
+}
+
+/* ============== COST CALC ============== */
+const PRICING={
+  // $ per 1M input tokens, $ per 1M output tokens (approximate 2026 pricing)
+  'Claude Opus 4.7':       {in:15.00,out:75.00,color:'#9d3dff'},
+  'GPT-5':                  {in:10.00,out:30.00,color:'#ffd23d'},
+  'Gemini 2.5 Pro':         {in:3.50, out:10.50,color:'#4d8eff'},
+  'Claude Sonnet 4.6':      {in:3.00, out:15.00,color:'#00f0ff'},
+  'GPT-4.1':                {in:2.50, out:10.00,color:'#ff8c42'},
+  'Claude Haiku 4.5':       {in:1.00, out:5.00, color:'#3dff8a'},
+  'GPT-4o-mini':            {in:0.15, out:0.60, color:'#ff3daa'},
+  'Llama 3.3 (self-host)':  {in:0.50, out:0.50, color:'#a8a8b8'},
+};
+
+function calcCost(){
+  const inTok=parseInt(document.getElementById('in-tok').value)||0;
+  const outTok=parseInt(document.getElementById('out-tok').value)||0;
+  const reqDay=parseInt(document.getElementById('req-day').value)||0;
+
+  const monthly={};
+  Object.keys(PRICING).forEach(m=>{
+    const p=PRICING[m];
+    const tokensInMonth_in=inTok*reqDay*30/1_000_000;
+    const tokensInMonth_out=outTok*reqDay*30/1_000_000;
+    monthly[m]={cost:tokensInMonth_in*p.in+tokensInMonth_out*p.out,color:p.color};
+  });
+
+  // Sort by cost
+  const sorted=Object.entries(monthly).sort((a,b)=>a[1].cost-b[1].cost);
+  const maxCost=sorted[sorted.length-1][1].cost;
+
+  const html=sorted.map(([name,d])=>{
+    const w=Math.max((d.cost/maxCost)*100,2);
+    const formatted=d.cost<10?'$'+d.cost.toFixed(2):d.cost<1000?'$'+d.cost.toFixed(0):'$'+(d.cost/1000).toFixed(1)+'K';
+    return `
+      <div class="cb-row">
+        <div class="cb-name" style="color:${d.color}">${name}</div>
+        <div class="cb-track"><div class="cb-fill" style="width:${w}%;background:${d.color}">${w>22?formatted:''}</div></div>
+        <div class="cb-val">${w<=22?formatted:'/mo'}</div>
+      </div>
+    `;
+  }).join('');
+
+  document.getElementById('cost-bars').innerHTML=html;
+}
+
+/* INIT */
+calcCost();
+</script>
+</body>
+</html>
