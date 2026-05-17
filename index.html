@@ -477,6 +477,75 @@
   }
   footer.notebook-end p strong { color: var(--ink-muted); font-weight: 600; }
 
+  /* VIDEO DEMOS (§02.5) */
+  .video-demos { display: flex; flex-direction: column; gap: 2rem; }
+  .video-featured { width: 100%; }
+  .video-featured .video-embed {
+    position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;
+    border-radius: 8px; background: var(--paper-2);
+    border: 1px solid var(--line);
+  }
+  .video-featured .video-embed iframe {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;
+  }
+  .video-featured h3 {
+    font-family: var(--display); font-weight: 500;
+    font-size: 1.5rem; margin-top: 1rem; color: var(--ink);
+  }
+  .video-featured p {
+    font-size: 1rem; color: var(--ink-2);
+    line-height: 1.6; margin-top: 0.35rem;
+  }
+  .video-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;
+  }
+  @media (max-width: 700px) { .video-grid { grid-template-columns: 1fr; } }
+  .video-card {
+    border: 1px solid var(--line); border-radius: 6px; overflow: hidden;
+    background: var(--surface); transition: border-color 0.2s;
+  }
+  .video-card:hover { border-color: var(--red); }
+  .video-card .video-embed {
+    position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;
+    background: var(--paper-2);
+  }
+  .video-card .video-embed iframe {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;
+  }
+  .video-card-body { padding: 1rem 1.25rem; }
+  .video-card-body h4 {
+    font-family: var(--display); font-weight: 500;
+    font-size: 1.15rem; color: var(--ink); margin-bottom: 0.35rem;
+  }
+  .video-card-body p {
+    font-size: 0.92rem; color: var(--ink-2); line-height: 1.55;
+  }
+  .video-label {
+    display: inline-block; font-family: var(--mono); font-size: 0.7rem;
+    color: var(--surface); background: var(--red);
+    padding: 0.2rem 0.5rem; border-radius: 3px;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    font-weight: 600; margin-bottom: 0.5rem;
+  }
+  .video-play-overlay {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    width: 68px; height: 48px; background: rgba(44,37,32,0.75);
+    border-radius: 12px; display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem; color: #fff; transition: background 0.2s, transform 0.2s;
+    pointer-events: none;
+  }
+  .video-embed:hover .video-play-overlay {
+    background: rgba(178,58,47,0.85); transform: translate(-50%,-50%) scale(1.08);
+  }
+  a.video-featured,
+  a.video-card {
+    text-decoration: none; color: inherit; display: block;
+  }
+  a.video-featured:hover h3,
+  a.video-featured h3 { color: var(--red); }
+  a.video-featured:hover,
+  a.video-card:hover { border-color: var(--red); }
+
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { transition-duration: 0.01ms !important; }
   }
@@ -679,6 +748,55 @@
   </section>
 
   <section>
+    <div class="section-marker"><span class="sym">§</span>02.5 <span class="slash">//</span> public product demonstrations</div>
+    <h2 class="section-title">Systems that <em>actually shipped</em>.</h2>
+    <p class="section-lede">Official product demonstrations of enterprise AI systems released publicly through company showcases.</p>
+
+    <div class="video-demos">
+
+      <a href="https://www.youtube.com/watch?v=-VGYxw98M8E" target="_blank" rel="noopener" class="video-featured">
+        <div class="video-label">featured demo</div>
+        <div class="video-embed" style="background:#000;">
+          <img src="https://img.youtube.com/vi/-VGYxw98M8E/maxresdefault.jpg" alt="RangerAI Demo" loading="lazy" style="width:100%;height:100%;position:absolute;top:0;left:0;object-fit:cover;" />
+          <div class="video-play-overlay">▶</div>
+        </div>
+        <h3>1. RangerAI</h3>
+        <p>End-to-end demonstration of the RangerAI suite — enterprise AI features shipping inside RunMyJobs 2026. Intelligent job diagnostics, conversational documentation, automated code generation, and self-documenting automation workflows.</p>
+      </a>
+
+      <div class="video-grid">
+
+        <a href="https://www.youtube.com/watch?v=VwNrREe9IhY" target="_blank" rel="noopener" class="video-card">
+          <div class="video-embed" style="background:#000;">
+            <img src="https://img.youtube.com/vi/VwNrREe9IhY/maxresdefault.jpg" alt="Natural-Language Operational Workflows Powered by MCP" loading="lazy" style="width:100%;height:100%;position:absolute;top:0;left:0;object-fit:cover;" />
+            <div class="video-play-overlay">▶</div>
+          </div>
+          <div class="video-card-body">
+            <div class="video-label">MCP</div>
+            <h4>2. Natural-language operational workflows powered by MCP</h4>
+            <p>Stateless MCP proxy bridge exposing core RunMyJobs operations through natural language — eliminating context-switching for operations teams.</p>
+          </div>
+        </a>
+
+        <a href="https://www.youtube.com/watch?v=1nrqbA2Dq8A" target="_blank" rel="noopener" class="video-card">
+          <div class="video-embed" style="background:#000;">
+            <img src="https://img.youtube.com/vi/1nrqbA2Dq8A/maxresdefault.jpg" alt="SAP Joule Integration" loading="lazy" style="width:100%;height:100%;position:absolute;top:0;left:0;object-fit:cover;" />
+            <div class="video-play-overlay">▶</div>
+          </div>
+          <div class="video-card-body">
+            <div class="video-label">SAP</div>
+            <h4>3. SAP Joule Integration</h4>
+            <p>Enterprise SAP integration demonstration — connecting AI-powered automation workflows with SAP's Joule intelligent assistant platform.</p>
+          </div>
+        </a>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <section>
     <div class="section-marker"><span class="sym">§</span>03 <span class="slash">//</span> production work</div>
     <h2 class="section-title">Things I've <em>shipped</em>.</h2>
     <p class="section-lede">The serious stuff — work that runs in production at companies you've heard of. Click any card to see the messy details.</p>
@@ -737,6 +855,7 @@
         </div>
         <div class="case-docs">
           <a href="reels.html#troubleshoot">▶ watch the reel</a>
+          <a href="https://www.youtube.com/watch?v=-VGYxw98M8E" target="_blank" rel="noopener">▶ watch demo</a>
           <a href="https://documentation.runmyjobs.cloud/runmyjobs-2026/Content/AIFeatures/TroubleshootingWithRangerAI.htm" target="_blank" rel="noopener">↗ official docs</a>
         </div>
       </div>
@@ -794,6 +913,7 @@
         </div>
         <div class="case-docs">
           <a href="reels.html#assistant">▶ watch the reel</a>
+          <a href="https://www.youtube.com/watch?v=-VGYxw98M8E" target="_blank" rel="noopener">▶ watch demo</a>
           <a href="https://documentation.runmyjobs.cloud/runmyjobs-2026/Content/AIFeatures/RangerAIProductAssistant.htm" target="_blank" rel="noopener">↗ official docs</a>
         </div>
       </div>
@@ -851,6 +971,7 @@
         </div>
         <div class="case-docs">
           <a href="reels.html#copilot">▶ watch the reel</a>
+          <a href="https://www.youtube.com/watch?v=-VGYxw98M8E" target="_blank" rel="noopener">▶ watch demo</a>
           <a href="https://documentation.runmyjobs.cloud/runmyjobs-2026/Content/AIFeatures/RangerAIScriptAssistant.htm" target="_blank" rel="noopener">↗ official docs</a>
         </div>
       </div>
@@ -908,6 +1029,7 @@
         </div>
         <div class="case-docs">
           <a href="reels.html#generate">▶ watch the reel</a>
+          <a href="https://www.youtube.com/watch?v=-VGYxw98M8E" target="_blank" rel="noopener">▶ watch demo</a>
           <a href="https://documentation.runmyjobs.cloud/runmyjobs-2026/Content/AIFeatures/GeneratingJobDocsWithRangerAI.htm" target="_blank" rel="noopener">↗ official docs</a>
         </div>
       </div>
@@ -1332,7 +1454,7 @@
 
       <div class="recognition">
         <h4>recognition</h4>
-        <p>National Innovation Awards · Department of Information Technology &amp; Ministry of Science (Government of India) for product innovation &amp; commercialisation · Contributed to <strong>Gartner Magic Quadrant 2025</strong> recognition at Redwood · 2 granted US Patents (10911,546 &amp; 11782734) · B.Sc. Information Technology (Sikkim Manipal University, 2009) · Diploma in Computer Engineering (Technical Education Board, Gandhinagar, 2003)</p>
+        <p>National Innovation Awards · Department of Information Technology &amp; Ministry of Science (Government of India) for product innovation &amp; commercialisation · Contributed to <strong>Gartner Magic Quadrant 2025</strong> recognition at Redwood · 2 granted US Patents (10911546 &amp; 11782734) · B.Sc. Information Technology (Sikkim Manipal University, 2009) · Diploma in Computer Engineering (Technical Education Board, Gandhinagar, 2003)</p>
       </div>
     </div>
   </section>
