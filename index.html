@@ -925,6 +925,62 @@
 
     <article class="case">
       <div class="case-number">05</div>
+      <h3>MCP Server — Natural Language Job Operations</h3>
+      <div class="case-meta">2025 <span class="pin">·</span> REDWOOD RUNMYJOBS 2026 <span class="pin">·</span> MODEL CONTEXT PROTOCOL · AUTOMATION</div>
+      <p class="case-summary">
+        Operations teams context-switch between terminal and UI — job submission, status checks, and cancellations demand jumping between tools. I architected a stateless MCP proxy bridge that exposes core RunMyJobs operations through natural language, eliminating context-switching friction and letting operators work directly in their LLM client or terminal.
+      </p>
+      <div class="case-metrics">
+        <div class="case-metric"><div class="n">70%</div><div class="l">Reduction in data transfer costs</div></div>
+        <div class="case-metric"><div class="n">Multi-tenant</div><div class="l">Single regional deployment</div></div>
+        <div class="case-metric"><div class="n">90%</div><div class="l">Faster job operations</div></div>
+      </div>
+      <button class="case-toggle" aria-expanded="false">
+        <span class="closed-text">show me the messy details</span>
+        <span class="open-text">collapse the messy details</span>
+      </button>
+      <div class="case-details">
+        <div class="case-section">
+          <h4>my approach</h4>
+          <ul>
+            <li><strong>Stateless proxy pattern</strong> — no credential persistence. Client API keys pass directly to RunMyJobs backend for simplified security.</li>
+            <li><strong>Header-based multi-tenant routing</strong> — single regional deployment routes requests via X-RMJ-Instance-ID header.</li>
+            <li><strong>MCP tool set</strong> — four core operations exposed: submit_job, get_job, cancel_job, get_process_server.</li>
+            <li><strong>Natural language interface</strong> — operators work in terminal or LLM client with zero context-switching.</li>
+          </ul>
+        </div>
+        <div class="case-section">
+          <h4>what's actually under the hood</h4>
+          <ul>
+            <li><strong>Spring AI MCP framework</strong> — bridges MCP protocol to RunMyJobs REST APIs.</li>
+            <li><strong>AWS EKS + Karpenter</strong> — co-located in same VPC and region with horizontal pod autoscaling.</li>
+            <li><strong>ALB + WAF ingress layer</strong> — protects the MCP server from external threats.</li>
+            <li><strong>Passthrough authentication</strong> — client API key relayed directly to backend; zero secrets stored in MCP layer.</li>
+          </ul>
+        </div>
+        <div class="case-section">
+          <h4>what i actually did</h4>
+          <ul>
+            <li>Architected the stateless proxy pattern and multi-tenant routing strategy.</li>
+            <li>Implemented passthrough auth — eliminated credential storage, direct API key relay to backend.</li>
+            <li>Led integration of the four MVP operations into the Spring AI MCP framework.</li>
+            <li>Designed deployment strategy for co-location in same AWS region/VPC to eliminate egress costs and latency.</li>
+          </ul>
+        </div>
+        <div class="case-section">
+          <h4>stack</h4>
+          <div class="case-stack">
+            <span>MCP</span><span>Spring AI</span><span>OpenAI / LLM</span><span>Python</span><span>Java</span><span>AWS EKS</span><span>Karpenter</span><span>ALB</span><span>WAF</span>
+          </div>
+        </div>
+        <div class="case-docs">
+          <a href="reels.html#mcp_server">▶ watch the reel</a>
+        </div>
+      </div>
+    </article>
+
+    <article class="case">
+      <div class="case-number">06</div>
       <h3>A360 Platform &amp; the Command Factory — 11 years at Automation Anywhere</h3>
       <div class="case-meta">2012 — 2023 <span class="pin">·</span> AUTOMATION ANYWHERE <span class="pin">·</span> RPA AT SCALE</div>
       <p class="case-summary">
